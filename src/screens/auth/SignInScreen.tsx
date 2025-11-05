@@ -31,7 +31,7 @@ const SignInScreen = ({ navigation }: any) => {
         style={styles.logo}
       />
 
-      <Text style={styles.title}>Welcome Back 👋</Text>
+      <Text style={styles.title}>Welcome Back </Text>
       <Text style={styles.subtitle}>Sign in to continue to Yuvabe</Text>
 
       <Controller
@@ -95,7 +95,6 @@ const SignInScreen = ({ navigation }: any) => {
         <Text style={styles.buttonText}>Sign In</Text>
       </TouchableOpacity>
 
-      {/* Footer */}
       <Text style={styles.footerText}>
         Don’t have an account?{' '}
         <Text style={styles.link} onPress={() => navigation.navigate('SignUp')}>
