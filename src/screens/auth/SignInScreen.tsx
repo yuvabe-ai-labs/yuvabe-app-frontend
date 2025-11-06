@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from './AuthStyles';
 import { useForm, Controller } from 'react-hook-form';
 import { COLORS } from '../../utils/theme';
+import { useUserStore } from '../../store/useUserStore';
 
 type FormData = {
   email: string;
@@ -10,6 +11,7 @@ type FormData = {
 };
 
 const SignInScreen = ({ navigation }: any) => {
+  const setUser = useUserStore(state => state.setUser);
   const {
     control,
     handleSubmit,
@@ -20,7 +22,7 @@ const SignInScreen = ({ navigation }: any) => {
 
   const onSubmit = (data: FormData) => {
     console.log('Form submitted:', data);
-
+    setUser({ email: data.email });
     navigation.navigate('Home');
   };
 

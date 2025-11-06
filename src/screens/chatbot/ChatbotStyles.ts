@@ -21,6 +21,14 @@ export const styles = StyleSheet.create({
     fontSize: SIZES.md,
     fontFamily: FONTS.gilroy.regular,
   },
+  key: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  touch: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',

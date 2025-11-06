@@ -9,7 +9,6 @@ import {
   Platform,
 } from 'react-native';
 import { styles } from './ChatbotStyles';
-// ✅ make sure the path is correct (adjust if needed)
 
 type Message = {
   id: string;
@@ -54,12 +53,7 @@ const ChatScreen = () => {
         item.from === 'user' ? styles.userBubble : styles.botBubble,
       ]}
     >
-      <Text
-        style={[
-          styles.text,
-          item.from === 'bot' && { color: '#000' }, // bot text visible on light bubble
-        ]}
-      >
+      <Text style={[styles.text, item.from === 'bot' && { color: '#000' }]}>
         {item.text}
       </Text>
     </View>
@@ -67,7 +61,7 @@ const ChatScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#F9FAFB' }}
+      style={styles.key}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Messages List */}
@@ -88,7 +82,7 @@ const ChatScreen = () => {
           onChangeText={setInput}
         />
         <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>Send</Text>
+          <Text style={styles.touch}>Send</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

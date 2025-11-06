@@ -1,8 +1,10 @@
 import React from 'react';
 import { styles } from './homeStyles';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { useUserStore } from '../../store/useUserStore';
 
 const HomeScreen = ({ navigation }: any) => {
+  const user = useUserStore(state => state.user);
   return (
     <View style={styles.container}>
       <Image
@@ -10,11 +12,15 @@ const HomeScreen = ({ navigation }: any) => {
         style={styles.logo}
       />
 
-      {/* Welcome text */}
-      <Text style={styles.title}>Welcome to Yuvabe</Text>
+      <Text style={styles.title}>
+        Welcome{' '}
+        {user?.email
+          ? user.email.split('@')[0].charAt(0).toUpperCase() +
+            user.email.split('@')[0].slice(1)
+          : 'to Yuvabe'}
+      </Text>
       <Text style={styles.subtitle}>Work Serve Evolve </Text>
 
-      {/* Cool Button */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => {
