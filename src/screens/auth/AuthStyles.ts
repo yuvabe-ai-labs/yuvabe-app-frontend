@@ -1,5 +1,6 @@
+// src/screens/SignIn/styles.js
 import { StyleSheet } from 'react-native';
-import { COLORS, SIZES, TEXT_STYLES } from '../../utils/theme';
+import { COLORS, SIZES, TEXT_STYLES, FONTS } from '../../utils/theme';
 
 export default StyleSheet.create({
   container: {
@@ -17,7 +18,8 @@ export default StyleSheet.create({
   },
 
   title: {
-    ...TEXT_STYLES.title, // ✅ using your theme text style
+    ...TEXT_STYLES.title,
+    fontFamily: FONTS.clashDisplay.bold,
     textAlign: 'center',
     marginBottom: SIZES.base,
   },
@@ -31,12 +33,13 @@ export default StyleSheet.create({
 
   input: {
     borderWidth: 1,
-    // borderColor: COLORS.border,
+    borderColor: COLORS.border,
     borderRadius: SIZES.radius,
     padding: SIZES.base * 1.8,
     marginVertical: SIZES.base,
     color: COLORS.textPrimary,
     fontSize: SIZES.md,
+    fontFamily: FONTS.gilroy.regular, // 👈 consistent font
   },
 
   button: {
@@ -50,8 +53,7 @@ export default StyleSheet.create({
   buttonText: {
     ...TEXT_STYLES.large,
     color: COLORS.white,
-    fontFamily: 'System',
-    fontWeight: '600',
+    fontFamily: FONTS.clashDisplay.bold, // 👈 use Gilroy bold
   },
 
   footerText: {
@@ -59,14 +61,16 @@ export default StyleSheet.create({
     textAlign: 'center',
     marginTop: SIZES.padding,
   },
+
   errorText: {
-    color: COLORS.error || 'red',
+    color: COLORS.error,
     fontSize: 14,
     marginBottom: 4,
+    fontFamily: FONTS.gilroy.regular,
   },
 
   link: {
     color: COLORS.primary,
-    fontWeight: '600',
+    fontFamily: FONTS.gilroy.bold,
   },
 });

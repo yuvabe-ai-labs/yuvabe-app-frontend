@@ -1,6 +1,9 @@
+// src/utils/theme.js
+
 export const COLORS = {
-  primary: '#4F46E5',
-  secondary: '#6366F1',
+  primary: '#5829c7',
+  secondary: '#ffca2d',
+  accent: '#DB5928',
   background: '#F9FAFB',
   textPrimary: '#111827',
   textSecondary: '#6B7280',
@@ -34,36 +37,43 @@ export const SIZES = {
 };
 
 export const FONTS = {
-  regular: 'System',
-  medium: 'System',
-  bold: 'System',
-  light: 'System',
+  clashDisplay: {
+    regular: 'ClashDisplay-Regular',
+    bold: 'ClashDisplay-Bold',
+  },
+  gilroy: {
+    regular: 'gilroy-regular',
+    medium: 'gilroy-medium',
+    bold: 'gilroy-bold',
+    italic: 'gilroy-bold-italic',
+  },
 };
 
+// ✅ Corrected TEXT_STYLES using the proper font references
 export const TEXT_STYLES = {
   small: {
     fontSize: SIZES.sm,
     color: COLORS.textSecondary,
-    fontFamily: FONTS.regular,
+    fontFamily: FONTS.gilroy.regular,
   },
   regular: {
     fontSize: SIZES.md,
     color: COLORS.textPrimary,
-    fontFamily: FONTS.regular,
+    fontFamily: FONTS.gilroy.regular,
   },
   large: {
     fontSize: SIZES.lg,
     color: COLORS.textPrimary,
-    fontFamily: FONTS.medium,
+    fontFamily: FONTS.gilroy.medium,
   },
   title: {
     fontSize: SIZES.xl,
     color: COLORS.textPrimary,
-    fontFamily: FONTS.bold,
+    fontFamily: FONTS.gilroy.bold,
   },
   heading: {
     fontSize: SIZES.xxxl,
     color: COLORS.textPrimary,
-    fontFamily: FONTS.bold,
+    fontFamily: FONTS.clashDisplay.bold,
   },
 };

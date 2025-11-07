@@ -23,7 +23,7 @@ const SignUpScreen = ({ navigation }: any) => {
 
   const onSubmit = (data: FormData) => {
     console.log('User signed up with:', data);
-    // TODO: connect with API later
+
     navigation.navigate('Home');
   };
 
@@ -35,9 +35,8 @@ const SignUpScreen = ({ navigation }: any) => {
       />
 
       <Text style={styles.title}>Create Account</Text>
-      <Text style={styles.subtitle}>Join Yuvabe today 🚀</Text>
+      <Text style={styles.subtitle}>Join Yuvabe today </Text>
 
-      {/* Full Name */}
       <Controller
         control={control}
         name="name"
@@ -62,7 +61,6 @@ const SignUpScreen = ({ navigation }: any) => {
         <Text style={styles.errorText}>{errors.name.message}</Text>
       )}
 
-      {/* Email */}
       <Controller
         control={control}
         name="email"
@@ -92,7 +90,6 @@ const SignUpScreen = ({ navigation }: any) => {
         <Text style={styles.errorText}>{errors.email.message}</Text>
       )}
 
-      {/* Password */}
       <Controller
         control={control}
         name="password"
@@ -121,12 +118,10 @@ const SignUpScreen = ({ navigation }: any) => {
         <Text style={styles.errorText}>{errors.password.message}</Text>
       )}
 
-      {/* Sign Up Button */}
       <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
-      {/* Footer */}
       <Text style={styles.footerText}>
         Already have an account?{' '}
         <Text style={styles.link} onPress={() => navigation.navigate('SignIn')}>

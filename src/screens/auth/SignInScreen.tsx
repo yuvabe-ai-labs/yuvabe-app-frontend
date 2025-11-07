@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from './AuthStyles';
 import { useForm, Controller } from 'react-hook-form';
 import { COLORS } from '../../utils/theme';
+import { useUserStore } from '../../store/useUserStore';
 
 type FormData = {
   email: string;
@@ -10,6 +11,7 @@ type FormData = {
 };
 
 const SignInScreen = ({ navigation }: any) => {
+  const setUser = useUserStore(state => state.setUser);
   const {
     control,
     handleSubmit,
@@ -20,7 +22,7 @@ const SignInScreen = ({ navigation }: any) => {
 
   const onSubmit = (data: FormData) => {
     console.log('Form submitted:', data);
-
+    setUser({ email: data.email });
     navigation.navigate('Home');
   };
 
@@ -31,7 +33,7 @@ const SignInScreen = ({ navigation }: any) => {
         style={styles.logo}
       />
 
-      <Text style={styles.title}>Welcome Back 👋</Text>
+      <Text style={styles.title}>Welcome Back </Text>
       <Text style={styles.subtitle}>Sign in to continue to Yuvabe</Text>
 
       <Controller
@@ -95,7 +97,6 @@ const SignInScreen = ({ navigation }: any) => {
         <Text style={styles.buttonText}>Sign In</Text>
       </TouchableOpacity>
 
-      {/* Footer */}
       <Text style={styles.footerText}>
         Don’t have an account?{' '}
         <Text style={styles.link} onPress={() => navigation.navigate('SignUp')}>
