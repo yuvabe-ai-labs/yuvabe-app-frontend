@@ -16,7 +16,7 @@ type Message = {
   from: 'user' | 'bot';
 };
 
-const ChatScreen = () => {
+export const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', text: 'Hello! 👋', from: 'bot' },
     { id: '2', text: 'Hi there! How are you?', from: 'user' },
@@ -89,4 +89,3 @@ const ChatScreen = () => {
   );
 };
 
-export default ChatScreen;
