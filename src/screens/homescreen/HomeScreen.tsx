@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { getItem, setItem, storage } from '../../store/storage';
 import styles from './HomeStyles';
 
 const HomeScreen = () => {
   const [showNotification, setShowNotification] = useState(false);
-
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  useEffect(() => {
+    const savedImage = getItem('profile_image');
+    if (savedImage) {
+      setProfileImage(savedImage);
+    } else {
+      const defaultImage = 'https://i.pravatar.cc/150?img=2';
+      setProfileImage(defaultImage);
+      setItem('profile_image', defaultImage);
+    }
+    console.log('Stored keys:', storage.getAllKeys());
+    console.log('Profile image:', storage.getString('profile_image'));
+  }, []);
   const checkNotificationTime = () => {
     const now = new Date();
     const hours = now.getHours();
 
-    if ((hours >= 9 && hours < 10) || (hours >= 23 && hours < 24)) {
+    if ((hours >= 10 && hours < 11) || (hours >= 23 && hours < 24)) {
       setShowNotification(true);
     } else {
       setShowNotification(false);
@@ -27,15 +40,14 @@ const HomeScreen = () => {
     console.log('Selected mood:', mood);
     setShowNotification(false);
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Image
-          source={{ uri: 'https://i.pravatar.cc/150?img=3' }}
+          source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=1' }}
           style={styles.profileImage}
         />
-        <Text style={styles.welcomeText}>Welcome, User 1</Text>
+        <Text style={styles.welcomeText}>Welcome, Venkat</Text>
       </View>
 
       <View style={styles.thoughtContainer}>
