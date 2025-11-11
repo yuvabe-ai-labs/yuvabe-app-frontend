@@ -1,12 +1,14 @@
 // src/navigation/AppNavigator.tsx
 import React from 'react';
 
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+// import OtpVerifyScreen from '../screens/auth/OtpVerification';
 import SignInScreen from '../screens/auth/SignInScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
-import HomeScreen from '../screens/homescreen/HomeScreen';
+import VerifyEmailScreen from '../screens/auth/VerifyEmailScreen';
 import ChatScreen from '../screens/chatbot/ChatBotScreen';
+import HomeScreen from '../screens/homescreen/HomeScreen';
 // import { NavigationContainer } from "@react-navigation/native/lib/typescript/src";
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +35,16 @@ const AppNavigator = () => {
         <Stack.Screen
           name="Chat"
           component={ChatScreen}
+          options={{ headerShown: false }}
+        />
+        {/* <Stack.Screen
+          name="OtpVerify"
+          component={OtpVerifyScreen}
+          options={{ headerShown: false }}
+        /> */}
+        <Stack.Screen
+          name="VerifyEmail"
+          component={VerifyEmailScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
