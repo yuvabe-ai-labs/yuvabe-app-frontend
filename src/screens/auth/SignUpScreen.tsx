@@ -1,9 +1,21 @@
 // src/screens/SignUpScreen.tsx
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
-import styles from './AuthStyles';
-import { useForm, Controller } from 'react-hook-form';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
+import { signUp } from '../../api/auth-api/authApi';
+import { setItem, setTokens } from '../../store/storage';
 import { COLORS } from '../../utils/theme';
+import styles from './styles/AuthStyles';
 
 type FormData = {
   name: string;
@@ -12,7 +24,9 @@ type FormData = {
 };
 
 const SignUpScreen = ({ navigation }: any) => {
-  // react-hook-form setup
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // 👈 new state
+
   const {
     control,
     handleSubmit,
@@ -21,10 +35,33 @@ const SignUpScreen = ({ navigation }: any) => {
     defaultValues: { name: '', email: '', password: '' },
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log('User signed up with:', data);
+  const onSubmit = async (data: FormData) => {
+    if (loading) return;
+    setLoading(true);
+    Keyboard.dismiss();
 
-    navigation.navigate('Home');
+    try {
+      const res = await signUp(data.name, data.email, data.password);
+      console.log('Signup successful:', res);
+
+      // ✅ Only save tokens if returned by backend
+      if (res.access_token && res.refresh_token) {
+        setTokens(res.access_token, res.refresh_token);
+      } else {
+        console.log('⚠️ No tokens returned at signup');
+      }
+
+      // ✅ Mark as not verified
+      setItem('is_verified', 'false');
+      navigation.navigate('VerifyEmail', { email: data.email });
+
+      Alert.alert('Account Created', 'Please verify your email to continue.');
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      Alert.alert('Error', error.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,8 +72,9 @@ const SignUpScreen = ({ navigation }: any) => {
       />
 
       <Text style={styles.title}>Create Account</Text>
-      <Text style={styles.subtitle}>Join Yuvabe today </Text>
+      <Text style={styles.subtitle}>Join Yuvabe today</Text>
 
+      {/* Name Field */}
       <Controller
         control={control}
         name="name"
@@ -61,6 +99,7 @@ const SignUpScreen = ({ navigation }: any) => {
         <Text style={styles.errorText}>{errors.name.message}</Text>
       )}
 
+      {/* Email Field */}
       <Controller
         control={control}
         name="email"
@@ -90,36 +129,63 @@ const SignUpScreen = ({ navigation }: any) => {
         <Text style={styles.errorText}>{errors.email.message}</Text>
       )}
 
-      <Controller
-        control={control}
-        name="password"
-        rules={{
-          required: 'Password is required',
-          minLength: {
-            value: 6,
-            message: 'Password must be at least 6 characters long',
-          },
-        }}
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Password"
-            secureTextEntry
-            value={value}
-            onChangeText={onChange}
-            style={[
-              styles.input,
-              errors.password && { borderColor: COLORS.error },
-            ]}
-            placeholderTextColor={COLORS.textSecondary}
+      {/* Password Field with Eye Icon */}
+      {/* Password Field with Eye Icon */}
+      <View style={styles.passwordContainer}>
+        <Controller
+          control={control}
+          name="password"
+          rules={{
+            required: 'Password is required',
+            minLength: {
+              value: 6,
+              message: 'Password must be at least 6 characters long',
+            },
+          }}
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              placeholder="Password"
+              secureTextEntry={!showPassword}
+              value={value}
+              onChangeText={onChange}
+              style={[
+                styles.passwordInput, // 👈 use a lighter input style here
+                errors.password && { borderColor: COLORS.error },
+              ]}
+              placeholderTextColor={COLORS.textSecondary}
+            />
+          )}
+        />
+
+        {/* 👁️ Toggle Visibility Icon */}
+        <TouchableOpacity
+          onPress={() => setShowPassword(!showPassword)}
+          style={styles.eyeIconContainer}
+        >
+          <Icon
+            name={showPassword ? 'eye-off' : 'eye'}
+            size={22}
+            color={COLORS.primary} // 👈 make it visible
           />
-        )}
-      />
+        </TouchableOpacity>
+      </View>
+
       {errors.password && (
         <Text style={styles.errorText}>{errors.password.message}</Text>
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-        <Text style={styles.buttonText}>Sign Up</Text>
+      {/* Sign Up Button with Loader */}
+      <TouchableOpacity
+        style={[styles.button, loading && { opacity: 0.6 }]}
+        onPress={handleSubmit(onSubmit)}
+        disabled={loading}
+        activeOpacity={0.8}
+      >
+        {loading ? (
+          <ActivityIndicator color={COLORS.white} />
+        ) : (
+          <Text style={styles.buttonText}>Sign Up</Text>
+        )}
       </TouchableOpacity>
 
       <Text style={styles.footerText}>

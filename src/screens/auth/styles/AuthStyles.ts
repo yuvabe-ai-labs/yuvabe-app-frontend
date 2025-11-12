@@ -1,6 +1,6 @@
 // src/screens/SignIn/styles.js
 import { StyleSheet } from 'react-native';
-import { COLORS, SIZES, TEXT_STYLES, FONTS } from '../../utils/theme';
+import { COLORS, FONTS, SIZES, TEXT_STYLES } from '../../../utils/theme';
 
 export default StyleSheet.create({
   container: {
@@ -67,6 +67,29 @@ export default StyleSheet.create({
     fontSize: 14,
     marginBottom: 4,
     fontFamily: FONTS.gilroy.regular,
+  },
+
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    backgroundColor: COLORS.white,
+    marginVertical: 8,
+    paddingHorizontal: 10,
+  },
+
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    color: COLORS.textPrimary,
+    fontFamily: 'gilroy-regular',
+    height: 44,
+  },
+
+  eyeIconContainer: {
+    padding: 8,
   },
 
   link: {
