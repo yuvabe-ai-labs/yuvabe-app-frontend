@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { signIn } from '../../api/auth-api/authApi';
+import { setItem, setTokens } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
@@ -50,7 +51,16 @@ const SignInScreen = ({ navigation }: any) => {
       console.log(res.access_token);
 
       Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
-        { text: 'Continue', onPress: () => navigation.navigate('Home') },
+        {
+          text: 'Continue',
+          onPress: () => {
+            setTokens(res.access_token, res.refresh_token); // save tokens
+            setItem('is_verified', res.user?.is_verified ? 'true' : 'false');
+            console.log(
+              '✅ Tokens saved, RootNavigator will now switch automatically',
+            );
+          },
+        },
       ]);
     } catch (error: any) {
       console.error(' Login error:', error);

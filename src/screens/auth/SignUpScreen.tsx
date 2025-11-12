@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { signUp } from '../../api/auth-api/authApi';
+import { setItem, setTokens } from '../../store/storage';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
 
@@ -43,11 +44,18 @@ const SignUpScreen = ({ navigation }: any) => {
       const res = await signUp(data.name, data.email, data.password);
       console.log('Signup successful:', res);
 
-      Alert.alert('Account Created', 'Now verify your email to continue.');
+      // ✅ Only save tokens if returned by backend
+      if (res.access_token && res.refresh_token) {
+        setTokens(res.access_token, res.refresh_token);
+      } else {
+        console.log('⚠️ No tokens returned at signup');
+      }
 
-      navigation.navigate('VerifyEmail', {
-        email: data.email,
-      });
+      // ✅ Mark as not verified
+      setItem('is_verified', 'false');
+      navigation.navigate('VerifyEmail', { email: data.email });
+
+      Alert.alert('Account Created', 'Please verify your email to continue.');
     } catch (error: any) {
       console.error('Signup error:', error);
       Alert.alert('Error', error.message || 'Something went wrong');
