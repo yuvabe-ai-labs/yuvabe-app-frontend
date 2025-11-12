@@ -1,49 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dimensions,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { getItem, setItem, storage } from '../../store/storage';
 import styles from './HomeStyles';
-import VisionBoard from './components/VisionBoard';
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const HomeScreen = () => {
   const [showNotification, setShowNotification] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [scrollEnabled, setScrollEnabled] = useState(true);
-  const [quote, setQuote] = useState<string>('');
-  const [author, setAuthor] = useState<string>('');
-
-  useEffect(() => {
-    const fetchQuote = async () => {
-      try {
-        const response = await fetch(
-          'https://api.api-ninjas.com/v2/quoteoftheday',
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': 'jsKcV9bT/AviMFilwrVMRA==xDRMRVCM3HswFL46',
-            },
-          },
-        );
-        const data = await response.json();
-        setQuote(data[0].quote);
-        setAuthor(data[0].author);
-      } catch (error) {
-        console.error('Error fetching quote:', error);
-        setQuote('“The only way to do great work is to love what you do.”');
-        setAuthor('Steve Jobs');
-      }
-    };
-
-    fetchQuote();
-  }, []);
-
   useEffect(() => {
     const savedImage = getItem('profile_image');
     if (savedImage) {
@@ -56,17 +18,20 @@ const HomeScreen = () => {
     console.log('Stored keys:', storage.getAllKeys());
     console.log('Profile image:', storage.getString('profile_image'));
   }, []);
-
   const checkNotificationTime = () => {
     const now = new Date();
     const hours = now.getHours();
-    setShowNotification(
-      (hours >= 9 && hours < 10) || (hours >= 22 && hours < 23),
-    );
+
+    if ((hours >= 10 && hours < 11) || (hours >= 23 && hours < 24)) {
+      setShowNotification(true);
+    } else {
+      setShowNotification(false);
+    }
   };
 
   useEffect(() => {
     checkNotificationTime();
+
     const interval = setInterval(checkNotificationTime, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -75,16 +40,29 @@ const HomeScreen = () => {
     console.log('Selected mood:', mood);
     setShowNotification(false);
   };
+  // =======
+  // import React, { useEffect } from 'react';
+  // import { Image, Text, TouchableOpacity, View } from 'react-native';
+  // import { getHome } from '../../api/auth-api/authApi';
+  // import { useUserStore } from '../../store/useUserStore';
+  // import { styles } from './homeStyles';
 
+  // const HomeScreen = ({ navigation }: any) => {
+  //   useEffect(() => {
+  //     (async () => {
+  //       try {
+  //         const res = await getHome();
+  //         console.log('Home response:', res);
+  //       } catch (err) {
+  //         console.error('Failed to load home:', err);
+  //         // if err.response?.status === 401 it means token failed and refresh also failed
+  //       }
+  //     })();
+  //   }, []);
+  //   const user = useUserStore(state => state.user);
+  // >>>>>>> main
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{
-        paddingBottom: 80,
-      }}
-      showsVerticalScrollIndicator={false}
-      scrollEnabled={scrollEnabled}
-    >
+    <View style={styles.container}>
       <View style={styles.header}>
         <Image
           source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=1' }}
@@ -95,11 +73,8 @@ const HomeScreen = () => {
 
       <View style={styles.thoughtContainer}>
         <Text style={styles.thoughtTitle}>Thought of the Day</Text>
-        <Text style={styles.thoughtText}>"{quote}"</Text>
-        <Text
-          style={[styles.thoughtText, { fontStyle: 'italic', fontSize: 14 }]}
-        >
-          — {author}
+        <Text style={styles.thoughtText}>
+          “The only way to do great work is to love what you do.” – Steve Jobs
         </Text>
       </View>
       {showNotification && (
@@ -114,7 +89,7 @@ const HomeScreen = () => {
           </View>
 
           <View style={styles.emojiContainer}>
-            {['😄', '🙂', '😐', '🙁', '😞'].map((emoji, index) => (
+            {['😄', '🙂', '😐', '🙁', '😞', '🙁', '😞'].map((emoji, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => handleMoodSelect(emoji)}
@@ -127,15 +102,10 @@ const HomeScreen = () => {
         </View>
       )}
 
-      <View style={{ width: '100%' }}>
-        <VisionBoard setScrollingEnabled={setScrollEnabled} />
-      </View>
-
       <View style={styles.moodHistoryContainer}>
         <Text style={styles.moodHistoryTitle}>Mood History / Mood Trend</Text>
-        {/* <MoodMirrorChart /> */}
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
