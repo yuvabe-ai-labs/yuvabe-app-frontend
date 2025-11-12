@@ -47,7 +47,7 @@ const SignInScreen = ({ navigation }: any) => {
       // Save user data (you can store token if needed)
       setUser(res.user);
 
-      console.log(res.accessToken);
+      console.log(res.access_token);
 
       Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
         { text: 'Continue', onPress: () => navigation.navigate('Home') },
