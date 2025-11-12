@@ -1,14 +1,19 @@
-// src/navigation/AppNavigator.tsx
 import React from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import SignInScreen from '../screens/auth/SignInScreen';
+import SignUpScreen from '../screens/auth/SignUpScreen';
+import TabNavigator from './TabNavigator';
+
 // import OtpVerifyScreen from '../screens/auth/OtpVerification';
 import SignInScreen from '../screens/auth/SignInScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import VerifyEmailScreen from '../screens/auth/VerifyEmailScreen';
 import ChatScreen from '../screens/chatbot/ChatBotScreen';
 import HomeScreen from '../screens/homescreen/HomeScreen';
+
 // import { NavigationContainer } from "@react-navigation/native/lib/typescript/src";
 
 const Stack = createNativeStackNavigator();
@@ -16,7 +21,7 @@ const Stack = createNativeStackNavigator();
 const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
+      <Stack.Navigator initialRouteName="Root">
         <Stack.Screen
           name="SignIn"
           component={SignInScreen}
@@ -28,13 +33,8 @@ const AppNavigator = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Chat"
-          component={ChatScreen}
+          name="Root"
+          component={TabNavigator}
           options={{ headerShown: false }}
         />
         {/* <Stack.Screen
