@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { sendVerificationEmail } from '../../api/auth-api/authApi';
-import { setToken } from '../../store/storage';
+import { setTokens } from '../../store/storage';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/VerifyEmailStyles';
 
@@ -65,7 +65,7 @@ const VerifyEmailScreen = ({ route, navigation }: any) => {
 
       if (token) {
         console.log('✅ JWT token received:', token);
-        setToken(token); // 🔹 Save token in MMKV
+        setTokens(token, '');
         Alert.alert('Success', 'Your email has been verified!');
 
         navigation.reset({

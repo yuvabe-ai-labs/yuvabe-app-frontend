@@ -1,13 +1,5 @@
-import axios from 'axios';
-
-// ✅ Use your backend base URL here
-const API_BASE_URL = 'https://68c71e06225c.ngrok-free.app';
-
-// Create an axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-});
+import { setTokens } from '../../store/storage';
+import api from './axiosInstance';
 
 export const signUp = async (name: string, email: string, password: string) => {
   try {
@@ -21,9 +13,7 @@ export const signUp = async (name: string, email: string, password: string) => {
   }
 };
 
-export const sendVerificationEmail = async (
-  email: string,
-) => {
+export const sendVerificationEmail = async (email: string) => {
   try {
     const response = await api.post('/auth/send-verification', {
       email,
@@ -54,11 +44,31 @@ export const verifyOtp = async (email: string, otp: string) => {
 export const signIn = async (email: string, password: string) => {
   try {
     const response = await api.post('/auth/login', { email, password });
-    return response.data;
+    console.log('🔍 Raw Axios response:', response);
+
+    const data = response.data.data;
+    console.log('📦 Parsed data:', data);
+
+    // If backend wraps tokens inside "data"
+    setTokens(data.access_token, data.refresh_token);
+    return data;
   } catch (error: any) {
+    console.log('Full login error:', error);
     if (error.response) {
-      throw new Error(error.response.data.detail || 'Login failed');
+      console.log('Response data:', error.response.data);
+      console.log('Status:', error.response.status);
+    } else if (error.request) {
+      console.log('Request made but no response:', error.request);
+    } else {
+      console.log('Error message:', error.message);
     }
+
     throw new Error('Network error');
   }
+};
+
+export const getHome = async () => {
+  // api is your axios instance that automatically adds Authorization header
+  const response = await api.get('/auth/home');
+  return response.data; // returns { code: 200, data: { ... } }
 };

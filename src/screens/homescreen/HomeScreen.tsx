@@ -1,9 +1,21 @@
-import React from 'react';
-import { styles } from './homeStyles';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { getHome } from '../../api/auth-api/authApi';
 import { useUserStore } from '../../store/useUserStore';
+import { styles } from './homeStyles';
 
 const HomeScreen = ({ navigation }: any) => {
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getHome();
+        console.log('Home response:', res);
+      } catch (err) {
+        console.error('Failed to load home:', err);
+        // if err.response?.status === 401 it means token failed and refresh also failed
+      }
+    })();
+  }, []);
   const user = useUserStore(state => state.user);
   return (
     <View style={styles.container}>
