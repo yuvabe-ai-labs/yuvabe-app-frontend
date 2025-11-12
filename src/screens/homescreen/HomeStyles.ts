@@ -75,10 +75,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
   moodHistoryContainer: {
-    marginTop: 20,
+    marginTop: 0,
   },
   moodHistoryTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     color: '#444',
   },
