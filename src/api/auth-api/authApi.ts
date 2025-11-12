@@ -54,16 +54,23 @@ export const signIn = async (email: string, password: string) => {
     return data;
   } catch (error: any) {
     console.log('Full login error:', error);
+
     if (error.response) {
       console.log('Response data:', error.response.data);
       console.log('Status:', error.response.status);
-    } else if (error.request) {
-      console.log('Request made but no response:', error.request);
-    } else {
-      console.log('Error message:', error.message);
+      const message =
+        error.response.data.detail ||
+        error.response.data.message ||
+        'Login failed';
+      throw new Error(message);
     }
 
-    throw new Error('Network error');
+    if (error.request) {
+      console.log('Request made but no response:', error.request);
+      throw new Error('No response from server');
+    }
+
+    throw new Error(error.message || 'Network error');
   }
 };
 

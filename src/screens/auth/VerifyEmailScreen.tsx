@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   Linking,
   Text,
   TouchableOpacity,
@@ -10,12 +11,12 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { sendVerificationEmail } from '../../api/auth-api/authApi';
-import { setTokens } from '../../store/storage';
+import { clearTokens, removeItem, setTokens } from '../../store/storage'; // 👈 added clearTokens, removeItem
 import { COLORS } from '../../utils/theme';
 import styles from './styles/VerifyEmailStyles';
 
 const VerifyEmailScreen = ({ route, navigation }: any) => {
-  const { email } = route.params;
+  const email = route?.params?.email || '';
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(0);
   const [showButton, setShowButton] = useState(true);
@@ -39,6 +40,51 @@ const VerifyEmailScreen = ({ route, navigation }: any) => {
       setLoading(false);
     }
   };
+
+  // ✅ Logout handler
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: () => {
+          clearTokens(); // remove access + refresh tokens
+          removeItem('is_verified'); // remove verification flag
+
+          // Reset navigation stack to Auth (SignIn)
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'SignIn' }],
+          });
+
+          console.log('🚪 Logged out successfully');
+        },
+      },
+    ]);
+  };
+
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert(
+        'Exit App',
+        'Are you sure you want to exit?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Exit', onPress: () => BackHandler.exitApp() },
+        ],
+        { cancelable: true },
+      );
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   // ✅ Listen for deep link (yuvabe://verified?token=XYZ)
   useEffect(() => {
@@ -129,6 +175,17 @@ const VerifyEmailScreen = ({ route, navigation }: any) => {
         ) : (
           <Text style={styles.timerText}>Resend available in {timer}s</Text>
         )}
+
+        {/* ✅ Logout Button */}
+        <TouchableOpacity
+          onPress={handleLogout}
+          style={[
+            styles.button,
+            { backgroundColor: COLORS.error, marginTop: 20 },
+          ]}
+        >
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
