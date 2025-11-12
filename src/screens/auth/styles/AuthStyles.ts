@@ -1,6 +1,6 @@
 // src/screens/SignIn/styles.js
 import { StyleSheet } from 'react-native';
-import { COLORS, FONTS, SIZES, TEXT_STYLES } from '../../utils/theme';
+import { COLORS, FONTS, SIZES, TEXT_STYLES } from '../../../utils/theme';
 
 export default StyleSheet.create({
   container: {

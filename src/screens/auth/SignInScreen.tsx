@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Keyboard,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,7 +14,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { signIn } from '../../api/auth-api/authApi';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
-import styles from './AuthStyles';
+import styles from './styles/AuthStyles';
 
 type FormData = {
   email: string;
@@ -36,6 +37,7 @@ const SignInScreen = ({ navigation }: any) => {
   const onSubmit = async (data: FormData) => {
     if (loading) return;
     setLoading(true);
+    Keyboard.dismiss();
 
     try {
       console.log(' Sending login request...');
@@ -47,7 +49,7 @@ const SignInScreen = ({ navigation }: any) => {
 
       console.log(res.accessToken);
 
-      Alert.alert('Welcome', `Hi ${res.user.name}!`, [
+      Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
         { text: 'Continue', onPress: () => navigation.navigate('Home') },
       ]);
     } catch (error: any) {

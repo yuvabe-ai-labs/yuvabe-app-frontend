@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Keyboard,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { signUp } from '../../api/auth-api/authApi';
 import { COLORS } from '../../utils/theme';
-import styles from './AuthStyles';
+import styles from './styles/AuthStyles';
 
 type FormData = {
   name: string;
@@ -36,17 +37,17 @@ const SignUpScreen = ({ navigation }: any) => {
   const onSubmit = async (data: FormData) => {
     if (loading) return;
     setLoading(true);
+    Keyboard.dismiss();
 
     try {
       const res = await signUp(data.name, data.email, data.password);
       console.log('Signup successful:', res);
 
-      Alert.alert(
-        'Verification Email Sent',
-        'Please check your email and click the verification link to activate your account.',
-      );
+      Alert.alert('Account Created', 'Now verify your email to continue.');
 
-      navigation.navigate('SignIn');
+      navigation.navigate('VerifyEmail', {
+        email: data.email,
+      });
     } catch (error: any) {
       console.error('Signup error:', error);
       Alert.alert('Error', error.message || 'Something went wrong');

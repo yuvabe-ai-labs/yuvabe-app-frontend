@@ -21,6 +21,24 @@ export const signUp = async (name: string, email: string, password: string) => {
   }
 };
 
+export const sendVerificationEmail = async (
+  email: string,
+) => {
+  try {
+    const response = await api.post('/auth/send-verification', {
+      email,
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(
+        error.response.data.detail || 'Failed to send verification link',
+      );
+    }
+    throw new Error('Network error');
+  }
+};
+
 export const verifyOtp = async (email: string, otp: string) => {
   try {
     const response = await api.post('/auth/verify-otp', { email, otp });
