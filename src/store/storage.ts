@@ -15,3 +15,27 @@ export const getItem = (key: string): string | null => {
 export const removeItem = (key: string) => {
   storage.remove(key);
 };
+
+
+export const setTokens = (accessToken: string, refreshToken: string) => {
+  storage.set('access_token', accessToken);
+  storage.set('refresh_token', refreshToken);
+};
+
+export const getToken = (): string | undefined => {
+  return storage.getString('jwt_token');
+};
+
+export const getAccessToken = (): string | null => {
+  return storage.getString('access_token') || null;
+};
+
+export const getRefreshToken = (): string | null => {
+  return storage.getString('refresh_token') || null;
+};
+
+export const clearTokens = () => {
+  storage.remove('access_token');
+  storage.remove('refresh_token');
+};
+
