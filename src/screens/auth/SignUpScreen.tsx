@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { signUp } from '../../api/auth-api/authApi';
-import { setItem, setTokens } from '../../store/storage';
+import { setItem } from '../../store/storage';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
 
@@ -44,21 +44,38 @@ const SignUpScreen = ({ navigation }: any) => {
       const res = await signUp(data.name, data.email, data.password);
       console.log('Signup successful:', res);
 
-      // ✅ Only save tokens if returned by backend
-      if (res.access_token && res.refresh_token) {
-        setTokens(res.access_token, res.refresh_token);
-      } else {
-        console.log('⚠️ No tokens returned at signup');
-      }
+      // const accessToken = res.data?.access_token;
+      // const refreshToken = res.data?.refresh_token;
 
-      // ✅ Mark as not verified
-      setItem('is_verified', 'false');
+      // if (accessToken && refreshToken) {
+      //   console.log('✅ Tokens received at signup');
+      //   setTokens(accessToken, refreshToken);
+      // } else {
+      //   console.warn('⚠️ No tokens returned at signup');
+      // }
+
+      console.log('Signup successful:', res.data);
+
+      // const email = data.email;
+
+      await setItem('is_verified', 'false');
+      await setItem('pending_email', data.email);
+      // Alert.alert(
+      //   'Verify Your Email',
+      //   'We’ve sent you a verification link. Please check your inbox.',
+      //   [
+      //     {
+      //       text: 'Go to Verification',
+      //       onPress: () =>
+      //         navigation.navigate('VerifyEmail', { email: data.email }),
+      //     },
+      //   ],
+      // );
+
+      // Navigate to verification screen
       navigation.navigate('VerifyEmail', { email: data.email });
-
-      Alert.alert('Account Created', 'Please verify your email to continue.');
     } catch (error: any) {
-      console.error('Signup error:', error);
-      Alert.alert('Error', error.message || 'Something went wrong');
+      Alert.alert('Signup Failed', error.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }

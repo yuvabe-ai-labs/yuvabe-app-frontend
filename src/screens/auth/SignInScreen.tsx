@@ -23,7 +23,7 @@ type FormData = {
 };
 
 const SignInScreen = ({ navigation }: any) => {
-  const setUser = useUserStore(state => state.setUser);
+  const { setUser, setIsLoggedIn, setIsVerified } = useUserStore();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -45,26 +45,46 @@ const SignInScreen = ({ navigation }: any) => {
       const res = await signIn(data.email, data.password);
       console.log(' Login success:', res);
 
-      // Save user data (you can store token if needed)
+      // ✅ Save user globally
       setUser(res.user);
+      setIsLoggedIn(true);
+      setIsVerified(res.user.is_verified);
 
-      console.log(res.access_token);
+      // ✅ Store tokens locally
+      setTokens(res.access_token, res.refresh_token);
+      await setItem('is_verified', res.user.is_verified ? 'true' : 'false');
+      await setItem('pending_email', data.email);
+      console.log('💾 Saved is_verified:', res.user.is_verified);
+      console.log('💾 Saved pending_email:', data.email);
+
+      if (!res.user.is_verified) {
+        console.log('⚠️ User not verified, navigating to VerifyEmail...');
+        navigation.navigate('VerifyEmail', { email: data.email });
+        return;
+      }
 
       Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
         {
           text: 'Continue',
           onPress: () => {
-            setTokens(res.access_token, res.refresh_token); // save tokens
-            setItem('is_verified', res.user?.is_verified ? 'true' : 'false');
-            console.log(
-              '✅ Tokens saved, RootNavigator will now switch automatically',
-            );
+            console.log('✅ RootNavigator will switch automatically');
           },
         },
       ]);
     } catch (error: any) {
       console.error(' Login error:', error);
-      Alert.alert('Error', error.message || 'Something went wrong');
+
+      if (
+        error.message?.includes('Verify email to login') ||
+        error.message?.includes('User not verified')
+      ) {
+        setIsVerified(false);
+        setItem('is_verified', 'false');
+        await setItem('pending_email', data.email);
+        navigation.navigate('VerifyEmail', { email: data.email });
+      } else {
+        Alert.alert('Error', error.message || 'Something went wrong');
+      }
     } finally {
       setLoading(false);
     }

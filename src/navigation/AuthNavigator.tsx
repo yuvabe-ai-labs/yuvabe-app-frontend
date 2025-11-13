@@ -1,5 +1,5 @@
-import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
 import SignInScreen from '../screens/auth/SignInScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import VerifyEmailScreen from '../screens/auth/VerifyEmailScreen';
@@ -19,7 +19,6 @@ const AuthNavigator = () => {
         component={SignUpScreen}
         options={{ headerShown: false }}
       />
-      {/* 👇 Add VerifyEmail here */}
       <AuthStack.Screen
         name="VerifyEmail"
         component={VerifyEmailScreen}

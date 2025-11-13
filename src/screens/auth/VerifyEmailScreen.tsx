@@ -1,4 +1,5 @@
 // src/screens/auth/VerifyEmailScreen.tsx
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,25 +12,36 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { sendVerificationEmail } from '../../api/auth-api/authApi';
-import { clearTokens, removeItem, setTokens } from '../../store/storage'; // 👈 added clearTokens, removeItem
+import { getItem, removeItem, setItem, setTokens } from '../../store/storage'; // 👈 added clearTokens, removeItem
+import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/VerifyEmailStyles';
 
-const VerifyEmailScreen = ({ route, navigation }: any) => {
-  const email = route?.params?.email || '';
+const VerifyEmailScreen = ({ route }: any) => {
+  const navigation = useNavigation<any>();
+  const [email, setEmail] = useState<string | null>(
+    route?.params?.email || null,
+  );
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(0);
   const [showButton, setShowButton] = useState(true);
+  const { setIsLoggedIn, setIsVerified } = useUserStore();
 
   // ✅ Send verification link
   const handleSendVerification = async () => {
     setLoading(true);
     try {
+      console.log('📨 Trying to send verification link to:', email);
+      if (!email) {
+        Alert.alert('Error', 'Email address is missing.');
+        return;
+      }
+
       const response = await sendVerificationEmail(email);
       console.log('Verification response:', response);
       Alert.alert(
         'Email Sent',
-        'A verification link has been sent to your email address.',
+        'A verification link has been sent to your email.',
       );
       setShowButton(false);
       setTimer(60);
@@ -41,27 +53,38 @@ const VerifyEmailScreen = ({ route, navigation }: any) => {
     }
   };
 
+  useEffect(() => {
+    const loadEmail = async () => {
+      if (!email) {
+        const storedEmail = await getItem('pending_email');
+        console.log('📩 Restored email from storage:', storedEmail);
+        if (storedEmail) setEmail(storedEmail);
+      }
+    };
+    loadEmail();
+  }, [email]);
+
   // ✅ Logout handler
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: () => {
-          clearTokens(); // remove access + refresh tokens
-          removeItem('is_verified'); // remove verification flag
+  const handleLogout = async () => {
+    console.log('🚪 Logging out...');
+    try {
+      setIsLoggedIn(false);
+      setIsVerified(false);
+      await setItem('is_verified', 'false');
+      await setItem('pending_email', '');
+      await setItem('access_token', '');
+      await setItem('refresh_token', '');
 
-          // Reset navigation stack to Auth (SignIn)
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'SignIn' }],
-          });
-
-          console.log('🚪 Logged out successfully');
-        },
-      },
-    ]);
+      console.log('🚪 Logged out successfully');
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Auth' }], // 👈 RootNavigator will show SignIn
+        }),
+      );
+    } catch (err) {
+      console.error('❌ Logout error:', err);
+    }
   };
 
   useEffect(() => {
@@ -111,13 +134,12 @@ const VerifyEmailScreen = ({ route, navigation }: any) => {
 
       if (token) {
         console.log('✅ JWT token received:', token);
-        setTokens(token, '');
+        await setTokens(token, '');
+        await setItem('is_verified', 'true');
+        removeItem('pending_email');
+        setIsVerified(true);
+        setIsLoggedIn(true);
         Alert.alert('Success', 'Your email has been verified!');
-
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }],
-        });
       }
     };
 
@@ -129,7 +151,7 @@ const VerifyEmailScreen = ({ route, navigation }: any) => {
     });
 
     return () => subscription.remove();
-  }, [navigation]);
+  }, [setIsLoggedIn, setIsVerified]);
 
   // ⏱ Timer
   useEffect(() => {
@@ -143,6 +165,9 @@ const VerifyEmailScreen = ({ route, navigation }: any) => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
       <View style={styles.card}>
         <Icon
           name="mail"
@@ -175,17 +200,6 @@ const VerifyEmailScreen = ({ route, navigation }: any) => {
         ) : (
           <Text style={styles.timerText}>Resend available in {timer}s</Text>
         )}
-
-        {/* ✅ Logout Button */}
-        <TouchableOpacity
-          onPress={handleLogout}
-          style={[
-            styles.button,
-            { backgroundColor: COLORS.error, marginTop: 20 },
-          ]}
-        >
-          <Text style={styles.buttonText}>Logout</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
