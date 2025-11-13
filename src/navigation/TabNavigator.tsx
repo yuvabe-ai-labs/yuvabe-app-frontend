@@ -1,4 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ChatScreen } from '../screens/chatbot/ChatBotScreen';
 import { FeedScreen } from '../screens/feedscreen/FeedScreen';
@@ -10,37 +11,39 @@ const Tab = createBottomTabNavigator();
 const TabNavigator = () => (
   //   <Tab.Navigator screenOptions={{ headerShown: true }}>
   // <<Tab.Navigator screenOptions={({ route }) => ({headerShown:.....,...,...,}) // Expression-Body
-  <Tab.Navigator
-    screenOptions={({ route }) => {
-      // Block Body
-      return {
-        headerShown: true,
-        tabBarActiveTintColor: 'blue',
-        tabBarInactiveTintColor: 'grey',
-        tabBarIcon: function ({ color, focused, size }) {
-          var iconName: string = 'home';
-          if (route.name === 'Home') {
-            if (focused) iconName = 'home';
-            else iconName = 'home-outline';
-          } else if (route.name === 'ChatBot') {
-            iconName = focused ? 'chatbox' : 'chatbox-outline';
-          } else if (route.name === 'Feed') {
-            iconName = focused ? 'newspaper' : 'newspaper-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
-          return (
-            <Ionicons name={iconName} color={color} size={size}></Ionicons>
-          );
-        },
-      };
-    }}
-  >
-    <Tab.Screen name="Home" component={HomeScreen}></Tab.Screen>
-    <Tab.Screen name="ChatBot" component={ChatScreen}></Tab.Screen>
-    <Tab.Screen name="Feed" component={FeedScreen}></Tab.Screen>
-    <Tab.Screen name="Profile" component={ProfileScreen}></Tab.Screen>
-  </Tab.Navigator>
+  <SafeAreaView style={{flex:1,backgroundColor: 'black'}}>
+    <Tab.Navigator
+      screenOptions={({ route }) => {
+        // Block Body
+        return {
+          headerShown: false,
+          tabBarActiveTintColor: 'blue',
+          tabBarInactiveTintColor: 'grey',
+          tabBarIcon: function ({ color, focused, size }) {
+            var iconName: string = 'home';
+            if (route.name === 'Home') {
+              if (focused) iconName = 'home';
+              else iconName = 'home-outline';
+            } else if (route.name === 'ChatBot') {
+              iconName = focused ? 'chatbox' : 'chatbox-outline';
+            } else if (route.name === 'Feed') {
+              iconName = focused ? 'newspaper' : 'newspaper-outline';
+            } else if (route.name === 'Profile') {
+              iconName = focused ? 'person' : 'person-outline';
+            }
+            return (
+              <Ionicons name={iconName} color={color} size={size}></Ionicons>
+            );
+          },
+        };
+      }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen}></Tab.Screen>
+      <Tab.Screen name="ChatBot" component={ChatScreen}></Tab.Screen>
+      <Tab.Screen name="Feed" component={FeedScreen}></Tab.Screen>
+      <Tab.Screen name="Profile" component={ProfileScreen}></Tab.Screen>
+    </Tab.Navigator>
+  </SafeAreaView>
 );
 export default TabNavigator;
 

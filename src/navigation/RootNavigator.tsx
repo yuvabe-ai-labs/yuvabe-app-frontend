@@ -14,8 +14,10 @@ const RootNavigator = () => {
     const verified = getItem('is_verified');
     console.log('🔍 Checking login state:', { userToken, verified });
 
-    setIsLoggedIn(!!userToken);
-    setIsVerified(verified === 'true');
+    // setIsLoggedIn(!!userToken);
+    // setIsVerified(verified === 'true');
+    setIsLoggedIn(true);
+    setIsVerified(true);
   };
 
   useEffect(() => {
