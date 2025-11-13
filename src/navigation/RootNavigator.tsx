@@ -1,49 +1,91 @@
-import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { getAccessToken, getItem, storage } from '../store/storage';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import SplashScreen from '../screens/auth/SplashScreen';
 import AppNavigator from './AppNavigator';
 import AuthNavigator from './AuthNavigator';
+import VerifyNavigator from './VerifyNavigator';
+import { getAccessToken, getItem, setItem } from '../store/storage';
+import { fetchUserDetails } from '../api/auth-api/authApi';
+import { useUserStore } from '../store/useUserStore';
+
+const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const [isVerified, setIsVerified] = useState<boolean | null>(null);
-
-  const checkLoginStatus = () => {
-    const userToken = getAccessToken();
-    const verified = getItem('is_verified');
-    console.log('🔍 Checking login state:', { userToken, verified });
-
-    setIsLoggedIn(!!userToken);
-    setIsVerified(verified === 'true');
-  };
+  const { isLoggedIn, isVerified, setUser, setIsLoggedIn, setIsVerified } =
+    useUserStore();
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
-    checkLoginStatus();
+    const initAuth = async () => {
+      const token = getAccessToken();
+      const storedVerified = await getItem('is_verified');
+      const storedEmail = await getItem('pending_email');
 
-    const listener = storage.addOnValueChangedListener(() => {
-      checkLoginStatus();
-    });
-    return () => listener.remove();
-  }, []);
+      console.log('🔍 Token:', token);
+      console.log('🔍 Stored is_verified:', storedVerified);
+      console.log('🔍 Stored email:', storedEmail);
 
-  if (isLoggedIn === null) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="blue" />
-      </View>
-    );
+      // 🧠 STEP 1: If user is unverified, go to Verify first (even without token)
+      if (storedVerified === 'false' && storedEmail) {
+        console.log('📧 User unverified → Go to Verify screen');
+        setIsLoggedIn(true);
+        setIsVerified(false);
+        setIsAuthChecked(true);
+        return;
+      }
+
+      // 🧠 STEP 2: If no token, show Sign-In
+      if (!token) {
+        console.log('🚪 No token → Show Sign-In');
+        setIsLoggedIn(false);
+        setIsVerified(false);
+        setIsAuthChecked(true);
+        return;
+      }
+
+      // 🧠 STEP 3: If token exists, verify via API
+      try {
+        const userData = await fetchUserDetails();
+        console.log('🧠 User from backend:', userData);
+
+        const verified = userData.user?.is_verified ?? false;
+        const email = userData.user?.email || '';
+
+        setUser(userData.user);
+        setIsLoggedIn(true);
+        setIsVerified(verified);
+
+        await setItem('is_verified', verified ? 'true' : 'false');
+        await setItem('pending_email', email);
+      } catch (err) {
+        console.error('❌ Could not verify user:', err);
+        setIsLoggedIn(false);
+        setIsVerified(false);
+      } finally {
+        setIsAuthChecked(true);
+      }
+    };
+
+    initAuth();
+  }, [setIsLoggedIn, setIsVerified, setUser]);
+
+  if (!isAuthChecked) {
+    return <SplashScreen navigation={{ replace: () => {} }} />;
   }
 
+  // ✅ Zustand handles re-rendering automatically here
   return (
     <NavigationContainer>
-      {isLoggedIn ? (
-        // ✅ Logged in → only AppNavigator (Home + Verify if needed)
-        <AppNavigator />
-      ) : (
-        // ✅ Not logged in → show Auth flow (SignIn, SignUp, VerifyEmail)
-        <AuthNavigator />
-      )}
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isLoggedIn && isVerified ? (
+          <Stack.Screen name="App" component={AppNavigator} />
+        ) : isLoggedIn && !isVerified ? (
+          <Stack.Screen name="Verify" component={VerifyNavigator} />
+        ) : (
+          <Stack.Screen name="Auth" component={AuthNavigator} />
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };

@@ -7,6 +7,11 @@ const AppStack = createNativeStackNavigator();
 const AppNavigator = () => {
   return (
     <AppStack.Navigator initialRouteName="Root">
+      {/* <AppStack.Screen
+        name="VerifyEmail"
+        component={VerifyEmailScreen}
+        options={{ headerShown: false }}
+      /> */}
       <AppStack.Screen
         name="Root"
         component={TabNavigator}

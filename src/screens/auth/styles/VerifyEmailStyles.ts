@@ -54,6 +54,18 @@ const styles = StyleSheet.create({
     ...TEXT_STYLES.large,
     color: COLORS.white,
   },
+  logoutButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    padding: 10,
+    zIndex: 10,
+  },
+  logoutText: {
+    color: '#007BFF', // or your theme primary color
+    fontSize: 16,
+    fontWeight: '500',
+  },
 
   timerText: {
     color: COLORS.primary,
