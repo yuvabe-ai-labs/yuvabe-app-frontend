@@ -16,6 +16,22 @@ export const removeItem = (key: string) => {
   storage.remove(key);
 };
 
+const visionBoardStorage = createMMKV({
+  id: 'visionBoardStorage',
+});
+
+export const getVisionBoard = () => {
+  const value = visionBoardStorage.getString('VISION_BOARD_TILES');
+  return value ? JSON.parse(value) : null;
+};
+
+export const setVisionBoard = (tiles: any[]) => {
+  visionBoardStorage.set('VISION_BOARD_TILES', JSON.stringify(tiles));
+};
+
+export const removeVisionBoard = () => {
+  visionBoardStorage.remove('VISION_BOARD_TILES');
+};
 
 export const setTokens = (accessToken: string, refreshToken: string) => {
   storage.set('access_token', accessToken);
@@ -38,4 +54,3 @@ export const clearTokens = () => {
   storage.remove('access_token');
   storage.remove('refresh_token');
 };
-

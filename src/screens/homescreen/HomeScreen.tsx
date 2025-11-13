@@ -90,7 +90,7 @@ const HomeScreen = () => {
     const now = new Date();
     const hours = now.getHours();
     setShowNotification(
-      (hours >= 9 && hours < 10) || (hours >= 22 && hours < 23),
+      (hours >= 9 && hours < 10) || (hours >= 16 && hours < 17),
     );
   };
 
