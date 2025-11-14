@@ -44,77 +44,51 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 12,
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    minWidth: '90%',
+    maxWidth: '90%',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  modalButton: {
+    marginTop: 10,
+  },
+  modalTextInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    marginTop: 10,
+    padding: 10,
+    color: '#000',
+  },
+  removeImageButton: {
+    marginTop: 10,
+    backgroundColor: '#fbeaea',
+    padding: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  removeImageText: {
+    color: '#b94a48',
+    fontWeight: '600',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
 });
 
 export default styles;
-// import { Dimensions, StyleSheet } from 'react-native';
-// import { COLORS, SIZES } from '../../../utils/theme';
-
-// export const SCREEN_WIDTH = Dimensions.get('window').width;
-// export const COLUMN_COUNT = 2;
-// export const GAP = SIZES.base;
-// export const BOARD_PADDING = SIZES.padding;
-
-// // ✅ Correct tile width calculation (prevents overlap)
-// export const TILE_WIDTH =
-//   (SCREEN_WIDTH - BOARD_PADDING * 2 - GAP * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
-
-// const styles = StyleSheet.create({
-//   boardContainer: {
-//     width: '100%',
-//     paddingHorizontal: BOARD_PADDING,
-//     paddingTop: BOARD_PADDING,
-//     backgroundColor: COLORS.lightGray,
-//     borderRadius: SIZES.radius,
-//     marginBottom: SIZES.base * 2,
-//   },
-
-//   header: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     marginBottom: GAP * 1.5,
-//   },
-
-//   pencilButton: {
-//     padding: SIZES.base,
-//   },
-
-//   columnsWrapper: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//   },
-
-//   column: {
-//     flex: 1,
-//     marginHorizontal: GAP / 2,
-//   },
-
-//   // ✅ Fixed overlap + removed rounded corners
-//   tile: {
-//     width: TILE_WIDTH,
-//     marginBottom: GAP,
-//     backgroundColor: COLORS.white,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: SIZES.base,
-//     borderWidth: 1,
-//     borderColor: COLORS.border,
-//     borderRadius: 0, // no rounded corners
-//     shadowColor: COLORS.textPrimary,
-//     shadowOpacity: 0.05,
-//     shadowRadius: 1,
-//     elevation: 0.5,
-//   },
-
-//   deleteButton: {
-//     position: 'absolute',
-//     top: 4,
-//     right: 4,
-//     backgroundColor: 'rgba(0,0,0,0.5)',
-//     padding: 4,
-//     borderRadius: 12,
-//   },
-// });
-
-// export default styles;
