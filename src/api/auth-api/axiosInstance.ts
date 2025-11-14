@@ -6,7 +6,7 @@ import {
   setTokens,
 } from '../../store/storage';
 
-const API_BASE_URL = 'https://55bd2da3df52.ngrok-free.app';
+const API_BASE_URL = 'https://hp137-yuvabe-backend-app.hf.space';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

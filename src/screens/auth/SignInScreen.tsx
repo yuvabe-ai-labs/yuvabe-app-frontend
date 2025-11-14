@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -12,15 +13,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { signIn } from '../../api/auth-api/authApi';
+import { signInSchema, SignInSchemaType } from '../../schemas/authSchema';
 import { setItem, setTokens } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
 
-type FormData = {
-  email: string;
-  password: string;
-};
+
 
 const SignInScreen = ({ navigation }: any) => {
   const { setUser, setIsLoggedIn, setIsVerified } = useUserStore();
@@ -31,11 +30,11 @@ const SignInScreen = ({ navigation }: any) => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
-    defaultValues: { email: '', password: '' },
+  } = useForm<SignInSchemaType>({
+    resolver: zodResolver(signInSchema),
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: SignInSchemaType) => {
     if (loading) return;
     setLoading(true);
     Keyboard.dismiss();
@@ -103,13 +102,6 @@ const SignInScreen = ({ navigation }: any) => {
       <Controller
         control={control}
         name="email"
-        rules={{
-          required: 'Email is required',
-          pattern: {
-            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            message: 'Enter a valid email address',
-          },
-        }}
         render={({ field: { onChange, value } }) => (
           <TextInput
             placeholder="Email"
@@ -133,13 +125,6 @@ const SignInScreen = ({ navigation }: any) => {
         <Controller
           control={control}
           name="password"
-          rules={{
-            required: 'Password is required',
-            minLength: {
-              value: 6,
-              message: 'Password must be at least 6 characters long',
-            },
-          }}
           render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="Password"
