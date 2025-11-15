@@ -5,9 +5,9 @@ import { COLORS } from '../../utils/theme'; // use your color theme or replace w
 const SplashScreen = ({ navigation }: any) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      // After splash, go to RootNavigator logic
+      
       navigation.replace('RootNavigator');
-    }, 2500); // show for 2.5 seconds
+    }, 2500); 
 
     return () => clearTimeout(timer);
   }, [navigation]);

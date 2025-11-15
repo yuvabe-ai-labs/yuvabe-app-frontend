@@ -19,20 +19,26 @@ export const ProfileScreen = () => {
         onPress: async () => {
           try {
             console.log('🚪 Logging out...');
+            // Reset store
             resetUser();
             setIsLoggedIn(false);
             setIsVerified(false);
 
-            await setItem('is_verified', 'false');
-            await setItem('pending_email', '');
-            await setItem('access_token', '');
-            await setItem('refresh_token', '');
+            // Clear local storage
+            await Promise.all([
+              setItem('is_verified', 'false'),
+              setItem('pending_email', ''),
+              setItem('access_token', ''),
+              setItem('refresh_token', ''),
+            ]);
 
             console.log('✅ Logged out successfully');
+
+            // Navigate to Auth flow
             navigation.dispatch(
               CommonActions.reset({
                 index: 0,
-                routes: [{ name: 'Auth' }], // 👈 RootNavigator will show SignIn
+                routes: [{ name: 'Auth' }],
               }),
             );
           } catch (error) {
