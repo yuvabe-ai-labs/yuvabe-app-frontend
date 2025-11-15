@@ -55,7 +55,10 @@ export const verifyOtp = async (email: string, otp: string) => {
 
 export const signIn = async (email: string, password: string) => {
   try {
+    console.log(`inside sign in function before api call`);
     const response = await api.post('/auth/login', { email, password });
+
+    console.log(`inside sign in function after api call`);
     console.log('🔍 Raw Axios response:', response);
 
     const data = response.data.data;
@@ -89,12 +92,14 @@ export const signIn = async (email: string, password: string) => {
 export const getHome = async () => {
   // api is your axios instance that automatically adds Authorization header
   const response = await api.get('/auth/home');
+  console.log(`The fetched user details is ${response}`);
   return response.data; // returns { code: 200, data: { ... } }
 };
 
 export const fetchUserDetails = async () => {
   try {
     const response = await api.get('/auth/home'); // authenticated GET
+    console.log(`The fetched user details is ${response.data.data}`);
     return response.data.data; // { id, name, email, is_verified }
   } catch (error: any) {
     console.error('Failed to fetch user details:', error);

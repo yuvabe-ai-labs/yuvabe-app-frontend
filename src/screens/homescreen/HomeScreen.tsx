@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dimensions,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { fetchUserDetails } from '../../api/auth-api/authApi';
 import { getItem, setItem, storage } from '../../store/storage';
 import styles from './HomeStyles';
 import VisionBoard from './components/VisionBoard';
@@ -17,6 +11,26 @@ const HomeScreen = () => {
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [quote, setQuote] = useState<string>('');
   const [author, setAuthor] = useState<string>('');
+
+  // user details from login
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userData = await fetchUserDetails();
+        console.log('Fetched User Details:', userData);
+        setUser(userData);
+      } catch (error) {
+        console.error('Error loading user details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUser();
+  }, []);
+  //
   useEffect(() => {
     const fetchQuote = async () => {
       const today = new Date().toISOString().split('T')[0];
@@ -78,7 +92,7 @@ const HomeScreen = () => {
     if (savedImage) {
       setProfileImage(savedImage);
     } else {
-      const defaultImage = 'https://i.pravatar.cc/150?img=2';
+      const defaultImage = 'https://i.pravatar.cc/150?img=3';
       setProfileImage(defaultImage);
       setItem('profile_image', defaultImage);
     }
@@ -116,10 +130,12 @@ const HomeScreen = () => {
     >
       <View style={styles.header}>
         <Image
-          source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=1' }}
+          source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=3' }}
           style={styles.profileImage}
         />
-        <Text style={styles.welcomeText}>Welcome, Venkat</Text>
+        <Text style={styles.welcomeText}>
+          Welcome, {user ? user.user.name : 'Loading...'}
+        </Text>
       </View>
 
       <View style={styles.thoughtContainer}>
@@ -161,8 +177,8 @@ const HomeScreen = () => {
       </View>
 
       {/* <View style={styles.moodHistoryContainer}> */}
-        {/* <Text style={styles.moodHistoryTitle}>Mood History / Mood Trend</Text> */}
-        {/* <MoodMirrorChart /> */}
+      {/* <Text style={styles.moodHistoryTitle}>Mood History / Mood Trend</Text> */}
+      {/* <MoodMirrorChart /> */}
       {/* </View> */}
     </ScrollView>
   );

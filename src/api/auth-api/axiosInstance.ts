@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Config from 'react-native-config';
 import {
   clearTokens,
   getAccessToken,
@@ -6,7 +7,7 @@ import {
   setTokens,
 } from '../../store/storage';
 
-const API_BASE_URL = 'https://hp137-yuvabe-backend-app.hf.space';
+const API_BASE_URL = Config.API_BASE_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
