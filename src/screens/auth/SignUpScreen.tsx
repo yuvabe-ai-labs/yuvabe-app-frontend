@@ -1,4 +1,5 @@
 // src/screens/SignUpScreen.tsx
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -13,15 +14,10 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { signUp } from '../../api/auth-api/authApi';
-import { setItem, setTokens } from '../../store/storage';
+import { signUpSchema, SignUpSchemaType } from '../../schemas/authSchema';
+import { setItem } from '../../store/storage';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
-
-type FormData = {
-  name: string;
-  email: string;
-  password: string;
-};
 
 const SignUpScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(false);
@@ -31,11 +27,11 @@ const SignUpScreen = ({ navigation }: any) => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
-    defaultValues: { name: '', email: '', password: '' },
+  } = useForm<SignUpSchemaType>({
+    resolver: zodResolver(signUpSchema),
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: SignUpSchemaType) => {
     if (loading) return;
     setLoading(true);
     Keyboard.dismiss();
@@ -44,21 +40,38 @@ const SignUpScreen = ({ navigation }: any) => {
       const res = await signUp(data.name, data.email, data.password);
       console.log('Signup successful:', res);
 
-      // ✅ Only save tokens if returned by backend
-      if (res.access_token && res.refresh_token) {
-        setTokens(res.access_token, res.refresh_token);
-      } else {
-        console.log('⚠️ No tokens returned at signup');
-      }
+      // const accessToken = res.data?.access_token;
+      // const refreshToken = res.data?.refresh_token;
 
-      // ✅ Mark as not verified
-      setItem('is_verified', 'false');
-      navigation.navigate('VerifyEmail', { email: data.email });
+      // if (accessToken && refreshToken) {
+      //   console.log('✅ Tokens received at signup');
+      //   setTokens(accessToken, refreshToken);
+      // } else {
+      //   console.warn('⚠️ No tokens returned at signup');
+      // }
 
-      Alert.alert('Account Created', 'Please verify your email to continue.');
+      console.log('Signup successful:', res.data);
+
+      // const email = data.email;
+
+      await setItem('is_verified', 'false');
+      await setItem('pending_email', data.email);
+      // Alert.alert(
+      //   'Verify Your Email',
+      //   'We’ve sent you a verification link. Please check your inbox.',
+      //   [
+      //     {
+      //       text: 'Go to Verification',
+      //       onPress: () =>
+      //         navigation.navigate('VerifyEmail', { email: data.email }),
+      //     },
+      //   ],
+      // );
+
+      // Navigate to verification screen
+      navigation.navigate('SignIn', { email: data.email });
     } catch (error: any) {
-      console.error('Signup error:', error);
-      Alert.alert('Error', error.message || 'Something went wrong');
+      Alert.alert('Signup Failed', error.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -78,13 +91,6 @@ const SignUpScreen = ({ navigation }: any) => {
       <Controller
         control={control}
         name="name"
-        rules={{
-          required: 'Full name is required',
-          minLength: {
-            value: 3,
-            message: 'Name must be at least 3 characters long',
-          },
-        }}
         render={({ field: { onChange, value } }) => (
           <TextInput
             placeholder="Full Name"
@@ -103,13 +109,6 @@ const SignUpScreen = ({ navigation }: any) => {
       <Controller
         control={control}
         name="email"
-        rules={{
-          required: 'Email is required',
-          pattern: {
-            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            message: 'Enter a valid email address',
-          },
-        }}
         render={({ field: { onChange, value } }) => (
           <TextInput
             placeholder="Email"
@@ -129,8 +128,6 @@ const SignUpScreen = ({ navigation }: any) => {
         <Text style={styles.errorText}>{errors.email.message}</Text>
       )}
 
-      {/* Password Field with Eye Icon */}
-      {/* Password Field with Eye Icon */}
       <View style={styles.passwordContainer}>
         <Controller
           control={control}
@@ -149,7 +146,7 @@ const SignUpScreen = ({ navigation }: any) => {
               value={value}
               onChangeText={onChange}
               style={[
-                styles.passwordInput, // 👈 use a lighter input style here
+                styles.passwordInput,
                 errors.password && { borderColor: COLORS.error },
               ]}
               placeholderTextColor={COLORS.textSecondary}
@@ -157,7 +154,6 @@ const SignUpScreen = ({ navigation }: any) => {
           )}
         />
 
-        {/* 👁️ Toggle Visibility Icon */}
         <TouchableOpacity
           onPress={() => setShowPassword(!showPassword)}
           style={styles.eyeIconContainer}
@@ -174,7 +170,6 @@ const SignUpScreen = ({ navigation }: any) => {
         <Text style={styles.errorText}>{errors.password.message}</Text>
       )}
 
-      {/* Sign Up Button with Loader */}
       <TouchableOpacity
         style={[styles.button, loading && { opacity: 0.6 }]}
         onPress={handleSubmit(onSubmit)}

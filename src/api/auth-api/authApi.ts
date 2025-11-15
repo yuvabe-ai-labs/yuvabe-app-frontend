@@ -15,16 +15,28 @@ export const signUp = async (name: string, email: string, password: string) => {
 
 export const sendVerificationEmail = async (email: string) => {
   try {
-    const response = await api.post('/auth/send-verification', {
-      email,
-    });
+    console.log('📧 Sending verification email for:', email);
+    const response = await api.post('/auth/send-verification', { email });
+    console.log('✅ Verification email response:', response.data);
     return response.data;
   } catch (error: any) {
+    console.error(
+      '❌ Verification email error:',
+      error.response?.data || error,
+    );
+
     if (error.response) {
-      throw new Error(
-        error.response.data.detail || 'Failed to send verification link',
-      );
+      const detail = error.response.data?.detail;
+      const message =
+        typeof detail === 'string'
+          ? detail
+          : typeof detail === 'object'
+          ? JSON.stringify(detail)
+          : 'Failed to send verification link';
+
+      throw new Error(message);
     }
+
     throw new Error('Network error');
   }
 };
@@ -78,4 +90,14 @@ export const getHome = async () => {
   // api is your axios instance that automatically adds Authorization header
   const response = await api.get('/auth/home');
   return response.data; // returns { code: 200, data: { ... } }
+};
+
+export const fetchUserDetails = async () => {
+  try {
+    const response = await api.get('/auth/home'); // authenticated GET
+    return response.data.data; // { id, name, email, is_verified }
+  } catch (error: any) {
+    console.error('Failed to fetch user details:', error);
+    throw error;
+  }
 };

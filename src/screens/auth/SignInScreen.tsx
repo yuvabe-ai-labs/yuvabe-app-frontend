@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -12,18 +13,16 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { signIn } from '../../api/auth-api/authApi';
+import { signInSchema, SignInSchemaType } from '../../schemas/authSchema';
 import { setItem, setTokens } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
 
-type FormData = {
-  email: string;
-  password: string;
-};
+
 
 const SignInScreen = ({ navigation }: any) => {
-  const setUser = useUserStore(state => state.setUser);
+  const { setUser, setIsLoggedIn, setIsVerified } = useUserStore();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -31,11 +30,11 @@ const SignInScreen = ({ navigation }: any) => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
-    defaultValues: { email: '', password: '' },
+  } = useForm<SignInSchemaType>({
+    resolver: zodResolver(signInSchema),
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: SignInSchemaType) => {
     if (loading) return;
     setLoading(true);
     Keyboard.dismiss();
@@ -45,26 +44,46 @@ const SignInScreen = ({ navigation }: any) => {
       const res = await signIn(data.email, data.password);
       console.log(' Login success:', res);
 
-      // Save user data (you can store token if needed)
+      // ✅ Save user globally
       setUser(res.user);
+      setIsLoggedIn(true);
+      setIsVerified(res.user.is_verified);
 
-      console.log(res.access_token);
+      // ✅ Store tokens locally
+      setTokens(res.access_token, res.refresh_token);
+      await setItem('is_verified', res.user.is_verified ? 'true' : 'false');
+      await setItem('pending_email', data.email);
+      console.log('💾 Saved is_verified:', res.user.is_verified);
+      console.log('💾 Saved pending_email:', data.email);
+
+      if (!res.user.is_verified) {
+        console.log('⚠️ User not verified, navigating to VerifyEmail...');
+        navigation.navigate('VerifyEmail', { email: data.email });
+        return;
+      }
 
       Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
         {
           text: 'Continue',
           onPress: () => {
-            setTokens(res.access_token, res.refresh_token); // save tokens
-            setItem('is_verified', res.user?.is_verified ? 'true' : 'false');
-            console.log(
-              '✅ Tokens saved, RootNavigator will now switch automatically',
-            );
+            console.log('✅ RootNavigator will switch automatically');
           },
         },
       ]);
     } catch (error: any) {
       console.error(' Login error:', error);
-      Alert.alert('Error', error.message || 'Something went wrong');
+
+      if (
+        error.message?.includes('Verify email to login') ||
+        error.message?.includes('User not verified')
+      ) {
+        setIsVerified(false);
+        setItem('is_verified', 'false');
+        await setItem('pending_email', data.email);
+        navigation.navigate('VerifyEmail', { email: data.email });
+      } else {
+        Alert.alert('Error', error.message || 'Something went wrong');
+      }
     } finally {
       setLoading(false);
     }
@@ -83,13 +102,6 @@ const SignInScreen = ({ navigation }: any) => {
       <Controller
         control={control}
         name="email"
-        rules={{
-          required: 'Email is required',
-          pattern: {
-            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            message: 'Enter a valid email address',
-          },
-        }}
         render={({ field: { onChange, value } }) => (
           <TextInput
             placeholder="Email"
@@ -113,13 +125,6 @@ const SignInScreen = ({ navigation }: any) => {
         <Controller
           control={control}
           name="password"
-          rules={{
-            required: 'Password is required',
-            minLength: {
-              value: 6,
-              message: 'Password must be at least 6 characters long',
-            },
-          }}
           render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="Password"

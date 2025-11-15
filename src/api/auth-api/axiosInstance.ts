@@ -1,7 +1,12 @@
 import axios from 'axios';
-import { getAccessToken, getRefreshToken, setTokens, clearTokens } from '../../store/storage';
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+} from '../../store/storage';
 
-const API_BASE_URL = 'https://68c71e06225c.ngrok-free.app';
+const API_BASE_URL = 'https://hp137-yuvabe-backend-app.hf.space';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
