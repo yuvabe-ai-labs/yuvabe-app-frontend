@@ -19,8 +19,6 @@ import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
 
-
-
 const SignInScreen = ({ navigation }: any) => {
   const { setUser, setIsLoggedIn, setIsVerified } = useUserStore();
   const [loading, setLoading] = useState(false);
@@ -41,6 +39,9 @@ const SignInScreen = ({ navigation }: any) => {
 
     try {
       console.log(' Sending login request...');
+      console.log(
+        `data that is being sent is : ${data.email} : ${data.password}`,
+      );
       const res = await signIn(data.email, data.password);
       console.log(' Login success:', res);
 
