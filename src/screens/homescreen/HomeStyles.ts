@@ -1,86 +1,94 @@
 import { StyleSheet } from 'react-native';
+import { COLORS, SIZES, TEXT_STYLES } from '../../utils/theme';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: SIZES.padding,
+    backgroundColor: COLORS.background,
   },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: SIZES.base * 2,
   },
+
   profileImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 10,
+    marginRight: SIZES.base,
   },
+
   welcomeText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    ...TEXT_STYLES.large,
   },
+
   thoughtContainer: {
-    backgroundColor: '#f3f4f6',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
+    backgroundColor: COLORS.lightGray,
+    padding: SIZES.base * 2,
+    borderRadius: SIZES.radius,
+    marginBottom: SIZES.base * 2.5,
   },
+
   thoughtTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#555',
-    marginBottom: 5,
+    ...TEXT_STYLES.title,
+    fontSize: SIZES.lg,
+    marginBottom: 4,
   },
+
   thoughtText: {
-    fontSize: 14,
-    color: '#666',
+    ...TEXT_STYLES.regular,
     fontStyle: 'italic',
   },
+
   notificationCard: {
-    backgroundColor: '#fff3cd',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    shadowColor: '#000',
+    backgroundColor: COLORS.warning + '33',
+    borderRadius: SIZES.radius,
+    padding: SIZES.base * 2,
+    marginBottom: SIZES.base * 2,
+    shadowColor: COLORS.textPrimary,
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowRadius: 2,
+    elevation: 2,
   },
+
   notificationHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+
   notificationTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    ...TEXT_STYLES.large,
   },
+
   closeButton: {
-    fontSize: 18,
-    color: '#333',
+    fontSize: SIZES.lg,
+    color: COLORS.textPrimary,
   },
+
   emojiContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 10,
+    marginTop: SIZES.base * 1.5,
   },
+
   emojiButton: {
-    padding: 5,
+    padding: SIZES.base / 2,
   },
+
   emoji: {
     fontSize: 28,
   },
+
   moodHistoryContainer: {
-    marginTop: 20,
+    marginTop: 0,
   },
+
   moodHistoryTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#444',
+    ...TEXT_STYLES.title,
   },
 });
 

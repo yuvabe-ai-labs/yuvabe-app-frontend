@@ -1,0 +1,94 @@
+import { Dimensions, StyleSheet } from 'react-native';
+
+export const SCREEN_WIDTH = Dimensions.get('window').width;
+export const GAP = 4;
+export const COLUMN_COUNT = 2;
+export const BOARD_PADDING = GAP;
+export const TILE_WIDTH =
+  (SCREEN_WIDTH - GAP * (COLUMN_COUNT + 1)) / COLUMN_COUNT;
+
+const styles = StyleSheet.create({
+  boardContainer: {
+    width: '100%',
+    padding: BOARD_PADDING,
+    backgroundColor: '#f2f2f2',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: GAP,
+  },
+  pencilButton: {
+    padding: 6,
+  },
+  columnsWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+  },
+  column: {
+    flex: 1,
+  },
+  tile: {
+    width: TILE_WIDTH - 30,
+    marginBottom: GAP,
+    backgroundColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 4,
+    borderRadius: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    minWidth: '90%',
+    maxWidth: '90%',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  modalButton: {
+    marginTop: 10,
+  },
+  modalTextInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    marginTop: 10,
+    padding: 10,
+    color: '#000',
+  },
+  removeImageButton: {
+    marginTop: 10,
+    backgroundColor: '#fbeaea',
+    padding: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  removeImageText: {
+    color: '#b94a48',
+    fontWeight: '600',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+});
+
+export default styles;

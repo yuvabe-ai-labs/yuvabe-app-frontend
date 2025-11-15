@@ -1,12 +1,78 @@
-
 import React, { useEffect, useState } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { getItem, setItem, storage } from '../../store/storage';
 import styles from './HomeStyles';
+import VisionBoard from './components/VisionBoard';
 
 const HomeScreen = () => {
   const [showNotification, setShowNotification] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
+  const [quote, setQuote] = useState<string>('');
+  const [author, setAuthor] = useState<string>('');
+  useEffect(() => {
+    const fetchQuote = async () => {
+      const today = new Date().toISOString().split('T')[0];
+
+      try {
+        const storedQuoteData = getItem('daily_quote');
+        if (storedQuoteData) {
+          const parsed = JSON.parse(storedQuoteData);
+
+          if (parsed.date === today && parsed.success === true) {
+            console.log('Using stored quote for today');
+            setQuote(parsed.quote);
+            setAuthor(parsed.author);
+            return;
+          }
+        }
+
+        console.log('Fetching new quote from API...');
+        const response = await fetch('https://quotes.domiadi.com/api'); // or try this https://motivational-spark-api.vercel.app/api/quotes/random
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+
+        const data = await response.json();
+        const quoteData = {
+          quote: data.quote,
+          author: data.from,
+          date: today,
+          success: true,
+        };
+
+        setItem('daily_quote', JSON.stringify(quoteData));
+        console.log('Stored new quote for today:', quoteData);
+
+        setQuote(quoteData.quote);
+        setAuthor(quoteData.author);
+      } catch (error) {
+        console.error('Error fetching or storing quote:', error);
+
+        setQuote('“The only way to do great work is to love what you do.”');
+        setAuthor('Steve Jobs');
+
+        const today = new Date().toISOString().split('T')[0];
+        const fallbackData = {
+          quote: '“The only way to do great work is to love what you do.”',
+          author: 'Steve Jobs',
+          date: today,
+          success: false,
+        };
+        setItem('daily_quote', JSON.stringify(fallbackData));
+      }
+    };
+
+    fetchQuote();
+  }, []);
+
   useEffect(() => {
     const savedImage = getItem('profile_image');
     if (savedImage) {
@@ -19,20 +85,17 @@ const HomeScreen = () => {
     console.log('Stored keys:', storage.getAllKeys());
     console.log('Profile image:', storage.getString('profile_image'));
   }, []);
+
   const checkNotificationTime = () => {
     const now = new Date();
     const hours = now.getHours();
-
-    if ((hours >= 10 && hours < 11) || (hours >= 23 && hours < 24)) {
-      setShowNotification(true);
-    } else {
-      setShowNotification(false);
-    }
+    setShowNotification(
+      (hours >= 9 && hours < 10) || (hours >= 15 && hours < 16),
+    );
   };
 
   useEffect(() => {
     checkNotificationTime();
-
     const interval = setInterval(checkNotificationTime, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -41,29 +104,16 @@ const HomeScreen = () => {
     console.log('Selected mood:', mood);
     setShowNotification(false);
   };
-// =======
-// import React, { useEffect } from 'react';
-// import { Image, Text, TouchableOpacity, View } from 'react-native';
-// import { getHome } from '../../api/auth-api/authApi';
-// import { useUserStore } from '../../store/useUserStore';
-// import { styles } from './homeStyles';
 
-// const HomeScreen = ({ navigation }: any) => {
-//   useEffect(() => {
-//     (async () => {
-//       try {
-//         const res = await getHome();
-//         console.log('Home response:', res);
-//       } catch (err) {
-//         console.error('Failed to load home:', err);
-//         // if err.response?.status === 401 it means token failed and refresh also failed
-//       }
-//     })();
-//   }, []);
-//   const user = useUserStore(state => state.user);
-// >>>>>>> main
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{
+        paddingBottom: 80,
+      }}
+      showsVerticalScrollIndicator={false}
+      scrollEnabled={scrollEnabled}
+    >
       <View style={styles.header}>
         <Image
           source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=1' }}
@@ -74,8 +124,11 @@ const HomeScreen = () => {
 
       <View style={styles.thoughtContainer}>
         <Text style={styles.thoughtTitle}>Thought of the Day</Text>
-        <Text style={styles.thoughtText}>
-          “The only way to do great work is to love what you do.” – Steve Jobs
+        <Text style={styles.thoughtText}>"{quote}"</Text>
+        <Text
+          style={[styles.thoughtText, { fontStyle: 'italic', fontSize: 14 }]}
+        >
+          — {author}
         </Text>
       </View>
       {showNotification && (
@@ -90,7 +143,7 @@ const HomeScreen = () => {
           </View>
 
           <View style={styles.emojiContainer}>
-            {['😄', '🙂', '😐', '🙁', '😞', '🙁', '😞'].map((emoji, index) => (
+            {['😄', '🙂', '😐', '🙁', '😞'].map((emoji, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => handleMoodSelect(emoji)}
@@ -103,10 +156,15 @@ const HomeScreen = () => {
         </View>
       )}
 
-      <View style={styles.moodHistoryContainer}>
-        <Text style={styles.moodHistoryTitle}>Mood History / Mood Trend</Text>
+      <View style={{ width: '100%' }}>
+        <VisionBoard setScrollingEnabled={setScrollEnabled} />
       </View>
-    </View>
+
+      {/* <View style={styles.moodHistoryContainer}> */}
+        {/* <Text style={styles.moodHistoryTitle}>Mood History / Mood Trend</Text> */}
+        {/* <MoodMirrorChart /> */}
+      {/* </View> */}
+    </ScrollView>
   );
 };
 
