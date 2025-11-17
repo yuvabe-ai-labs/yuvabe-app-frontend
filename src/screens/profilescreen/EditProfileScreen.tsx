@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
@@ -25,16 +25,6 @@ import {
 } from '../../schemas/profileSchema';
 import { useUserStore } from '../../store/useUserStore';
 import { styles } from './EditProfileStyles';
-
-// ---------- Helper: format date to DD.MM.YYYY ----------
-const toDDMMYYYY = (isoDate: string | Date | null) => {
-  if (!isoDate) return null;
-  const d = typeof isoDate === 'string' ? new Date(isoDate) : isoDate;
-  const day = `${d.getDate()}`.padStart(2, '0');
-  const month = `${d.getMonth() + 1}`.padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}.${month}.${year}`;
-};
 
 // ---------- Password input with eye inside right edge ----------
 const PasswordInput = ({
@@ -71,7 +61,7 @@ const PasswordInput = ({
         }}
         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       >
-        <Icon name={show ? 'eye-off' : 'eye'} size={20} color="#6b6b6b" />
+        <Icon name={show ? 'eye' : 'eye-off'} size={20} color="#6b6b6b" />
       </TouchableOpacity>
     </View>
   );
@@ -80,6 +70,12 @@ const PasswordInput = ({
 const EditProfileScreen = ({ navigation }: any) => {
   const { user, setUser } = useUserStore();
   const [loading, setLoading] = useState(false);
+
+  console.log('🔥 EditProfileScreen mounted');
+
+  //   useEffect(() => {
+  //     console.log('📌 Zustand user on first render:', user);
+  //   }, []);
 
   // image local preview
   const [profileImage, setProfileImage] = useState<string | undefined>(
@@ -96,21 +92,67 @@ const EditProfileScreen = ({ navigation }: any) => {
   const animatedHeight = useRef(new Animated.Value(0)).current;
   const contentHeightRef = useRef(0);
 
+  const isoToDDMMYYYY = (iso: string) => {
+    if (!iso) return '';
+    const [year, month, day] = iso.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
+  const toDDMMYYYY = (dob: string | null) => {
+    if (!dob) return null;
+    // Convert DD-MM-YYYY → DD.MM.YYYY
+    const [day, month, year] = dob.split('-');
+    return `${day}.${month}.${year}`;
+  };
+
   const {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
       name: user?.name || '',
       email: user?.email || '',
       // user.dob expected to be ISO from backend like 1998-05-28
-      dob: user?.dob || '',
+      dob: '',
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
     },
+  });
+  useEffect(() => {
+    console.log("🟦 useEffect triggered because 'user' changed");
+    console.log('➡️ Current user:', user);
+
+    if (user) {
+      console.log('🟩 user.dob BEFORE convert:', user.dob);
+
+      const formattedDob = user.dob ? isoToDDMMYYYY(user.dob) : '';
+      reset({
+        name: user.name || '',
+        email: user.email || '',
+        dob: formattedDob, // show DD-MM-YYYY in UI
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+
+      console.log('✅ reset() CALLED with:', {
+        name: user.name,
+        email: user.email,
+        dob: formattedDob,
+      });
+    } else {
+      console.log('❌ user is NULL in useEffect');
+    }
+  }, [user, reset]);
+
+  console.log('🟧 defaultValues used:', {
+    name: user?.name,
+    email: user?.email,
+    dob: '',
   });
 
   // ---------- Image picker (local only) ----------
@@ -254,6 +296,7 @@ const EditProfileScreen = ({ navigation }: any) => {
               keyboardType="email-address"
               style={[styles.input, errors.email && styles.inputError]}
               value={value}
+              editable={false}
               onChangeText={onChange}
             />
           )}

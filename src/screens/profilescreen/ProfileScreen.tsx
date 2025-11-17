@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
@@ -48,9 +49,18 @@ export const ProfileScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Profile Header */}
-      <View style={styles.header}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Gradient Header */}
+      <LinearGradient colors={['#4A90E2', '#5A6FF0']} style={styles.headerBg}>
+        {/* <Text style={styles.headerTitle}>My Profile</Text> */}
+      </LinearGradient>
+
+      {/* Profile Card */}
+      <View style={styles.profileCard}>
         <Image
           source={{
             uri:
@@ -62,7 +72,6 @@ export const ProfileScreen = () => {
         />
 
         <Text style={styles.name}>{user?.name || 'User'}</Text>
-
         <Text style={styles.email}>{user?.email || 'example@yuvabe.com'}</Text>
       </View>
 
@@ -83,20 +92,12 @@ export const ProfileScreen = () => {
           label="Leave Requests"
           onPress={() => navigation.navigate('LeaveScreen')}
         />
-        <SectionItem
-          icon="info"
-          label="Information"
-          onPress={() => navigation.navigate('InformationScreen')}
-        />
-
-        <SectionItem
-          icon="activity"
-          label="Consistency Streak"
-          onPress={() => {}}
-        />
       </View>
 
-      {/* Logout Button */}
+      {/* Spacer to make design full */}
+      <View style={{ flex: 1 }} />
+
+      {/* Logout */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Icon name="log-out" size={18} color="#FF3B30" />
         <Text style={styles.logoutText}>Logout</Text>

@@ -4,22 +4,45 @@ import { COLORS } from '../../utils/theme';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
-    paddingTop: 100,
+    backgroundColor: '#F2F5F9',
   },
 
-  header: {
-    alignItems: 'center',
-    marginBottom: 30,
+  /* Gradient Header */
+  headerBg: {
+    height: 160,
+    justifyContent: 'flex-end',
+    paddingBottom: 25,
+    paddingHorizontal: 20,
   },
+  headerTitle: {
+    color: 'white',
+    fontSize: 28,
+    fontWeight: '700',
+  },
+
+  /* Profile Card */
+  profileCard: {
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    marginTop: -50,
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
+
   profileImage: {
     width: 110,
     height: 110,
-    borderRadius: 55,
+    borderRadius: 60,
     borderWidth: 3,
     borderColor: COLORS.primary || '#007AFF',
-    marginBottom: 15,
+    marginBottom: 10,
   },
+
   name: {
     fontSize: 22,
     fontWeight: '700',
@@ -27,41 +50,42 @@ export const styles = StyleSheet.create({
   },
   email: {
     fontSize: 15,
-    marginTop: 4,
     color: '#6C757D',
+    marginTop: 4,
   },
 
-  /* -------- Sections -------- */
+  /* Sections */
   sectionWrapper: {
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#E5E5E5',
+    marginTop: 40,
+    borderRadius: 12,
+    marginHorizontal: 20,
+    overflow: 'hidden',
   },
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 18,
+    paddingVertical: 22,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
+    borderBottomColor: '#EEE',
   },
   sectionLabel: {
     flex: 1,
     marginLeft: 14,
-    fontSize: 16,
+    fontSize: 17,
     color: '#1A1A1A',
     fontWeight: '500',
   },
 
-  /* -------- Logout -------- */
+  /* Logout */
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 25,
+    marginHorizontal: 20,
     marginTop: 40,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: 12,
     backgroundColor: '#FFE8E8',
   },

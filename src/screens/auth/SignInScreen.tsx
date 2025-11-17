@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { signIn } from '../../api/auth-api/authApi';
+import { fetchUserDetails, signIn } from '../../api/auth-api/authApi';
 import { signInSchema, SignInSchemaType } from '../../schemas/authSchema';
 import { setItem, setTokens } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
@@ -44,9 +44,10 @@ const SignInScreen = ({ navigation }: any) => {
       );
       const res = await signIn(data.email, data.password);
       console.log(' Login success:', res);
+      const userData = await fetchUserDetails();
 
       // ✅ Save user globally
-      setUser(res.user);
+      setUser(userData.user);
       setIsLoggedIn(true);
       setIsVerified(res.user.is_verified);
 
@@ -145,7 +146,7 @@ const SignInScreen = ({ navigation }: any) => {
           style={styles.eyeIconContainer}
         >
           <Icon
-            name={showPassword ? 'eye-off' : 'eye'}
+            name={showPassword ? 'eye' : 'eye-off'}
             size={22}
             color={COLORS.primary}
           />

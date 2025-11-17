@@ -20,10 +20,7 @@ export const sendVerificationEmail = async (email: string) => {
     console.log('✅ Verification email response:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error(
-      '❌ Verification email error:',
-      error.response?.data || error,
-    );
+    console.error(' Verification email error:', error.response?.data || error);
 
     if (error.response) {
       const detail = error.response.data?.detail;
@@ -59,10 +56,10 @@ export const signIn = async (email: string, password: string) => {
     const response = await api.post('/auth/login', { email, password });
 
     console.log(`inside sign in function after api call`);
-    console.log('🔍 Raw Axios response:', response);
+    console.log(' Raw Axios response:', response);
 
     const data = response.data.data;
-    console.log('📦 Parsed data:', data);
+    console.log(' Parsed data:', data);
 
     // If backend wraps tokens inside "data"
     setTokens(data.access_token, data.refresh_token);
@@ -98,9 +95,13 @@ export const getHome = async () => {
 
 export const fetchUserDetails = async () => {
   try {
-    const response = await api.get('/auth/home'); // authenticated GET
-    console.log(`The fetched user details is ${response.data.data}`);
-    return response.data.data; // { id, name, email, is_verified }
+    const response = await api.get('/auth/home');
+
+    console.log('Fetched:', response.data.data);
+
+    // root navigator expects this EXACT structure:
+    // return { message, user, home_data }
+    return response.data.data;
   } catch (error: any) {
     console.error('Failed to fetch user details:', error);
     throw error;

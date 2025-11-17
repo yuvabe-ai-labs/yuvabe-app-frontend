@@ -8,6 +8,6 @@ export type AssetDTO = {
 };
 
 export const fetchAssets = async (): Promise<AssetDTO[]> => {
-  const res = await api.get('/assets');
+  const res = await api.get('/profile');
   return res.data.data.assets;
 };

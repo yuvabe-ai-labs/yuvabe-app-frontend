@@ -180,7 +180,7 @@ const SignUpScreen = ({ navigation }: any) => {
           style={styles.eyeIconContainer}
         >
           <Icon
-            name={showPassword ? 'eye-off' : 'eye'}
+            name={showPassword ? 'eye' : 'eye-off'}
             size={22}
             color={COLORS.primary} // 👈 make it visible
           />

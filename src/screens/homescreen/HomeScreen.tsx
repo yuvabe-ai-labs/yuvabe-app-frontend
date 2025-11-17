@@ -134,7 +134,7 @@ const HomeScreen = () => {
           style={styles.profileImage}
         />
         <Text style={styles.welcomeText}>
-          Welcome, {user ? user.user.name : 'Loading...'}
+          Welcome, {user?.name || 'Loading...'}
         </Text>
       </View>
 
