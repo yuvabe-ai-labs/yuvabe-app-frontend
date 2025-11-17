@@ -1,35 +1,74 @@
-// src/screens/profilescreen/ProfileStyles.ts
 import { StyleSheet } from 'react-native';
 import { COLORS } from '../../utils/theme';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center', // centers content vertically
-    alignItems: 'center', // centers content horizontally
+    backgroundColor: '#F8F9FA',
+    paddingTop: 100,
   },
-  content: {
-    alignItems: 'center', // makes text + button centered
+
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
   },
-  title: {
-    fontSize: 24,
+  profileImage: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 3,
+    borderColor: COLORS.primary || '#007AFF',
+    marginBottom: 15,
+  },
+  name: {
+    fontSize: 22,
     fontWeight: '700',
-    color: COLORS.primary || '#333',
-    marginBottom: 10,
+    color: '#1A1A1A',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 20, // space before logout button
+  email: {
+    fontSize: 15,
+    marginTop: 4,
+    color: '#6C757D',
   },
-  logoutButton: {
-    paddingVertical: 10,
+
+  /* -------- Sections -------- */
+  sectionWrapper: {
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 18,
     paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  sectionLabel: {
+    flex: 1,
+    marginLeft: 14,
+    fontSize: 16,
+    color: '#1A1A1A',
+    fontWeight: '500',
+  },
+
+  /* -------- Logout -------- */
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 25,
+    marginTop: 40,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#FFE8E8',
   },
   logoutText: {
-    color: '#007BFF',
+    marginLeft: 8,
     fontSize: 16,
-    fontWeight: '500',
+    color: '#FF3B30',
+    fontWeight: '600',
   },
 });

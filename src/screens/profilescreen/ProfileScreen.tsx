@@ -1,65 +1,114 @@
-// src/screens/profilescreen/ProfileScreen.tsx
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { Alert, Text, TouchableOpacity, View } from 'react-native';
-import { setItem } from '../../store/storage';
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
+import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { styles } from './ProfileStyles';
 
 export const ProfileScreen = () => {
   const navigation = useNavigation<any>();
-  const { setIsLoggedIn, setIsVerified, resetUser } = useUserStore();
+  const { user, resetUser, setIsLoggedIn, setIsVerified } = useUserStore();
+  const storedImage = getItem('profile_image');
 
-  const handleLogout = async () => {
-    Alert.alert('Logout', 'Are you sure you want to log out?', [
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Logout',
         style: 'destructive',
         onPress: async () => {
-          try {
-            console.log('🚪 Logging out...');
-            // Reset store
-            resetUser();
-            setIsLoggedIn(false);
-            setIsVerified(false);
+          resetUser();
+          setIsLoggedIn(false);
+          setIsVerified(false);
 
-            // Clear local storage
-            await Promise.all([
-              setItem('is_verified', 'false'),
-              setItem('pending_email', ''),
-              setItem('access_token', ''),
-              setItem('refresh_token', ''),
-            ]);
+          await Promise.all([
+            setItem('is_verified', 'false'),
+            setItem('pending_email', ''),
+            setItem('access_token', ''),
+            setItem('refresh_token', ''),
+          ]);
 
-            console.log('✅ Logged out successfully');
-
-            // Navigate to Auth flow
-            navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [{ name: 'Auth' }],
-              }),
-            );
-          } catch (error) {
-            console.error('❌ Logout error:', error);
-          }
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'Auth' }],
+            }),
+          );
         },
       },
     ]);
   };
 
   return (
-    <View style={styles.container}>
-      {/* ✅ Logout in top-right corner */}
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Profile Header */}
+      <View style={styles.header}>
+        <Image
+          source={{
+            uri:
+              storedImage ||
+              user?.profile_picture ||
+              'https://i.pravatar.cc/150?img=3',
+          }}
+          style={styles.profileImage}
+        />
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Profile</Text>
-        <Text style={styles.subtitle}>Welcome to your profile screen!</Text>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        <Text style={styles.name}>{user?.name || 'User'}</Text>
+
+        <Text style={styles.email}>{user?.email || 'example@yuvabe.com'}</Text>
       </View>
-    </View>
+
+      {/* Sections */}
+      <View style={styles.sectionWrapper}>
+        <SectionItem
+          icon="edit-3"
+          label="Edit Profile"
+          onPress={() => navigation.navigate('EditProfile')}
+        />
+        <SectionItem
+          icon="briefcase"
+          label="My Assets"
+          onPress={() => navigation.navigate('AssetsScreen')}
+        />
+        <SectionItem
+          icon="calendar"
+          label="Leave Requests"
+          onPress={() => navigation.navigate('LeaveScreen')}
+        />
+        <SectionItem
+          icon="info"
+          label="Information"
+          onPress={() => navigation.navigate('InformationScreen')}
+        />
+
+        <SectionItem
+          icon="activity"
+          label="Consistency Streak"
+          onPress={() => {}}
+        />
+      </View>
+
+      {/* Logout Button */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Icon name="log-out" size={18} color="#FF3B30" />
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
+
+const SectionItem = ({ label, icon, onPress }: any) => (
+  <TouchableOpacity style={styles.sectionRow} onPress={onPress}>
+    <Icon name={icon} size={22} color="#4A90E2" />
+    <Text style={styles.sectionLabel}>{label}</Text>
+    <Icon name="chevron-right" size={22} color="#C4C4C4" />
+  </TouchableOpacity>
+);
