@@ -7,6 +7,7 @@ import ViewShot from 'react-native-view-shot';
 import { getVisionBoard, setVisionBoard } from '../../../store/storage';
 import Tile from './Tile';
 import styles, { COLUMN_COUNT, GAP } from './VisionBoardStyles';
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 
 interface VisionItem {
   id: string;
@@ -57,10 +58,13 @@ const VisionBoard: React.FC<{
 
   const handleDownload = () => {
     if (ref.current) {
-      ref.current.capture().then(uri => {
+      ref.current.capture().then(async uri => {
+
+        await CameraRoll.saveAsset(uri,{type: 'photo'});
+
         Alert.alert(
           'VisionBoard',
-          'Vision Board Screenshot has been captured!',
+          'Vision Board Screenshot has been captured and saved to gallery! \n Would you like to share your VisionBoard?',
           [
             { text: 'Cancel', style: 'cancel' },
             {
