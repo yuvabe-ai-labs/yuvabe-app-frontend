@@ -98,9 +98,8 @@ export const getHome = async () => {
 
 export const fetchUserDetails = async () => {
   try {
-    const response = await api.get('/auth/home'); // authenticated GET
-    console.log(`The fetched user details is ${response.data.data}`);
-    return response.data.data; // { id, name, email, is_verified }
+    const response = await api.get('/auth/home');
+    return response.data.data;
   } catch (error: any) {
     console.error('Failed to fetch user details:', error);
     throw error;
