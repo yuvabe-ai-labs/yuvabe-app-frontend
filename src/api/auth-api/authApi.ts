@@ -97,10 +97,13 @@ export const fetchUserDetails = async () => {
   try {
     const response = await api.get('/auth/home');
 
+
     console.log('Fetched:', response.data.data);
 
     // root navigator expects this EXACT structure:
     // return { message, user, home_data }
+
+
     return response.data.data;
   } catch (error: any) {
     console.error('Failed to fetch user details:', error);
