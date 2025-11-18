@@ -2,9 +2,12 @@
 import { create } from 'zustand';
 
 type User = {
+  id: string; 
   name?: string;
   email?: string;
   is_verified?: boolean;
+  dob?: string | null;
+  profile_picture?: string | null;
 };
 
 type UserStore = {

@@ -53,6 +53,7 @@ const RootNavigator = () => {
         const email = userData.user?.email || '';
 
         setUser(userData.user);
+        // console.log(' User is verified:', user);
         setIsLoggedIn(true);
         setIsVerified(verified);
 

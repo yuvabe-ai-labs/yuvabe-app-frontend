@@ -13,14 +13,17 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { signUp } from '../../api/auth-api/authApi';
+import { fetchUserDetails, signUp } from '../../api/auth-api/authApi';
 import { signUpSchema, SignUpSchemaType } from '../../schemas/authSchema';
 import { setItem } from '../../store/storage';
+import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
 
 const SignUpScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(false);
+  const { setUser, setIsLoggedIn, setIsVerified } = useUserStore();
+
   const [showPassword, setShowPassword] = useState(false); // 👈 new state
 
   const {
@@ -54,8 +57,8 @@ const SignUpScreen = ({ navigation }: any) => {
 
       // const email = data.email;
 
-      await setItem('is_verified', 'false');
-      await setItem('pending_email', data.email);
+      // await setItem('is_verified', 'false');
+      // await setItem('pending_email', data.email);
       // Alert.alert(
       //   'Verify Your Email',
       //   'We’ve sent you a verification link. Please check your inbox.',
@@ -69,7 +72,25 @@ const SignUpScreen = ({ navigation }: any) => {
       // );
 
       // Navigate to verification screen
-      navigation.navigate('SignIn', { email: data.email });
+      await setItem('is_verified', 'true');
+      await setItem('pending_email', data.email);
+
+      // If your API returns token
+      if (res?.data?.access_token) {
+        await setItem('access_token', res.data.access_token);
+      }
+
+      const userData = await fetchUserDetails();
+      console.log('User fetched after signup:', userData);
+
+      setUser(userData.user);
+      setIsLoggedIn(true);
+      setIsVerified(true);
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'App' }],
+      });
     } catch (error: any) {
       Alert.alert('Signup Failed', error.message || 'Something went wrong');
     } finally {
@@ -159,7 +180,7 @@ const SignUpScreen = ({ navigation }: any) => {
           style={styles.eyeIconContainer}
         >
           <Icon
-            name={showPassword ? 'eye-off' : 'eye'}
+            name={showPassword ? 'eye' : 'eye-off'}
             size={22}
             color={COLORS.primary} // 👈 make it visible
           />
