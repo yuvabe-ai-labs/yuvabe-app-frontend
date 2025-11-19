@@ -1,4 +1,5 @@
 import * as RNFS from '@dr.pogodin/react-native-fs';
+import * as ort from 'onnxruntime-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,6 +13,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { semanticSearch, tokenizeQuery } from '../../api/auth-api/authApi';
+import {
+  isLlamaReady,
+  llamaGenerate,
+  loadLlama,
+} from '../chatbot/llama/llamaManager';
 import { styles } from './ChatbotStyles';
 
 const MODEL_URL_1 =
@@ -21,9 +28,10 @@ const MODEL_URL_2 =
 const MODEL_URL_3 =
   'https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q5_K_M.gguf';
 
-const MODEL_1_PATH = RNFS.DocumentDirectoryPath + '/model1.bin';
-const MODEL_2_PATH = RNFS.DocumentDirectoryPath + '/model2.bin';
-const MODEL_3_PATH = RNFS.DocumentDirectoryPath + '/model3.bin';
+// 2. Updated paths to ensure ONNX Runtime finds the external data correctly
+const MODEL_1_PATH = RNFS.DocumentDirectoryPath + '/model.onnx';
+const MODEL_2_PATH = RNFS.DocumentDirectoryPath + '/model.onnx_data';
+const MODEL_3_PATH = RNFS.DocumentDirectoryPath + '/model3.gguf';
 
 type Message = {
   id: string;
@@ -39,6 +47,9 @@ export const ChatScreen = () => {
   const [progress3, setProgress3] = useState(0);
   const [downloadDone, setDownloadDone] = useState(false);
 
+  // 3. State to hold the Loaded ONNX Session
+  const [session, setSession] = useState<ort.InferenceSession | null>(null);
+
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', text: 'Hello! 👋', from: 'bot' },
     { id: '2', text: 'Hi there! How are you?', from: 'user' },
@@ -50,6 +61,30 @@ export const ChatScreen = () => {
     checkExistingModels();
   }, []);
 
+  // 4. Logic to Load the Model (Adapted from HelloWorks)
+  const handleLoadModel = async () => {
+    console.log('Inside handle load model...');
+    try {
+      // ONNX Runtime requires the 'file://' prefix for local paths on React Native
+      const sessionPath = `file://${MODEL_1_PATH}`;
+
+      const internalSession = await ort.InferenceSession.create(sessionPath);
+      setSession(internalSession);
+
+      // 5. The requested Console Output
+      console.log('Model loaded successfully!');
+      console.log(
+        'Input Names:',
+        internalSession.inputNames,
+        'Output Names:',
+        internalSession.outputNames,
+      );
+    } catch (err) {
+      console.error('Error loading ONNX model:', err);
+      Alert.alert('Error', 'Failed to load ONNX model');
+    }
+  };
+
   const checkExistingModels = async () => {
     const exists1 = await RNFS.exists(MODEL_1_PATH);
     const exists2 = await RNFS.exists(MODEL_2_PATH);
@@ -58,6 +93,8 @@ export const ChatScreen = () => {
     if (exists1 && exists2 && exists3) {
       setShowDownloadModal(false);
       setDownloadDone(true);
+      await handleLoadModel();
+      await loadLlama(MODEL_3_PATH);
     }
   };
 
@@ -88,6 +125,9 @@ export const ChatScreen = () => {
 
       setDownloadDone(true);
       setShowDownloadModal(false);
+
+      await handleLoadModel();
+      await loadLlama(MODEL_3_PATH);
     } catch (error) {
       console.log('Download error:', error);
       Alert.alert('Failed to download models. Check your network & try again.');
@@ -96,25 +136,134 @@ export const ChatScreen = () => {
     setDownloading(false);
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const newMsg: Message = {
+    const userMsg: Message = {
       id: String(Date.now()),
       text: input,
       from: 'user',
     };
-    setMessages(prev => [...prev, newMsg]);
-    setInput('');
+    setMessages(prev => [...prev, userMsg]);
 
-    setTimeout(() => {
+    try {
+      if (!session) {
+        const botReply: Message = {
+          id: String(Date.now() + 1),
+          text: 'Model not loaded yet. Try again once it’s ready.',
+          from: 'bot',
+        };
+        setMessages(prev => [...prev, botReply]);
+        setInput('');
+        return;
+      }
+      const tokens = await tokenizeQuery(input);
+
+      const inputIdsTensor = new ort.Tensor(
+        'int64',
+        BigInt64Array.from(tokens.input_ids.map(BigInt)),
+        [1, tokens.input_ids.length],
+      );
+
+      const attentionMaskTensor = new ort.Tensor(
+        'int64',
+        BigInt64Array.from(tokens.attention_mask.map(BigInt)),
+        [1, tokens.attention_mask.length],
+      );
+
+      const output = await session.run({
+        input_ids: inputIdsTensor,
+        attention_mask: attentionMaskTensor,
+      });
+
+      const embedding = Array.from(
+        output[session.outputNames[1]].data as Float32Array,
+      );
+
+      const embedMsg: Message = {
+        id: String(Date.now() + 1),
+        text: `Embedding generated! (dim: ${embedding.length})`,
+        from: 'bot',
+      };
+      setMessages(prev => [...prev, embedMsg]);
+
+      // const searchResults = await semanticSearch(embedding);
+      // console.log(`the search results are `, searchResults);
+      // const best = searchResults?.[0];
+
+      // if (!best) {
+      //   const noResultMsg: Message = {
+      //     id: String(Date.now() + 2),
+      //     text: 'No relevant information found.',
+      //     from: 'bot',
+      //   };
+      //   setMessages(prev => [...prev, noResultMsg]);
+      //   setInput('');
+      //   return;
+      // }
+      // const botReply: Message = {
+      //   id: String(Date.now() + 2),
+      //   text: best.text,
+      //   from: 'bot',
+      // };
+      // setMessages(prev => [...prev, botReply]);
+      const searchResults = await semanticSearch(embedding);
+      const best = searchResults?.[0];
+
+      if (!best) {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: String(Date.now() + 2),
+            text: 'No relevant information found.',
+            from: 'bot',
+          },
+        ]);
+        return;
+      }
+
+      const ragPrompt = `
+CONTEXT:
+${best.text}
+
+USER QUESTION:
+${input}
+
+ASSISTANT ANSWER:
+`;
+
+      if (!isLlamaReady()) {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: String(Date.now() + 3),
+            text: 'Llama model is not loaded yet.',
+            from: 'bot',
+          },
+        ]);
+      } else {
+        const finalText = await llamaGenerate(ragPrompt);
+
+        setMessages(prev => [
+          ...prev,
+          {
+            id: String(Date.now() + 4),
+            text: finalText,
+            from: 'bot',
+          },
+        ]);
+      }
+    } catch (err) {
+      console.log('Chat processing error:', err);
       const botReply: Message = {
         id: String(Date.now() + 1),
-        text: "Cool! I'll respond once the AI backend is connected 😄",
+        text: 'Something went wrong processing your query.',
         from: 'bot',
       };
       setMessages(prev => [...prev, botReply]);
-    }, 1000);
+    }
+
+    setInput('');
   };
 
   const renderItem = ({ item }: { item: Message }) => (
@@ -133,42 +282,21 @@ export const ChatScreen = () => {
   return (
     <>
       <Modal visible={showDownloadModal} transparent animationType="fade">
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 20,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: '#fff',
-              padding: 20,
-              borderRadius: 10,
-              width: '90%',
-            }}
-          >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
             {!downloading ? (
               <>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                <Text style={styles.downloadText}>
                   Download Required Models
                 </Text>
-                <Text style={{ marginTop: 10 }}>
-                  To enable offline AI processing, two model files must be
+                <Text style={styles.downloadDescription}>
+                  To enable offline AI processing, three model files must be
                   downloaded. Would you like to download them now?
                 </Text>
 
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginTop: 20,
-                  }}
-                >
+                <View style={styles.downloadRow}>
                   <TouchableOpacity
-                    style={{ padding: 10 }}
+                    style={styles.downloadBtn}
                     onPress={() =>
                       Alert.alert('You need the models to continue.')
                     }
@@ -178,7 +306,7 @@ export const ChatScreen = () => {
 
                   <TouchableOpacity
                     onPress={startDownload}
-                    style={{ padding: 10 }}
+                    style={styles.downloadBtn}
                   >
                     <Text style={{ fontWeight: '700' }}>Download</Text>
                   </TouchableOpacity>
@@ -186,71 +314,36 @@ export const ChatScreen = () => {
               </>
             ) : (
               <>
-                <Text style={{ fontSize: 16, marginBottom: 10 }}>
+                <Text style={styles.downloadProgressText}>
                   Downloading models... please wait
                 </Text>
 
                 <Text>Model 1: {progress1.toFixed(1)}%</Text>
-                <View
-                  style={{
-                    height: 6,
-                    backgroundColor: '#ddd',
-                    width: '100%',
-                    borderRadius: 3,
-                  }}
-                >
+                <View style={styles.progressBar}>
                   <View
-                    style={{
-                      height: 6,
-                      width: `${progress1}%`,
-                      backgroundColor: 'blue',
-                      borderRadius: 3,
-                    }}
+                    style={[styles.progressFill, { width: `${progress1}%` }]}
                   />
                 </View>
 
                 <Text style={{ marginTop: 12 }}>
                   Model 2: {progress2.toFixed(1)}%
                 </Text>
-                <View
-                  style={{
-                    height: 6,
-                    backgroundColor: '#ddd',
-                    width: '100%',
-                    borderRadius: 3,
-                  }}
-                >
+                <View style={styles.progressBar}>
                   <View
-                    style={{
-                      height: 6,
-                      width: `${progress2}%`,
-                      backgroundColor: 'blue',
-                      borderRadius: 3,
-                    }}
-                  />
-                </View>
-                <Text style={{ marginTop: 12 }}>
-                  Model 3: {progress3.toFixed(1)}%
-                </Text>
-                <View
-                  style={{
-                    height: 6,
-                    backgroundColor: '#ddd',
-                    width: '100%',
-                    borderRadius: 3,
-                  }}
-                >
-                  <View
-                    style={{
-                      height: 6,
-                      width: `${progress3}%`,
-                      backgroundColor: 'blue',
-                      borderRadius: 3,
-                    }}
+                    style={[styles.progressFill, { width: `${progress2}%` }]}
                   />
                 </View>
 
-                <ActivityIndicator style={{ marginTop: 20 }} />
+                <Text style={{ marginTop: 12 }}>
+                  Model 3: {progress3.toFixed(1)}%
+                </Text>
+                <View style={styles.progressBar}>
+                  <View
+                    style={[styles.progressFill, { width: `${progress3}%` }]}
+                  />
+                </View>
+
+                <ActivityIndicator style={styles.activityIndicator} />
               </>
             )}
           </View>
