@@ -2,10 +2,14 @@ import { StyleSheet } from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../utils/theme';
 
 export const styles = StyleSheet.create({
-  // Existing styles
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+
   bubble: {
-    padding: SIZES.base * 1.25, // ~10px
-    marginVertical: SIZES.base * 0.6, // ~5px
+    padding: SIZES.base * 1.25,
+    marginVertical: SIZES.base * 0.6,
     borderRadius: SIZES.radius,
     maxWidth: '80%',
   },
@@ -17,19 +21,17 @@ export const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: COLORS.lightGray,
   },
+  botText: {
+    color: 'black',
+    fontSize: SIZES.md,
+    fontFamily: FONTS.gilroy.regular,
+  },
   text: {
     color: COLORS.white,
     fontSize: SIZES.md,
     fontFamily: FONTS.gilroy.regular,
   },
-  key: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  touch: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
+
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -55,8 +57,21 @@ export const styles = StyleSheet.create({
     paddingVertical: SIZES.base * 1.25,
     borderRadius: SIZES.radius,
   },
+  sendText: {
+    color: COLORS.white,
+    fontSize: SIZES.md,
+    fontFamily: FONTS.gilroy.medium,
+  },
 
-  // New styles (from your updated code)
+  typingBubble: {
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.lightGray,
+    padding: SIZES.base * 1.25,
+    marginVertical: SIZES.base * 0.6,
+    borderRadius: SIZES.radius,
+    maxWidth: '50%',
+  },
+
   modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
@@ -74,34 +89,11 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  downloadDescription: {
-    marginTop: 10,
-    fontSize: 16,
-  },
-  downloadRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  downloadBtn: {
-    padding: 10,
-  },
   downloadProgressText: {
     fontSize: 16,
     marginBottom: 10,
   },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#ddd',
-    width: '100%',
-    borderRadius: 3,
-  },
-  progressFill: {
-    height: 6,
-    backgroundColor: 'blue',
-    borderRadius: 3,
-  },
-  activityIndicator: {
-    marginTop: 20,
+  downloadBtn: {
+    padding: 10,
   },
 });

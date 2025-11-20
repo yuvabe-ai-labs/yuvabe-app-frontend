@@ -10,14 +10,14 @@ const RAW_RUNTIME_STATE =
   ],\
   "dependencyTreeRoots": [\
     {\
-      "name": "YuvabeApp",\
+      "name": "Yuvabe",\
       "reference": "workspace:."\
     }\
   ],\
   "enableTopLevelFallback": true,\
   "ignorePatternData": "(^(?:\\\\.yarn\\\\/sdks(?:\\\\/(?!\\\\.{1,2}(?:\\\\/|$))(?:(?:(?!(?:^|\\\\/)\\\\.{1,2}(?:\\\\/|$)).)*?)|$))$)",\
   "fallbackExclusionList": [\
-    ["YuvabeApp", ["workspace:."]]\
+    ["Yuvabe", ["workspace:."]]\
   ],\
   "fallbackPool": [\
   ],\
@@ -4910,11 +4910,11 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["YuvabeApp", [\
+    ["Yuvabe", [\
       ["workspace:.", {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["YuvabeApp", "workspace:."],\
+          ["Yuvabe", "workspace:."],\
           ["@babel/core", "npm:7.28.5"],\
           ["@babel/preset-env", "virtual:1b2e3f3f6cf212ed5d1e731693df34540c71f79bd655d0195c2efeda6916197878c6f9149d753f13a6a820bdf2d6a659759af48d7c9c898f3348f08c2b0f89ae#npm:7.28.5"],\
           ["@babel/runtime", "npm:7.28.4"],\

@@ -63,15 +63,15 @@ const SignInScreen = ({ navigation }: any) => {
         navigation.navigate('VerifyEmail', { email: data.email });
         return;
       }
-
-      Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
-        {
-          text: 'Continue',
-          onPress: () => {
-            console.log('✅ RootNavigator will switch automatically');
-          },
-        },
-      ]);
+      console.log('✅ RootNavigator will switch automatically');
+      // Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
+      //   {
+      //     text: 'Continue',
+      //     onPress: () => {
+      //       console.log('✅ RootNavigator will switch automatically');
+      //     },
+      //   },
+      // ]);
     } catch (error: any) {
       console.error(' Login error:', error);
 
