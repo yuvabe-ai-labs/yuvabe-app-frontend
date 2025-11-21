@@ -79,12 +79,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    width: '90%',
-  },
   downloadText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -95,5 +89,34 @@ export const styles = StyleSheet.create({
   },
   downloadBtn: {
     padding: 10,
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+
+  modalContentSmall: {
+    width: '75%',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+
+  modalInfo: {
+    fontSize: 14,
+    color: '#444',
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });

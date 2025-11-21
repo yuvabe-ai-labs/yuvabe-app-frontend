@@ -1,39 +1,37 @@
-import { InferenceSession } from 'onnxruntime-react-native';
+import type { InferenceSession } from 'onnxruntime-react-native';
 import { semanticSearch } from '../../../api/auth-api/authApi';
-import { isLlamaReady, llamaGenerate } from '../llama/llamaManager';
 import { generateEmbedding } from '../models/embed';
 
-export const processUserQuery = async (
+type SearchResult = {
+  chunk_id: string;
+  kb_id: string;
+  text: string;
+  score: number;
+};
+
+export const retrieveContextForQuery = async (
   session: InferenceSession,
   text: string,
-  onToken: (t: string) => void,
-) => {
+): Promise<string | null> => {
   const embedding = await generateEmbedding(session, text);
 
   const results = await semanticSearch(embedding);
-  const best = results?.[0];
-  if (!best) {
-    onToken('No relevant information found.');
-    return;
+
+   if (!results || results.length === 0) {
+    return null;
   }
 
-  const prompt = `
-SYSTEM:
-You must strictly answer ONLY using the information in the provided CONTEXT.
-If the answer is not in the context, say: "The information you requested is not available"
+  const combinedContext = results
+    .filter((r: SearchResult) => r.text)
+    .map((r: SearchResult) => r.text)
+    .join("\n\n");
 
-CONTEXT:
-${best.text}
+  return combinedContext;
+  // const best = results?.[0];
 
-QUESTION:
-${text}
+  // if (!best || !best.text) {
+  //   return null;
+  // }
 
-ANSWER:
-`;
-  if (!isLlamaReady()) {
-    onToken('Llama not loaded yet.');
-    return;
-  }
-
-  return await llamaGenerate(prompt, onToken);
+  // return best.text as string;
 };
