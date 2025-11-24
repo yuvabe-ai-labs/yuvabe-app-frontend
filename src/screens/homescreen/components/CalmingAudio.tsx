@@ -1,50 +1,59 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { useSound } from 'react-native-nitro-sound';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from '../HomeStyles';
 
 const tracks = [
   {
     id: 'wellness',
-    url: 'http://192.168.0.108:8080/static/audio/PQReps.mp3',
-    title: 'Wellness Healing Audio',
+    url: 'http://192.168.68.184:8080/static/audio/PQReps.mp3',
+    title: 'PQ Reps',
   },
   {
     id: 'selfRealisation',
-    url: 'http://192.168.0.108:8080/static/audio/MindfullnessExcercise.mp3',
-    title: 'Self Realisation Audio',
+    url: 'http://192.168.68.184:8080/static/audio/MindfullnessExcercise.mp3',
+    title: 'Mindfull Meditation',
   },
 ];
 
 const CalmingAudio = () => {
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const {
-    sound,
-    state,
-    startPlayer,
-    pausePlayer,
-    resumePlayer,
-    stopPlayer,
-    seekToPlayer,
-    mmssss,
-  } = useSound({
-    subscriptionDuration: 0.1,
-  });
+  const { state, startPlayer, pausePlayer, resumePlayer, stopPlayer } =
+    useSound({
+      subscriptionDuration: 0.2,
+    });
 
-  const playTrack = async (track: any) => {
-    if (currentTrack !== track.id) {
-      await stopPlayer();
-      setCurrentTrack(track.id);
-      await startPlayer(track.url);
+  // Format MM:SS
+  const formatToMMSS = (ms: number) => {
+    if (!ms || ms < 0) return '00:00';
+    const sec = Math.floor(ms / 1000);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const handlePlayPause = async (track: any) => {
+    if (!isPlaying) {
+      if (currentTrack !== track.id) {
+        await stopPlayer();
+        setCurrentTrack(track.id);
+        await startPlayer(track.url);
+      } else {
+        await resumePlayer();
+      }
+      setIsPlaying(true);
     } else {
-      await stopPlayer();
-      await startPlayer(track.url);
+      await pausePlayer();
+      setIsPlaying(false);
     }
   };
 
-  const resetTrack = async () => {
+  const handleReset = async () => {
     await stopPlayer();
+    setIsPlaying(false);
     setCurrentTrack(null);
   };
 
@@ -52,46 +61,48 @@ const CalmingAudio = () => {
     <View style={styles.audioContainer}>
       <Text style={styles.audioTitle}>Would you like to hear calming audio?</Text>
 
-      {tracks.map(track => (
-        <View key={track.id} style={styles.audioItem}>
-          <Text style={styles.audioItemTitle}>{track.title}</Text>
+      {tracks.map(track => {
+        const isActive = currentTrack === track.id;
 
-          <Text style={{ marginBottom: 10, color: '#444' }}>
-            {mmssss(Math.floor(state.currentPosition))} /{' '}
-            {mmssss(Math.floor(state.duration))}
-          </Text>
+        const currentTime = isActive
+          ? formatToMMSS(state.currentPosition)
+          : '00:00';
 
-          <View style={styles.audioControls}>
-            <TouchableOpacity
-              onPress={() => playTrack(track)}
-              style={styles.audioButton}
-            >
-              <Text style={styles.audioButtonText}>▶️ Play</Text>
-            </TouchableOpacity>
+        const durationTime = formatToMMSS(state.duration);
 
-            <TouchableOpacity onPress={pausePlayer} style={styles.audioButton}>
-              <Text style={styles.audioButtonText}>⏸ Pause</Text>
-            </TouchableOpacity>
+        return (
+          <View key={track.id} style={styles.audioItem}>
+            <Text style={styles.audioItemTitle}>{track.title}</Text>
 
-            <TouchableOpacity onPress={resumePlayer} style={styles.audioButton}>
-              <Text style={styles.audioButtonText}>⏯ Resume</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+              <TouchableOpacity
+                onPress={() => handlePlayPause(track)}
+                style={{ marginRight: 16 }}
+              >
+                {isActive && isPlaying ? (
+                  <Ionicons name="pause" size={24} color="black" />
+                ) : (
+                  <Ionicons name="play" size={24} color="black" />
+                )}
+              </TouchableOpacity>
 
-            <TouchableOpacity onPress={resetTrack}>
-              <Text style={styles.audioButtonText}>⏹ Reset</Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={handleReset}>
+                <Ionicons name="stop" size={24} color="black" />
+              </TouchableOpacity>
+
+              <Text
+                style={{
+                  marginLeft: 'auto',
+                  fontSize: 14,
+                  color: '#444',
+                }}
+              >
+                {currentTime} / {durationTime}
+              </Text>
+            </View>
           </View>
-
-          <TouchableOpacity
-            onPress={() => seekToPlayer(10000)}
-            style={{ marginTop: 8 }}
-          >
-            <Text style={[styles.audioButtonText, { fontSize: 14 }]}>
-              ⏩ Seek to 10s
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 };
