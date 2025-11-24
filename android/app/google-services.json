@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "167408577394",
+    "project_id": "yuvabe-478505",
+    "storage_bucket": "yuvabe-478505.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:167408577394:android:d2c8439c75eb600dd34beb",
+        "android_client_info": {
+          "package_name": "com.yuvabeapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "167408577394-qf9lt339dt3b093kp4d5gfhqt4d3td83.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTf2a1jzxkUcJV5nDV4ZNFEhIkugt7xmo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "167408577394-qf9lt339dt3b093kp4d5gfhqt4d3td83.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
