@@ -3,6 +3,7 @@ import { Image, ScrollView, Text, View } from 'react-native';
 import { fetchUserDetails } from '../../api/auth-api/authApi';
 import { getItem, setItem } from '../../store/storage';
 import styles from './HomeStyles';
+import CalmingAudio from './components/CalmingAudio';
 import VisionBoard from './components/VisionBoard';
 
 const HomeScreen = () => {
@@ -116,6 +117,9 @@ const HomeScreen = () => {
         >
           — {author}
         </Text>
+      </View>
+      <View style={{ width: '100%' }}>
+        <CalmingAudio />
       </View>
 
       <View style={{ width: '100%' }}>
