@@ -1,4 +1,8 @@
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  createNavigationContainerRef,
+  NavigationContainer,
+  NavigationContainerRefWithCurrent,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { fetchUserDetails } from '../api/auth-api/authApi';
@@ -8,6 +12,15 @@ import { useUserStore } from '../store/useUserStore';
 import AppNavigator from './AppNavigator';
 import AuthNavigator from './AuthNavigator';
 import VerifyNavigator from './VerifyNavigator';
+
+export const navigationRef: NavigationContainerRefWithCurrent<any> =
+  createNavigationContainerRef();
+
+export function navigate(name: string, params?: any) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate(name, params);
+  }
+}
 
 const Stack = createNativeStackNavigator();
 
@@ -86,7 +99,12 @@ const RootNavigator = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
+        console.log('✅ Navigation is ready');
+      }}
+    >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isLoggedIn && isVerified ? (
           <Stack.Screen name="App" component={AppNavigator} />
