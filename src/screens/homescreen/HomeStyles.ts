@@ -90,6 +90,50 @@ const styles = StyleSheet.create({
   moodHistoryTitle: {
     ...TEXT_STYLES.title,
   },
+  audioContainer: {
+  backgroundColor: COLORS.lightGray,
+  padding: SIZES.base * 2,
+  borderRadius: SIZES.radius,
+  marginBottom: SIZES.base * 2.5,
+},
+
+audioTitle: {
+  ...TEXT_STYLES.title,
+  fontSize: SIZES.lg,
+  marginBottom: 8,
+},
+
+audioItem: {
+  backgroundColor: COLORS.background,
+  padding: SIZES.base * 1.5,
+  borderRadius: SIZES.radius,
+  marginTop: SIZES.base,
+  shadowColor: COLORS.textPrimary,
+  shadowOpacity: 0.05,
+  shadowRadius: 2,
+  elevation: 2,
+},
+
+audioItemTitle: {
+  ...TEXT_STYLES.large,
+  fontSize: SIZES.md,
+  marginBottom: 10,
+},
+
+audioControls: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginTop: 6,
+},
+
+audioButton: {
+  marginRight: 20,
+},
+
+audioButtonText: {
+  ...TEXT_STYLES.regular,
+  fontSize: 16,
+},
 });
 
 export default styles;

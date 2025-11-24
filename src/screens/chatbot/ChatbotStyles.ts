@@ -2,9 +2,14 @@ import { StyleSheet } from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../utils/theme';
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+
   bubble: {
-    padding: SIZES.base * 1.25, // ~10px
-    marginVertical: SIZES.base * 0.6, // ~5px
+    padding: SIZES.base * 1.25,
+    marginVertical: SIZES.base * 0.6,
     borderRadius: SIZES.radius,
     maxWidth: '80%',
   },
@@ -16,19 +21,17 @@ export const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: COLORS.lightGray,
   },
+  botText: {
+    color: 'black',
+    fontSize: SIZES.md,
+    fontFamily: FONTS.gilroy.regular,
+  },
   text: {
     color: COLORS.white,
     fontSize: SIZES.md,
     fontFamily: FONTS.gilroy.regular,
   },
-  key: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  touch: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
+
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -53,5 +56,67 @@ export const styles = StyleSheet.create({
     paddingHorizontal: SIZES.padding,
     paddingVertical: SIZES.base * 1.25,
     borderRadius: SIZES.radius,
+  },
+  sendText: {
+    color: COLORS.white,
+    fontSize: SIZES.md,
+    fontFamily: FONTS.gilroy.medium,
+  },
+
+  typingBubble: {
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.lightGray,
+    padding: SIZES.base * 1.25,
+    marginVertical: SIZES.base * 0.6,
+    borderRadius: SIZES.radius,
+    maxWidth: '50%',
+  },
+
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  downloadText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  downloadProgressText: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  downloadBtn: {
+    padding: 10,
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+
+  modalContentSmall: {
+    width: '75%',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+
+  modalInfo: {
+    fontSize: 14,
+    color: '#444',
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });

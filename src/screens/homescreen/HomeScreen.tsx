@@ -3,10 +3,10 @@ import { Image, ScrollView, Text, View } from 'react-native';
 import { fetchUserDetails } from '../../api/auth-api/authApi';
 import { getItem, setItem } from '../../store/storage';
 import styles from './HomeStyles';
+import CalmingAudio from './components/CalmingAudio';
 import VisionBoard from './components/VisionBoard';
 
 const HomeScreen = () => {
-  const [showNotification, setShowNotification] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [quote, setQuote] = useState<string>('');
@@ -66,7 +66,6 @@ const HomeScreen = () => {
         setQuote('The only way to do great work is to love what you do.');
         setAuthor('Steve Jobs');
 
-        const today = new Date().toISOString().split('T')[0];
         const fallbackData = {
           quote: quote,
           author: author,
@@ -91,25 +90,6 @@ const HomeScreen = () => {
     }
   }, []);
 
-  // const checkNotificationTime = () => {
-  //   const now = new Date();
-  //   const hours = now.getHours();
-  //   setShowNotification(
-  //     (hours >= 9 && hours < 10) || (hours >= 15 && hours < 16),
-  //   );
-  // };
-
-  // useEffect(() => {
-  //   checkNotificationTime();
-  //   const interval = setInterval(checkNotificationTime, 60000);
-  //   return () => clearInterval(interval);
-  // }, []);
-
-  // const handleMoodSelect = (mood: string) => {
-  //   console.log('Selected mood:', mood);
-  //   setShowNotification(false);
-  // };
-
   return (
     <ScrollView
       style={styles.container}
@@ -125,7 +105,7 @@ const HomeScreen = () => {
           style={styles.profileImage}
         />
         <Text style={styles.welcomeText}>
-          Welcome, {user?.name || 'Loading...'}
+          Welcome, {user?.user.name || 'Loading...'}
         </Text>
       </View>
 
@@ -138,40 +118,13 @@ const HomeScreen = () => {
           — {author}
         </Text>
       </View>
-
-      {/* {showNotification && (
-        <View style={styles.notificationCard}>
-          <View style={styles.notificationHeader}>
-            <Text style={styles.notificationTitle}>
-              How are you feeling today?
-            </Text>
-            <TouchableOpacity onPress={() => setShowNotification(false)}>
-              <Text style={styles.closeButton}>✖</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.emojiContainer}>
-            {['😄', '🙂', '😐', '🙁', '😞'].map((emoji, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => handleMoodSelect(emoji)}
-                style={styles.emojiButton}
-              >
-                <Text style={styles.emoji}>{emoji}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-        </View>
-      )} */}
+      <View style={{ width: '100%' }}>
+        <CalmingAudio />
+      </View>
 
       <View style={{ width: '100%' }}>
         <VisionBoard setScrollingEnabled={setScrollEnabled} />
       </View>
-
-      {/* <View style={styles.moodHistoryContainer}> */}
-      {/* <Text style={styles.moodHistoryTitle}>Mood History / Mood Trend</Text> */}
-      {/* <MoodMirrorChart /> */}
-      {/* </View> */}
     </ScrollView>
   );
 };

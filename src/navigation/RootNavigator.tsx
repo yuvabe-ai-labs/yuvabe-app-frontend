@@ -18,6 +18,16 @@ const RootNavigator = () => {
 
   useEffect(() => {
     const initAuth = async () => {
+
+    //   const DEV_BYPASS = true; 
+
+    // if (DEV_BYPASS) {
+    //   console.log('DEV MODE: Bypassing auth → Going straight to App');
+    //   setIsLoggedIn(true);
+    //   setIsVerified(true);
+    //   setIsAuthChecked(true);
+    //   return;
+    // }
       const token = getAccessToken();
       const storedVerified = await getItem('is_verified');
       const storedEmail = await getItem('pending_email');
