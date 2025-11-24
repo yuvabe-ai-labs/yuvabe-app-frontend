@@ -26,7 +26,6 @@ const CalmingAudio = () => {
       subscriptionDuration: 0.2,
     });
 
-  // Format MM:SS
   const formatToMMSS = (ms: number) => {
     if (!ms || ms < 0) return '00:00';
     const sec = Math.floor(ms / 1000);
