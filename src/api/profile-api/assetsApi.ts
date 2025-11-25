@@ -1,4 +1,5 @@
-import api from '../auth-api/axiosInstance';
+import api from "../client/axiosClient";
+
 
 export type AssetDTO = {
   id: string;

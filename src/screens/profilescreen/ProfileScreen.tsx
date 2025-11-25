@@ -114,8 +114,12 @@ export const ProfileScreen = () => {
         />
         <SectionItem
           icon="calendar"
-          label="Leave Requests"
-          onPress={() => navigation.navigate('LeaveScreen')}
+          label={user?.role === 'mentor' ? 'Team Leaves' : 'My Leaves'}
+          onPress={() =>
+            user?.role === 'mentor'
+              ? navigation.navigate('TeamLeaveHistory')
+              : navigation.navigate('MyLeaveHistory')
+          }
         />
       </View>
 

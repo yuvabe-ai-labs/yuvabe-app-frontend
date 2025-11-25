@@ -30,9 +30,6 @@ export default function RequestLeaveScreen() {
   const [sickCount, setSickCount] = useState(0);
   const [casualCount, setCasualCount] = useState(0);
 
-  // ---------------------------------------
-  // FETCH LEAVE BALANCE FROM BACKEND
-  // ---------------------------------------
   useEffect(() => {
     loadBalance();
   }, []);
@@ -49,9 +46,6 @@ export default function RequestLeaveScreen() {
     }
   };
 
-  // ---------------------------------------
-  // SUBMIT LEAVE REQUEST
-  // ---------------------------------------
   const handleSubmit = async () => {
     if (!reason.trim()) {
       return Alert.alert('Error', 'Please enter a reason.');
