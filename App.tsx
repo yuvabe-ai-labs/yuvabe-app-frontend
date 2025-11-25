@@ -1,5 +1,6 @@
 import messaging from '@react-native-firebase/messaging';
 import React, { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
 import { getDeviceToken } from './src/utils/pushNotifications';
@@ -64,10 +65,10 @@ function App(): React.JSX.Element {
   }, []);
 
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <RootNavigator />
       <Toast />
-    </>
+    </GestureHandlerRootView>
   );
 }
 

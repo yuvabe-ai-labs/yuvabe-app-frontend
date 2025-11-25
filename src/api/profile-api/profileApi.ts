@@ -1,7 +1,7 @@
 import messaging from '@react-native-firebase/messaging';
 import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import api from '../auth-api/axiosInstance';
+import api from '../client/axiosClient';
 
 export async function registerDevice() {
   const device_token = await messaging().getToken();
@@ -55,4 +55,15 @@ export const mentorDecision = (leaveId: string, body: any) => {
 
 export const getUserLeaveBalance = (userId: string) => {
   return api.get(`/profile/balance/${userId}`);
+};
+
+export const fetchMyLeaveHistory = () => {
+  return api.get('/profile/my-leaves');
+};
+export const fetchTeamLeaveHistory = () => {
+  return api.get('/profile/mentor/team-leaves');
+};
+
+export const cancelLeave = (leaveId: string) => {
+  return api.post(`/profile/leave/${leaveId}/cancel`);
 };

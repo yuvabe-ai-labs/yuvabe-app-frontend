@@ -19,7 +19,6 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
 
   const [loading, setLoading] = useState(true);
   const [leave, setLeave] = useState<any>(null);
-
   const [sick, setSick] = useState(0);
   const [casual, setCasual] = useState(0);
 
@@ -90,20 +89,31 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
 
   return (
     <ScrollView style={{ padding: 20 }}>
-      <Text style={{ fontSize: 22, fontWeight: 'bold' }}>Leave Approval</Text>
+      {/* Page Title */}
+      <Text style={{ fontSize: 24, fontWeight: '700', marginBottom: 20 }}>
+        Leave Approval
+      </Text>
+
+      {/* Employee Name */}
+      <View>
+        <Text style={{ fontSize: 16, color: '#777' }}>Employee</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 2 }}>
+          {leave.user_name || 'Unknown User'}
+        </Text>
+      </View>
 
       {/* Leave Balance */}
-      <View style={{ flexDirection: 'row', marginTop: 20 }}>
+      <View style={{ flexDirection: 'row', marginTop: 25 }}>
         <View
           style={{
             flex: 1,
             padding: 15,
-            backgroundColor: '#eee',
-            borderRadius: 10,
+            backgroundColor: '#F0F4F7',
+            borderRadius: 12,
           }}
         >
-          <Text style={{ fontSize: 16 }}>Sick Remaining</Text>
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{sick}</Text>
+          <Text style={{ fontSize: 15 }}>Sick Remaining</Text>
+          <Text style={{ fontSize: 22, fontWeight: 'bold' }}>{sick}</Text>
         </View>
 
         <View style={{ width: 15 }} />
@@ -112,80 +122,109 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
           style={{
             flex: 1,
             padding: 15,
-            backgroundColor: '#eee',
-            borderRadius: 10,
+            backgroundColor: '#F0F4F7',
+            borderRadius: 12,
           }}
         >
-          <Text style={{ fontSize: 16 }}>Casual Remaining</Text>
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{casual}</Text>
+          <Text style={{ fontSize: 15 }}>Casual Remaining</Text>
+          <Text style={{ fontSize: 22, fontWeight: 'bold' }}>{casual}</Text>
         </View>
       </View>
 
       {/* Leave Info */}
       <View style={{ marginTop: 30 }}>
-        <Text style={{ fontSize: 17 }}>Leave Type:</Text>
-        <Text style={{ fontSize: 19, fontWeight: 'bold' }}>
+        <Text style={{ fontSize: 16, color: '#777' }}>Leave Type</Text>
+        <Text style={{ fontSize: 19, fontWeight: 'bold', marginTop: 2 }}>
           {leave.leave_type}
         </Text>
 
-        <Text style={{ fontSize: 17, marginTop: 10 }}>From:</Text>
-        <Text style={{ fontSize: 19 }}>{leave.from_date}</Text>
+        <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>From</Text>
+        <Text style={{ fontSize: 18 }}>{leave.from_date}</Text>
 
-        <Text style={{ fontSize: 17, marginTop: 10 }}>To:</Text>
-        <Text style={{ fontSize: 19 }}>{leave.to_date}</Text>
+        <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>To</Text>
+        <Text style={{ fontSize: 18 }}>{leave.to_date}</Text>
 
-        <Text style={{ fontSize: 17, marginTop: 10 }}>Reason:</Text>
-        <Text style={{ fontSize: 19 }}>{leave.reason}</Text>
+        <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>
+          Reason
+        </Text>
+        <Text style={{ fontSize: 18 }}>{leave.reason}</Text>
       </View>
 
       {/* Reject Comment */}
-      <Text style={{ marginTop: 20 }}>Reject Comment</Text>
+      <Text style={{ marginTop: 25, fontSize: 16 }}>Reject Comment</Text>
       <TextInput
         placeholder="Enter reason if rejecting"
         style={{
           borderWidth: 1,
           borderColor: '#ccc',
-          padding: 10,
-          borderRadius: 8,
-          marginTop: 5,
+          padding: 12,
+          borderRadius: 10,
+          marginTop: 8,
+          fontSize: 16,
         }}
         value={rejectComment}
         onChangeText={setRejectComment}
       />
 
-      {/* Buttons */}
-      <View style={{ flexDirection: 'row', marginTop: 30 }}>
+      {/* Action Buttons */}
+      <View style={{ flexDirection: 'row', marginTop: 35 }}>
+        {/* APPROVE BUTTON */}
         <TouchableOpacity
           style={{
             flex: 1,
-            backgroundColor: 'green',
+            backgroundColor: submitLoading ? '#6DBF6B' : 'green',
             padding: 16,
-            borderRadius: 10,
+            borderRadius: 12,
             marginRight: 10,
+            opacity: submitLoading ? 0.7 : 1,
           }}
-          onPress={approveLeave}
           disabled={submitLoading}
+          onPress={approveLeave}
         >
-          <Text style={{ color: '#fff', textAlign: 'center', fontSize: 17 }}>
-            Approve
+          <Text
+            style={{
+              color: '#fff',
+              textAlign: 'center',
+              fontSize: 18,
+              fontWeight: '600',
+            }}
+          >
+            {submitLoading ? 'Approving...' : 'Approve'}
           </Text>
         </TouchableOpacity>
 
+        {/* REJECT BUTTON */}
         <TouchableOpacity
           style={{
             flex: 1,
-            backgroundColor: 'red',
+            backgroundColor: submitLoading ? '#D96666' : 'red',
             padding: 16,
-            borderRadius: 10,
+            borderRadius: 12,
+            opacity: submitLoading ? 0.7 : 1,
           }}
-          onPress={rejectLeave}
           disabled={submitLoading}
+          onPress={rejectLeave}
         >
-          <Text style={{ color: '#fff', textAlign: 'center', fontSize: 17 }}>
-            Reject
+          <Text
+            style={{
+              color: '#fff',
+              textAlign: 'center',
+              fontSize: 18,
+              fontWeight: '600',
+            }}
+          >
+            {submitLoading ? 'Rejecting...' : 'Reject'}
           </Text>
         </TouchableOpacity>
       </View>
+
+      {submitLoading && (
+        <ActivityIndicator
+          size="large"
+          style={{ marginTop: 20 }}
+          color="#007AFF"
+        />
+      )}
     </ScrollView>
   );
 }
