@@ -1,12 +1,42 @@
+import messaging from '@react-native-firebase/messaging';
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import {
+  Image,
+  PermissionsAndroid,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { fetchUserDetails } from '../../api/auth-api/authApi';
-import { getItem, setItem } from '../../store/storage';
+import { registerDevice } from '../../api/profile-api/profileApi';
+import { getItem, setItem, storage } from '../../store/storage';
 import styles from './HomeStyles';
 import CalmingAudio from './components/CalmingAudio';
 import VisionBoard from './components/VisionBoard';
 
-const HomeScreen = () => {
+export async function requestNotificationPermission() {
+  if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+    console.log('Android Permission:', granted);
+  }
+
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  console.log('Firebase permission:', enabled);
+
+  return enabled;
+}
+
+const HomeScreen = ({ navigation }: any) => {
+  const [showNotification, setShowNotification] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [quote, setQuote] = useState<string>('');
@@ -14,6 +44,12 @@ const HomeScreen = () => {
 
   // user details from login
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -27,6 +63,11 @@ const HomeScreen = () => {
     loadUser();
   }, []);
   //
+
+  useEffect(() => {
+    registerDevice();
+  }, []);
+
   useEffect(() => {
     const fetchQuote = async () => {
       const today = new Date().toISOString().split('T')[0];
@@ -107,6 +148,9 @@ const HomeScreen = () => {
         <Text style={styles.welcomeText}>
           Welcome, {user?.user.name || 'Loading...'}
         </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+          <Ionicons name="notifications-outline" size={28} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.thoughtContainer}>

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
+import { fetchProfileDetails } from '../../api/profile-api/profileApi';
 import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { styles } from './ProfileStyles';
@@ -17,7 +18,18 @@ import { styles } from './ProfileStyles';
 export const ProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { user, resetUser, setIsLoggedIn, setIsVerified } = useUserStore();
+  const { setProfileDetails } = useUserStore();
+  const { team_name, mentor_name } = useUserStore();
+
   const storedImage = getItem('profile_image');
+
+  React.useEffect(() => {
+    fetchProfileDetails().then(res => {
+      if (res.code === 200) {
+        setProfileDetails(res.data);
+      }
+    });
+  }, [setProfileDetails]);
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure?', [
@@ -73,6 +85,19 @@ export const ProfileScreen = () => {
 
         <Text style={styles.name}>{user?.name || 'User'}</Text>
         <Text style={styles.email}>{user?.email || 'example@yuvabe.com'}</Text>
+        <View style={{ marginTop: 12, width: '60%' }}>
+          <View style={styles.infoRow}>
+            <Icon name="users" size={18} style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Team</Text>
+            <Text style={styles.infoValue}>{team_name || '—'}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Icon name="user-check" size={18} style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Mentor</Text>
+            <Text style={styles.infoValue}>{mentor_name || '—'}</Text>
+          </View>
+        </View>
       </View>
 
       {/* Sections */}

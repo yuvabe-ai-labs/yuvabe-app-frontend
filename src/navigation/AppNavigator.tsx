@@ -1,10 +1,13 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
+import NotificationScreen from '../screens/notification/NotificationScreen';
 import { AssetSection } from '../screens/profilescreen/AssetSection';
 import EditProfileScreen from '../screens/profilescreen/EditProfileScreen';
 import { InformationScreen } from '../screens/profilescreen/InformationScreen';
+import LeaveDetailsScreen from '../screens/profilescreen/LeaveDetailsScreen';
 import LeaveRequestScreen from '../screens/profilescreen/LeaveScreen';
 import TabNavigator from './TabNavigator';
+import MentorApprovalScreen from '../screens/mentor/MentorApproveScreen';
 
 const AppStack = createNativeStackNavigator();
 
@@ -32,6 +35,13 @@ const AppNavigator = () => {
         name="LeaveScreen"
         component={LeaveRequestScreen}
         options={{ headerTitle: 'Leave Request' }}
+      />
+      <AppStack.Screen name="LeaveDetails" component={LeaveDetailsScreen} />
+      <AppStack.Screen name="Notifications" component={NotificationScreen} />
+      <AppStack.Screen
+        name="MentorApproval"
+        component={MentorApprovalScreen}
+        options={{ headerTitle: 'Leave Approval' }}
       />
     </AppStack.Navigator>
   );

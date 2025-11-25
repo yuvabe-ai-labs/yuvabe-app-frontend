@@ -95,4 +95,26 @@ export const styles = StyleSheet.create({
     color: '#FF3B30',
     fontWeight: '600',
   },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+
+  infoIcon: {
+    marginRight: 8,
+    color: '#4A90E2',
+  },
+
+  infoLabel: {
+    fontSize: 14,
+    color: '#888',
+    width: 80,
+  },
+
+  infoValue: {
+    fontSize: 15,
+    color: '#000',
+    fontWeight: '600',
+  },
 });
