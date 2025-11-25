@@ -30,9 +30,6 @@ export default function RequestLeaveScreen() {
   const [sickCount, setSickCount] = useState(0);
   const [casualCount, setCasualCount] = useState(0);
 
-  // ---------------------------------------
-  // FETCH LEAVE BALANCE FROM BACKEND
-  // ---------------------------------------
   useEffect(() => {
     loadBalance();
   }, []);
@@ -42,16 +39,13 @@ export default function RequestLeaveScreen() {
       const res = await fetchLeaveBalance();
       const data = res.data.data;
 
-      setSickCount(data.sick_used);
-      setCasualCount(data.casual_used);
+      setSickCount(data.sick_remaining);
+      setCasualCount(data.casual_remaining);
     } catch (err) {
       console.log('Balance error:', err);
     }
   };
 
-  // ---------------------------------------
-  // SUBMIT LEAVE REQUEST
-  // ---------------------------------------
   const handleSubmit = async () => {
     if (!reason.trim()) {
       return Alert.alert('Error', 'Please enter a reason.');

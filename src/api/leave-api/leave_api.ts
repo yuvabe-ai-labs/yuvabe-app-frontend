@@ -1,4 +1,4 @@
-import api from '../auth-api/axiosInstance';
+import api from '../client/axiosClient';
 
 export const getLeaveContacts = async () => {
   try {
@@ -26,3 +26,9 @@ export const sendLeaveEmail = async (payload: {
     throw new Error(msg);
   }
 };
+
+export const markNotificationRead = (id: string) =>
+  api.post(`/notifications/${id}/mark-read`);
+
+export const markAllNotificationsRead = () =>
+  api.post(`/notifications/mark-all-read`);

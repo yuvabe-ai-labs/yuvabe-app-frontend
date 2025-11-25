@@ -1,5 +1,5 @@
 import { setTokens } from '../../store/storage';
-import api from './axiosInstance';
+import api from '../client/axiosClient';
 
 export const signUp = async (name: string, email: string, password: string) => {
   try {

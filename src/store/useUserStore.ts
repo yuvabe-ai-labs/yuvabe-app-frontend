@@ -7,6 +7,8 @@ type User = {
   email?: string;
   is_verified?: boolean;
   team_name?: string;
+  role?: string;
+  appRole?: string;
   mentor_name?: string;
   dob?: string | null;
   profile_picture?: string | null;
@@ -40,7 +42,15 @@ export const useUserStore = create<UserStore>(set => ({
   team_name: '',
   mentor_name: '',
 
-  setUser: userData => set({ user: userData }),
+  setUser: userData =>
+    set(state => ({
+      user: {
+        ...state.user,
+        ...userData,
+        role: userData.role ?? state.user?.role,
+      },
+    })),
+
   setProfileDetails: (details: ProfileDetails) =>
     set(state => ({
       user: state.user
@@ -50,7 +60,7 @@ export const useUserStore = create<UserStore>(set => ({
             email: details.email,
           }
         : {
-            id: '', // fallback so TS stops complaining
+            id: '',
             name: details.name,
             email: details.email,
           },
