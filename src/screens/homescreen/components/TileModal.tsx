@@ -140,7 +140,7 @@ const TileModal: React.FC<TileModalProps> = ({
             </View>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback> 
     </Modal>
   );
 };

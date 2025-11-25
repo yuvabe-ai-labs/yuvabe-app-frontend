@@ -14,6 +14,7 @@ import { fetchUserDetails } from '../../api/auth-api/authApi';
 import { registerDevice } from '../../api/profile-api/profileApi';
 import { getItem, setItem, storage } from '../../store/storage';
 import styles from './HomeStyles';
+import CalmingAudio from './components/CalmingAudio';
 import VisionBoard from './components/VisionBoard';
 
 export async function requestNotificationPermission() {
@@ -53,12 +54,9 @@ const HomeScreen = ({ navigation }: any) => {
     const loadUser = async () => {
       try {
         const userData = await fetchUserDetails();
-        console.log('Fetched User Details:', userData);
         setUser(userData);
       } catch (error) {
         console.error('Error loading user details:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -80,14 +78,12 @@ const HomeScreen = ({ navigation }: any) => {
           const parsed = JSON.parse(storedQuoteData);
 
           if (parsed.date === today && parsed.success === true) {
-            console.log('Using stored quote for today');
             setQuote(parsed.quote);
             setAuthor(parsed.author);
             return;
           }
         }
 
-        console.log('Fetching new quote from API...');
         const response = await fetch('https://quotes.domiadi.com/api'); // or try this https://motivational-spark-api.vercel.app/api/quotes/random
         if (!response.ok) {
           throw new Error(`HTTP error ${response.status}`);
@@ -102,20 +98,18 @@ const HomeScreen = ({ navigation }: any) => {
         };
 
         setItem('daily_quote', JSON.stringify(quoteData));
-        console.log('Stored new quote for today:', quoteData);
 
         setQuote(quoteData.quote);
         setAuthor(quoteData.author);
       } catch (error) {
         console.error('Error fetching or storing quote:', error);
 
-        setQuote('“The only way to do great work is to love what you do.”');
+        setQuote('The only way to do great work is to love what you do.');
         setAuthor('Steve Jobs');
 
-        const today = new Date().toISOString().split('T')[0];
         const fallbackData = {
-          quote: '“The only way to do great work is to love what you do.”',
-          author: 'Steve Jobs',
+          quote: quote,
+          author: author,
           date: today,
           success: false,
         };
@@ -135,28 +129,7 @@ const HomeScreen = ({ navigation }: any) => {
       setProfileImage(defaultImage);
       setItem('profile_image', defaultImage);
     }
-    console.log('Stored keys:', storage.getAllKeys());
-    console.log('Profile image:', storage.getString('profile_image'));
   }, []);
-
-  const checkNotificationTime = () => {
-    const now = new Date();
-    const hours = now.getHours();
-    setShowNotification(
-      (hours >= 9 && hours < 10) || (hours >= 15 && hours < 16),
-    );
-  };
-
-  useEffect(() => {
-    checkNotificationTime();
-    const interval = setInterval(checkNotificationTime, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleMoodSelect = (mood: string) => {
-    console.log('Selected mood:', mood);
-    setShowNotification(false);
-  };
 
   return (
     <ScrollView
@@ -189,39 +162,13 @@ const HomeScreen = ({ navigation }: any) => {
           — {author}
         </Text>
       </View>
-      {showNotification && (
-        <View style={styles.notificationCard}>
-          <View style={styles.notificationHeader}>
-            <Text style={styles.notificationTitle}>
-              How are you feeling today?
-            </Text>
-            <TouchableOpacity onPress={() => setShowNotification(false)}>
-              <Text style={styles.closeButton}>✖</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.emojiContainer}>
-            {['😄', '🙂', '😐', '🙁', '😞'].map((emoji, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => handleMoodSelect(emoji)}
-                style={styles.emojiButton}
-              >
-                <Text style={styles.emoji}>{emoji}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      )}
+      <View style={{ width: '100%' }}>
+        <CalmingAudio />
+      </View>
 
       <View style={{ width: '100%' }}>
         <VisionBoard setScrollingEnabled={setScrollEnabled} />
       </View>
-
-      {/* <View style={styles.moodHistoryContainer}> */}
-      {/* <Text style={styles.moodHistoryTitle}>Mood History / Mood Trend</Text> */}
-      {/* <MoodMirrorChart /> */}
-      {/* </View> */}
     </ScrollView>
   );
 };

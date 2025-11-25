@@ -8,7 +8,7 @@ import {
 } from '../../store/storage';
 
 const API_BASE_URL = Config.API_BASE_URL;
-
+console.log(`The api base url is : ${API_BASE_URL}`);
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
