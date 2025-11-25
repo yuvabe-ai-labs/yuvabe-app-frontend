@@ -1,4 +1,4 @@
-package com.yuvabeapp
+package com.yuvabe
 
 import android.app.Application
 import com.facebook.react.PackageList

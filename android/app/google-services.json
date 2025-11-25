@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:167408577394:android:d2c8439c75eb600dd34beb",
+        "mobilesdk_app_id": "1:167408577394:android:3724f96b94ab3962d34beb",
         "android_client_info": {
-          "package_name": "com.yuvabeapp"
+          "package_name": "com.yuvabe"
         }
       },
       "oauth_client": [

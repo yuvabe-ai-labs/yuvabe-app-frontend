@@ -7,6 +7,7 @@ type User = {
   email?: string;
   is_verified?: boolean;
   team_name?: string;
+  role?: 'user' | 'lead' | 'mentor';
   mentor_name?: string;
   dob?: string | null;
   profile_picture?: string | null;

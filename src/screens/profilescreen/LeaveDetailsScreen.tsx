@@ -14,7 +14,7 @@ export default function LeaveDetailsScreen({ route }: any) {
   const loadLeave = async () => {
     try {
       const res = await getLeaveDetails(leaveId);
-      setLeave(res.data);
+      setLeave(res.data.data);
     } catch (e) {
       console.log('leave error:', e);
     } finally {

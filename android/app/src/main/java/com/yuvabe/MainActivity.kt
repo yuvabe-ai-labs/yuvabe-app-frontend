@@ -1,4 +1,4 @@
-package com.yuvabeapp
+package com.yuvabe
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

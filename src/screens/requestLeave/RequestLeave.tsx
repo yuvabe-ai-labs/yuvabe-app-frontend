@@ -42,8 +42,8 @@ export default function RequestLeaveScreen() {
       const res = await fetchLeaveBalance();
       const data = res.data.data;
 
-      setSickCount(data.sick_used);
-      setCasualCount(data.casual_used);
+      setSickCount(data.sick_remaining);
+      setCasualCount(data.casual_remaining);
     } catch (err) {
       console.log('Balance error:', err);
     }

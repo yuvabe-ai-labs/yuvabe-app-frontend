@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity } from 'react-native';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { fetchNotifications } from '../../api/profile-api/profileApi';
 import { useUserStore } from '../../store/useUserStore';
 
@@ -19,6 +19,10 @@ type NotificationItem = {
 export default function NotificationScreen({ navigation }: any) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const { user } = useUserStore();
+
+  const handleClearAll = () => {
+    setNotifications([]);
+  };
 
   useEffect(() => {
     loadNotifications();
@@ -40,35 +44,54 @@ export default function NotificationScreen({ navigation }: any) {
   };
 
   return (
-    <FlatList
-      data={notifications}
-      keyExtractor={item => item.id}
-      style={{ padding: 15 }}
-      renderItem={({ item }) => (
+    <View style={{ flex: 1 }}>
+      {/* 🔥 Clear All Button */}
+      {notifications.length > 0 && (
         <TouchableOpacity
-          onPress={() => {
-            if (item.type === 'Pending' && item.mentor_id === user?.id) {
-              navigation.navigate('MentorApproval', { leaveId: item.id });
-              return;
-            }
-
-            navigation.navigate('LeaveDetails', { leaveId: item.id });
-          }}
+          onPress={handleClearAll}
           style={{
-            backgroundColor: '#fff',
-            padding: 15,
-            borderRadius: 10,
-            marginBottom: 12,
-            elevation: 2,
+            backgroundColor: '#ff4d4d',
+            padding: 10,
+            margin: 15,
+            borderRadius: 8,
+            alignItems: 'center',
           }}
         >
-          <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{item.title}</Text>
-          <Text style={{ marginTop: 5 }}>{item.body}</Text>
-          <Text style={{ fontSize: 12, color: 'gray', marginTop: 5 }}>
-            {item.updated_at.slice(0, 10)}
-          </Text>
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>Clear All</Text>
         </TouchableOpacity>
       )}
-    />
+      <FlatList
+        data={notifications}
+        keyExtractor={item => item.id}
+        style={{ padding: 15 }}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => {
+              if (item.type === 'Pending' && item.mentor_id === user?.id) {
+                navigation.navigate('MentorApproval', { leaveId: item.id });
+                return;
+              }
+
+              navigation.navigate('LeaveDetails', { leaveId: item.id });
+            }}
+            style={{
+              backgroundColor: '#fff',
+              padding: 15,
+              borderRadius: 10,
+              marginBottom: 12,
+              elevation: 2,
+            }}
+          >
+            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+              {item.title}
+            </Text>
+            <Text style={{ marginTop: 5 }}>{item.body}</Text>
+            <Text style={{ fontSize: 12, color: 'gray', marginTop: 5 }}>
+              {item.updated_at.slice(0, 10)}
+            </Text>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 }
