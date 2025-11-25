@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './ChatbotStyles';
 
-import { llamaChat, loadLlama } from '../chatbot/llama/llamaManager';
+import { loadLlama, qwenChat } from '../chatbot/llama/llamaManager';
 import {
   checkModelsExist,
   downloadAllModels,
@@ -207,7 +207,19 @@ on a mobile device
 
       // console.log('===== MODEL INPUT END =====');
 
-      const finalText = await llamaChat(messagesForModel, token => {
+      // const finalText = await llamaChat(messagesForModel, token => {
+      //   setMessages(prev => {
+      //     const copy = [...prev];
+      //     const idx = copy.findIndex(m => m.id === botMsgId);
+      //     if (idx !== -1) {
+      //       if (copy[idx].text === 'Thinking...') copy[idx].text = token;
+      //       else copy[idx].text += token;
+      //     }
+      //     return copy;
+      //   });
+      // });
+
+      const finalText = await qwenChat(messagesForModel, token => {
         setMessages(prev => {
           const copy = [...prev];
           const idx = copy.findIndex(m => m.id === botMsgId);
