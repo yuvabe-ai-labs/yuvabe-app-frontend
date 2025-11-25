@@ -19,27 +19,57 @@ function App(): React.JSX.Element {
     tryNav();
   }
 
+  function safeNavigateToHome() {
+    const tryNav = () => {
+      if (navigationRef.current?.isReady()) {
+        navigationRef.current.navigate(
+          'Root' as any,
+          {
+            screen: 'Home',
+          } as never,
+        );
+      } else {
+        setTimeout(tryNav, 300);
+      }
+    };
+    tryNav();
+  }
+
   useEffect(() => {
     getDeviceToken();
 
-    // 🔥 APP IN BACKGROUND
     messaging().onNotificationOpenedApp(remoteMessage => {
       if (!remoteMessage?.data) return;
 
-      const { screen, leave_id } = remoteMessage.data;
+      const { type, screen, leave_id, message } = remoteMessage.data;
 
       Toast.show({
         type: 'info',
         text1: remoteMessage.notification?.title,
         text2: remoteMessage.notification?.body,
       });
+
+      if (type === 'home_alert') {
+        (globalThis as any).homeAlert = {
+          visible: true,
+          message: message || 'Hello!',
+        };
+        safeNavigateToHome();
+        return;
+      }
 
       safeNavigate(screen as any, leave_id as any);
     });
 
-    // APP IS OPEN (FOREGROUND)
     messaging().onMessage(async remoteMessage => {
-      console.log('🔥 Foreground Notification:', remoteMessage);
+      const { type, message } = remoteMessage.data || {};
+
+      if (type === 'home_alert') {
+        (globalThis as any).homeAlert = {
+          visible: true,
+          message: message,
+        };
+      }
 
       Toast.show({
         type: 'info',
@@ -48,16 +78,23 @@ function App(): React.JSX.Element {
       });
     });
 
-    // 🔥 APP KILLED (QUIT)
     messaging()
       .getInitialNotification()
       .then(remoteMessage => {
         if (!remoteMessage?.data) return;
 
-        const { screen, leave_id } = remoteMessage.data;
+        const { type, screen, leave_id, message } = remoteMessage.data;
 
-        // delay to wait for navigator to mount
         setTimeout(() => {
+          if (type === 'home_alert') {
+            (globalThis as any).homeAlert = {
+              visible: true,
+              message: message || 'Hello!',
+            };
+            safeNavigateToHome();
+            return;
+          }
+
           safeNavigate(screen as any, leave_id as any);
         }, 500);
       });
