@@ -4,18 +4,23 @@ import {
   Image,
   PermissionsAndroid,
   Platform,
-  ScrollView,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { scheduleOnRN } from 'react-native-worklets';
 import { fetchUserDetails, submitEmotion } from '../../api/auth-api/authApi';
 import { registerDevice } from '../../api/profile-api/profileApi';
 import { getItem, setItem } from '../../store/storage';
 import styles from './HomeStyles';
 import CalmingAudio from './components/CalmingAudio';
 import EmotionCheckIn from './components/EmotionCheckIn';
+import FloatingActionButton from './components/FloatingActionButton';
 import VisionBoard from './components/VisionBoard';
 
 export async function requestNotificationPermission() {
@@ -73,7 +78,6 @@ const HomeScreen = ({ navigation }: any) => {
 
     loadUser();
   }, []);
-  //
 
   useEffect(() => {
     registerDevice();
@@ -155,72 +159,107 @@ const HomeScreen = ({ navigation }: any) => {
     return () => clearInterval(interval);
   }, []);
 
+  const panGesture = Gesture.Pan()
+    .activeOffsetX(25)
+    .failOffsetY([-5, 5])
+    .onBegin(() => console.log('Begin Swipe'))
+    .onUpdate(e => console.log('Move', e.translationX))
+    .onEnd(e => {
+      'worklet';
+      console.log('End', e.translationX);
+      if (e.translationX > 120) {
+        scheduleOnRN(() => navigation.navigate('RequestLeave'));
+      }
+    });
+
   return (
     <>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={{
-          paddingBottom: 80,
-        }}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={scrollEnabled}
-      >
-        <View style={styles.header}>
-          <Image
-            source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=3' }}
-            style={styles.profileImage}
+      <SafeAreaView style={{ flex: 1 }}>
+        <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
+        <View style={{ flex: 1 }}>
+          <Animated.ScrollView
+            style={styles.container}
+            contentContainerStyle={{ paddingBottom: 80 }}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={scrollEnabled}
+          >
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <Image
+                  source={{
+                    uri: profileImage || 'https://i.pravatar.cc/150?img=3',
+                  }}
+                  style={styles.profileImage}
+                />
+              </TouchableOpacity>
+
+              <Text style={styles.welcomeText}>
+                Welcome, {user?.user.name || 'Loading...'}
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Notifications')}
+              >
+                <Ionicons name="notifications-outline" size={28} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Thought */}
+            <View style={styles.thoughtContainer}>
+              <Text style={styles.thoughtTitle}>Thought of the Day</Text>
+              <Text style={styles.thoughtText}>"{quote}"</Text>
+              <Text
+                style={[
+                  styles.thoughtText,
+                  { fontStyle: 'italic', fontSize: 14 },
+                ]}
+              >
+                — {author}
+              </Text>
+            </View>
+
+            <CalmingAudio />
+            <VisionBoard setScrollingEnabled={setScrollEnabled} />
+          </Animated.ScrollView>
+
+          <GestureDetector gesture={panGesture}>
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: 80,
+                backgroundColor: 'transparent',
+              }}
+              hitSlop={{ left: 20, right: 20 }}
+            />
+          </GestureDetector>
+        </View>
+
+        {/* Modals */}
+        {showNotificationModal && (
+          <EmotionCheckIn
+            visible={showNotificationModal}
+            message={homeAlertMessage}
+            onClose={() => setShowNotificationModal(false)}
+            onSelect={async emoji => {
+              setShowNotificationModal(false);
+              const emojiNumber = emoji ? EMOJI_MAP[emoji] : null;
+              try {
+                const timeOfDay = homeAlertMessage.includes('morning')
+                  ? 'morning'
+                  : 'evening';
+                await submitEmotion(user?.user.id, emojiNumber, timeOfDay);
+              } catch (err) {
+                console.error('Emotion submit failed', err);
+              }
+            }}
           />
-          <Text style={styles.welcomeText}>
-            Welcome, {user?.user.name || 'Loading...'}
-          </Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Notifications')}
-          >
-            <Ionicons name="notifications-outline" size={28} />
-          </TouchableOpacity>
-        </View>
+        )}
 
-        <View style={styles.thoughtContainer}>
-          <Text style={styles.thoughtTitle}>Thought of the Day</Text>
-          <Text style={styles.thoughtText}>"{quote}"</Text>
-          <Text
-            style={[styles.thoughtText, { fontStyle: 'italic', fontSize: 14 }]}
-          >
-            — {author}
-          </Text>
-        </View>
-        <View style={{ width: '100%' }}>
-          <CalmingAudio />
-        </View>
-
-        <View style={{ width: '100%' }}>
-          <VisionBoard setScrollingEnabled={setScrollEnabled} />
-        </View>
-      </ScrollView>
-      {showNotificationModal && (
-        <EmotionCheckIn
-          visible={showNotificationModal}
-          message={homeAlertMessage}
-          onClose={() => setShowNotificationModal(false)}
-          onSelect={async emoji => {
-            setShowNotificationModal(false);
-
-            const emojiNumber = emoji ? EMOJI_MAP[emoji] : null;
-
-            try {
-              const timeOfDay = homeAlertMessage.includes('morning')
-                ? 'morning'
-                : 'evening';
-
-              await submitEmotion(user?.user.id, emojiNumber, timeOfDay);
-
-              console.log('Emotion submitted:', emojiNumber);
-            } catch (err) {
-              console.error('Emotion submit failed', err);
-            }
-          }}
-        />
-      )}
+        <FloatingActionButton onPress={() => navigation.navigate('Chat')} />
+      </SafeAreaView>
     </>
   );
 };

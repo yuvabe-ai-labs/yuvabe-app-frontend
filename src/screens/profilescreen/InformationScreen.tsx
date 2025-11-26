@@ -9,7 +9,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { fetchUserDetails } from '../../api/auth-api/authApi';
 
-export const InformationScreen = () => {
+const InformationScreen = () => {
   const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState<any>(null);
 
@@ -81,6 +81,8 @@ export const InformationScreen = () => {
     </ScrollView>
   );
 };
+
+export default InformationScreen;
 
 const InfoRow = ({ label, value }: any) => (
   <View style={styles.row}>

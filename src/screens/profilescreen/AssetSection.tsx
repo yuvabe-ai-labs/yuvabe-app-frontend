@@ -13,7 +13,7 @@ export const ASSET_ICONS: Record<string, string> = {
   tablet: '📱',
 };
 
-export const AssetSection = () => {
+const AssetSection = () => {
   const [loading, setLoading] = useState(true);
   const [assets, setAssets] = useState<AssetDTO[]>([]);
 
@@ -67,3 +67,5 @@ export const AssetSection = () => {
     </View>
   );
 };
+
+export default AssetSection;

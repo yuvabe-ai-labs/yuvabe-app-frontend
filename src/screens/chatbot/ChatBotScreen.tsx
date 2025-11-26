@@ -36,7 +36,7 @@ type ChatTurn = {
   content: string;
 };
 
-export const ChatScreen = () => {
+const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [session, setSession] = useState<InferenceSession | null>(null);
@@ -337,3 +337,5 @@ on a mobile device
     </>
   );
 };
+
+export default ChatScreen;
