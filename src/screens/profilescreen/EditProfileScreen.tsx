@@ -25,6 +25,7 @@ import {
 } from '../../schemas/profileSchema';
 import { useUserStore } from '../../store/useUserStore';
 import { styles } from './EditProfileStyles';
+import { showToast } from '../../utils/ToastHelper';
 
 // ---------- Password input with eye inside right edge ----------
 const PasswordInput = ({
@@ -166,7 +167,7 @@ const EditProfileScreen = ({ navigation }: any) => {
         if (response.didCancel) return;
         if (response.errorCode) {
           console.log('Image Picker Error:', response.errorMessage);
-          Alert.alert(
+          showToast(
             'Image Error',
             response.errorMessage || 'Failed to pick image',
           );
@@ -240,7 +241,7 @@ const EditProfileScreen = ({ navigation }: any) => {
       navigation.goBack();
     } catch (err: any) {
       console.error('Update profile failed', err);
-      Alert.alert('Update failed', err.message || 'Something went wrong');
+      showToast('Update failed', err.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }

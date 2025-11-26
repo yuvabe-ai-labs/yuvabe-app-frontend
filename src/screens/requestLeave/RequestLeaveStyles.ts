@@ -19,7 +19,7 @@ export const newLeaveStyles = StyleSheet.create({
   countContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 30,
   },
 
   countCard: {
@@ -29,6 +29,7 @@ export const newLeaveStyles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginHorizontal: 5,
+    marginTop: 30,
   },
 
   countLabel: {

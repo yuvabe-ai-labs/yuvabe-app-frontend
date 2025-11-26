@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
-  Alert,
+  
   Image,
   Keyboard,
   Text,
@@ -19,6 +19,7 @@ import { setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
+import { showToast } from '../../utils/ToastHelper';
 
 const SignUpScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(false);
@@ -92,7 +93,7 @@ const SignUpScreen = ({ navigation }: any) => {
         routes: [{ name: 'App' }],
       });
     } catch (error: any) {
-      Alert.alert('Signup Failed', error.message || 'Something went wrong');
+      showToast('Signup Failed', error.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }

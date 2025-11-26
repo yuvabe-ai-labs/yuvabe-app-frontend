@@ -1,3 +1,4 @@
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -7,7 +8,6 @@ import ViewShot from 'react-native-view-shot';
 import { getVisionBoard, setVisionBoard } from '../../../store/storage';
 import Tile from './Tile';
 import styles, { COLUMN_COUNT, GAP } from './VisionBoardStyles';
-import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 
 interface VisionItem {
   id: string;
@@ -59,8 +59,7 @@ const VisionBoard: React.FC<{
   const handleDownload = () => {
     if (ref.current) {
       ref.current.capture().then(async uri => {
-
-        await CameraRoll.saveAsset(uri,{type: 'photo'});
+        await CameraRoll.saveAsset(uri, { type: 'photo' });
 
         Alert.alert(
           'VisionBoard',

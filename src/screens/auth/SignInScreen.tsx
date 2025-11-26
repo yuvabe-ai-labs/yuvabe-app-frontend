@@ -18,6 +18,7 @@ import { setItem, setTokens } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './styles/AuthStyles';
+import { showToast } from '../../utils/ToastHelper';
 
 const SignInScreen = ({ navigation }: any) => {
   const { setUser, setIsLoggedIn, setIsVerified } = useUserStore();
@@ -84,7 +85,7 @@ const SignInScreen = ({ navigation }: any) => {
         await setItem('pending_email', data.email);
         navigation.navigate('VerifyEmail', { email: data.email });
       } else {
-        Alert.alert('Error', error.message || 'Something went wrong');
+        showToast('Error', error.message || 'Something went wrong');
       }
     } finally {
       setLoading(false);

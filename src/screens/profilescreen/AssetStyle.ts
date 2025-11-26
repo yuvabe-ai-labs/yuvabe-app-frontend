@@ -21,9 +21,6 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
 
-    // Shadow for Android
-    elevation: 5,
-
     marginBottom: 18,
     flexDirection: 'row',
     alignItems: 'center',

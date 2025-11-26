@@ -2,8 +2,10 @@ import messaging from '@react-native-firebase/messaging';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
+import { toastConfig } from './src/components/customToast';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
 import { getDeviceToken } from './src/utils/pushNotifications';
+import { showToast } from './src/utils/ToastHelper';
 
 function App(): React.JSX.Element {
   function safeNavigate(screen: string, leaveId: string) {
@@ -29,11 +31,10 @@ function App(): React.JSX.Element {
 
       const { screen, leave_id } = remoteMessage.data;
 
-      Toast.show({
-        type: 'info',
-        text1: remoteMessage.notification?.title,
-        text2: remoteMessage.notification?.body,
-      });
+      showToast(
+        remoteMessage.notification?.title ?? 'Notification',
+        remoteMessage.notification?.body ?? '',
+      );
 
       safeNavigate(screen as any, leave_id as any);
     });
@@ -42,11 +43,10 @@ function App(): React.JSX.Element {
     messaging().onMessage(async remoteMessage => {
       console.log('🔥 Foreground Notification:', remoteMessage);
 
-      Toast.show({
-        type: 'info',
-        text1: remoteMessage.notification?.title,
-        text2: remoteMessage.notification?.body,
-      });
+      showToast(
+        remoteMessage.notification?.title ?? 'Notification',
+        remoteMessage.notification?.body ?? '',
+      );
     });
 
     // 🔥 APP KILLED (QUIT)
@@ -67,7 +67,7 @@ function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <RootNavigator />
-      <Toast />
+      <Toast config={toastConfig} />
     </GestureHandlerRootView>
   );
 }
