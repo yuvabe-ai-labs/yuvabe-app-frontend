@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -270,23 +271,27 @@ on a mobile device
             animationType="fade"
             onRequestClose={handleModalDismiss}
           >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Download Models</Text>
+            <TouchableWithoutFeedback onPress={handleModalDismiss}>
+              <View style={styles.modalContainer}>
+                <TouchableWithoutFeedback onPress={() => {}}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Download Models</Text>
 
-                <Text style={styles.modalInfo}>
-                  To enable on-device offline inference, the required model
-                  files must be downloaded.
-                </Text>
+                    <Text style={styles.modalInfo}>
+                      To enable on-device offline inference, the required model
+                      files must be downloaded.
+                    </Text>
 
-                <TouchableOpacity
-                  onPress={startDownload}
-                  style={styles.downloadBtn}
-                >
-                  <Text style={styles.downloadText}>Download</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={startDownload}
+                      style={styles.downloadBtn}
+                    >
+                      <Text style={styles.downloadText}>Download</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           </Modal>
         )}
 
