@@ -150,3 +150,30 @@ export const semanticSearch = async (
     throw new Error(error.response?.data?.detail || 'Semantic search failed');
   }
 };
+
+export const submitEmotion = async (
+  userId: string,
+  emojiNumber: number | null,
+  timeOfDay: "morning" | "evening"
+) => {
+  try {
+    const payload: any = {
+      user_id: userId,
+      log_date: new Date().toISOString().split("T")[0],
+    };
+
+    if (timeOfDay === "morning") {
+      payload.morning_emotion = emojiNumber;
+    } else {
+      payload.evening_emotion = emojiNumber;
+    }
+
+    const response = await api.post("/home/emotion", payload);
+    return response.data;
+  } catch (error: any) {
+    console.log("Emotion API error:", error.response?.data || error);
+    throw new Error(
+      error.response?.data?.detail || "Failed to submit emotion"
+    );
+  }
+};

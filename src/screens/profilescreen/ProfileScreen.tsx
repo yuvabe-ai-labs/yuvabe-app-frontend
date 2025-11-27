@@ -19,7 +19,7 @@ import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { styles } from './ProfileStyles';
 
-export const ProfileScreen = () => {
+const ProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { user, resetUser, setIsLoggedIn, setIsVerified } = useUserStore();
   const { setProfileDetails } = useUserStore();
@@ -166,3 +166,5 @@ const SectionItem = ({ label, icon, onPress }: any) => (
     <Icon name="chevron-right" size={22} color="#C4C4C4" />
   </TouchableOpacity>
 );
+
+export default ProfileScreen;

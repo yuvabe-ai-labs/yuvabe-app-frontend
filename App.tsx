@@ -1,6 +1,7 @@
 import messaging from '@react-native-firebase/messaging';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/components/customToast';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
@@ -22,26 +23,56 @@ function App(): React.JSX.Element {
     tryNav();
   }
 
+  function safeNavigateToHome() {
+    const tryNav = () => {
+      if (navigationRef.current?.isReady()) {
+        navigationRef.current.navigate(
+          'Root' as any,
+          {
+            screen: 'Home',
+          } as never,
+        );
+      } else {
+        setTimeout(tryNav, 300);
+      }
+    };
+    tryNav();
+  }
+
   useEffect(() => {
     getDeviceToken();
 
-    // 🔥 APP IN BACKGROUND
     messaging().onNotificationOpenedApp(remoteMessage => {
       if (!remoteMessage?.data) return;
 
-      const { screen, leave_id } = remoteMessage.data;
+      const { type, screen, leave_id, message } = remoteMessage.data;
 
       showToast(
         remoteMessage.notification?.title ?? 'Notification',
         remoteMessage.notification?.body ?? '',
       );
+
+      if (type === 'home_alert') {
+        (globalThis as any).homeAlert = {
+          visible: true,
+          message: message || 'Hello!',
+        };
+        safeNavigateToHome();
+        return;
+      }
 
       safeNavigate(screen as any, leave_id as any);
     });
 
-    // APP IS OPEN (FOREGROUND)
     messaging().onMessage(async remoteMessage => {
-      console.log('🔥 Foreground Notification:', remoteMessage);
+      const { type, message } = remoteMessage.data || {};
+
+      if (type === 'home_alert') {
+        (globalThis as any).homeAlert = {
+          visible: true,
+          message: message,
+        };
+      }
 
       showToast(
         remoteMessage.notification?.title ?? 'Notification',
@@ -49,16 +80,23 @@ function App(): React.JSX.Element {
       );
     });
 
-    // 🔥 APP KILLED (QUIT)
     messaging()
       .getInitialNotification()
       .then(remoteMessage => {
         if (!remoteMessage?.data) return;
 
-        const { screen, leave_id } = remoteMessage.data;
+        const { type, screen, leave_id, message } = remoteMessage.data;
 
-        // delay to wait for navigator to mount
         setTimeout(() => {
+          if (type === 'home_alert') {
+            (globalThis as any).homeAlert = {
+              visible: true,
+              message: message || 'Hello!',
+            };
+            safeNavigateToHome();
+            return;
+          }
+
           safeNavigate(screen as any, leave_id as any);
         }, 500);
       });

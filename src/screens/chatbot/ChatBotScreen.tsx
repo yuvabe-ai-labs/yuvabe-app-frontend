@@ -9,12 +9,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './ChatbotStyles';
 
-import { llamaChat, loadLlama } from '../chatbot/llama/llamaManager';
+import { loadLlama, qwenChat } from '../chatbot/llama/llamaManager';
 import {
   checkModelsExist,
   downloadAllModels,
@@ -36,7 +37,7 @@ type ChatTurn = {
   content: string;
 };
 
-export const ChatScreen = () => {
+const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [session, setSession] = useState<InferenceSession | null>(null);
@@ -207,7 +208,19 @@ on a mobile device
 
       // console.log('===== MODEL INPUT END =====');
 
-      const finalText = await llamaChat(messagesForModel, token => {
+      // const finalText = await llamaChat(messagesForModel, token => {
+      //   setMessages(prev => {
+      //     const copy = [...prev];
+      //     const idx = copy.findIndex(m => m.id === botMsgId);
+      //     if (idx !== -1) {
+      //       if (copy[idx].text === 'Thinking...') copy[idx].text = token;
+      //       else copy[idx].text += token;
+      //     }
+      //     return copy;
+      //   });
+      // });
+
+      const finalText = await qwenChat(messagesForModel, token => {
         setMessages(prev => {
           const copy = [...prev];
           const idx = copy.findIndex(m => m.id === botMsgId);
@@ -258,23 +271,27 @@ on a mobile device
             animationType="fade"
             onRequestClose={handleModalDismiss}
           >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Download Models</Text>
+            <TouchableWithoutFeedback onPress={handleModalDismiss}>
+              <View style={styles.modalContainer}>
+                <TouchableWithoutFeedback onPress={() => {}}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Download Models</Text>
 
-                <Text style={styles.modalInfo}>
-                  To enable on-device offline inference, the required model
-                  files must be downloaded.
-                </Text>
+                    <Text style={styles.modalInfo}>
+                      To enable on-device offline inference, the required model
+                      files must be downloaded.
+                    </Text>
 
-                <TouchableOpacity
-                  onPress={startDownload}
-                  style={styles.downloadBtn}
-                >
-                  <Text style={styles.downloadText}>Download</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={startDownload}
+                      style={styles.downloadBtn}
+                    >
+                      <Text style={styles.downloadText}>Download</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           </Modal>
         )}
 
@@ -325,3 +342,5 @@ on a mobile device
     </>
   );
 };
+
+export default ChatScreen;
