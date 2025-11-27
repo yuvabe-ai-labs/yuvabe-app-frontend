@@ -65,8 +65,8 @@ const HomeScreen = ({ navigation }: any) => {
   };
 
   //
-  const drawerWidth = 300; // half screen or any width you want
-  const drawerX = useSharedValue(-drawerWidth); // hidden initially
+  const drawerWidth = 300;
+  const drawerX = useSharedValue(-drawerWidth);
 
   const openDrawer = () => {
     drawerX.value = withTiming(0, { duration: 300 });
@@ -296,7 +296,6 @@ const HomeScreen = ({ navigation }: any) => {
             ]}
           >
             <SafeAreaView style={{ flex: 1, padding: 20 }}>
-              {/* Profile section in the drawer */}
               <View
                 style={{
                   flexDirection: 'row',
