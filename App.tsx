@@ -3,8 +3,10 @@ import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import { toastConfig } from './src/components/customToast';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
 import { getDeviceToken } from './src/utils/pushNotifications';
+import { showToast } from './src/utils/ToastHelper';
 
 function App(): React.JSX.Element {
   function safeNavigate(screen: string, leaveId: string) {
@@ -45,11 +47,10 @@ function App(): React.JSX.Element {
 
       const { type, screen, leave_id, message } = remoteMessage.data;
 
-      Toast.show({
-        type: 'info',
-        text1: remoteMessage.notification?.title,
-        text2: remoteMessage.notification?.body,
-      });
+      showToast(
+        remoteMessage.notification?.title ?? 'Notification',
+        remoteMessage.notification?.body ?? '',
+      );
 
       if (type === 'home_alert') {
         (globalThis as any).homeAlert = {
@@ -73,11 +74,10 @@ function App(): React.JSX.Element {
         };
       }
 
-      Toast.show({
-        type: 'info',
-        text1: remoteMessage.notification?.title,
-        text2: remoteMessage.notification?.body,
-      });
+      showToast(
+        remoteMessage.notification?.title ?? 'Notification',
+        remoteMessage.notification?.body ?? '',
+      );
     });
 
     messaging()
@@ -103,12 +103,10 @@ function App(): React.JSX.Element {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootNavigator />
-        <Toast />
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <RootNavigator />
+      <Toast config={toastConfig} />
+    </GestureHandlerRootView>
   );
 }
 

@@ -1,4 +1,8 @@
 import { CommonActions, useNavigation } from '@react-navigation/native';
+import {
+  UserCheck as IconLucideUserCheck,
+  Users as IconLucideUsers,
+} from 'lucide-react-native';
 import React from 'react';
 import {
   Alert,
@@ -72,7 +76,13 @@ const ProfileScreen = () => {
       </LinearGradient>
 
       {/* Profile Card */}
-      <View style={styles.profileCard}>
+      <View
+        style={[
+          styles.profileCard,
+          { flexDirection: 'row', alignItems: 'center' },
+        ]}
+      >
+        {/* LEFT – PROFILE IMAGE */}
         <Image
           source={{
             uri:
@@ -80,21 +90,35 @@ const ProfileScreen = () => {
               user?.profile_picture ||
               'https://i.pravatar.cc/150?img=3',
           }}
-          style={styles.profileImage}
+          style={[styles.profileImage, { marginRight: 20 }]}
         />
 
-        <Text style={styles.name}>{user?.name || 'User'}</Text>
-        <Text style={styles.email}>{user?.email || 'example@yuvabe.com'}</Text>
-        <View style={{ marginTop: 12, width: '60%' }}>
-          <View style={styles.infoRow}>
-            <Icon name="users" size={18} style={styles.infoIcon} />
-            <Text style={styles.infoLabel}>Team</Text>
+        {/* RIGHT – DETAILS */}
+        <View style={{ flex: 1 }}>
+          <Text style={styles.name}>{user?.name || 'User'}</Text>
+          <Text style={styles.email}>
+            {user?.email || 'example@yuvabe.com'}
+          </Text>
+
+          {/* TEAM */}
+          <View style={[styles.infoRow, { marginTop: 8 }]}>
+            <IconLucideUsers
+              size={18}
+              color="#4A90E2"
+              style={styles.infoIcon}
+            />
+            <Text style={styles.infoLabel}>Team:</Text>
             <Text style={styles.infoValue}>{team_name || '—'}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Icon name="user-check" size={18} style={styles.infoIcon} />
-            <Text style={styles.infoLabel}>Mentor</Text>
+          {/* MENTOR */}
+          <View style={[styles.infoRow, { marginTop: 4 }]}>
+            <IconLucideUserCheck
+              size={18}
+              color="#4A90E2"
+              style={styles.infoIcon}
+            />
+            <Text style={styles.infoLabel}>Mentor:</Text>
             <Text style={styles.infoValue}>{mentor_name || '—'}</Text>
           </View>
         </View>

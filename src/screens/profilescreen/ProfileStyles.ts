@@ -28,10 +28,6 @@ export const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 16,
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
   },
 
   profileImage: {
@@ -95,26 +91,26 @@ export const styles = StyleSheet.create({
     color: '#FF3B30',
     fontWeight: '600',
   },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
 
   infoIcon: {
     marginRight: 8,
     color: '#4A90E2',
   },
-
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 2,
+  },
   infoLabel: {
     fontSize: 14,
-    color: '#888',
-    width: 80,
+    color: '#555',
+    marginLeft: 6,
+    width: 70, // to align labels
   },
-
   infoValue: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#000',
-    fontWeight: '600',
+    marginLeft: 4,
+    flexShrink: 1,
   },
 });

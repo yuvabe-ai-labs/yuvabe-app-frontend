@@ -1,20 +1,28 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+
 import {
   fetchLeaveBalance,
   requestLeave,
 } from '../../api/profile-api/profileApi';
+
+import { ChevronLeft } from 'lucide-react-native';
+
+import { showToast } from '../../utils/ToastHelper';
 import { newLeaveStyles as styles } from './RequestLeaveStyles';
 
 export default function RequestLeaveScreen() {
+  const navigation = useNavigation<any>();
+
   const [leaveType, setLeaveType] = useState('Sick Leave');
   const [showLeaveType, setShowLeaveType] = useState(false);
 
@@ -48,11 +56,11 @@ export default function RequestLeaveScreen() {
 
   const handleSubmit = async () => {
     if (!reason.trim()) {
-      return Alert.alert('Error', 'Please enter a reason.');
+      return showToast('Error', 'Please enter a reason.');
     }
 
     if (toDate < fromDate) {
-      return Alert.alert('Error', '"To date" must be after "From date".');
+      return showToast('Error', '"To date" must be after "From date".');
     }
 
     const mappedType = leaveType === 'Sick Leave' ? 'Sick' : 'Casual';
@@ -75,7 +83,7 @@ export default function RequestLeaveScreen() {
 
       const response = await requestLeave(body);
 
-      Alert.alert('Success', 'Leave request submitted!');
+      showToast('Success', 'Leave request submitted!');
       console.log('Leave created:', response);
 
       // Reset form
@@ -87,7 +95,7 @@ export default function RequestLeaveScreen() {
       // refresh balance after applying leave
       loadBalance();
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      showToast('Error', err.message);
     } finally {
       setLoading(false);
     }
@@ -97,8 +105,42 @@ export default function RequestLeaveScreen() {
   // UI
   // ---------------------------------------
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.heading}>Request Leave</Text>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 30 }}
+    >
+      {/* HEADER WITH CHEVRON + TITLE */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 15,
+          marginTop: 10,
+        }}
+      >
+        {/* Back Icon */}
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ paddingRight: 8 }}
+        >
+          <ChevronLeft size={28} color="#000" />
+        </TouchableOpacity>
+
+        {/* Title */}
+        <Text
+          style={[
+            styles.heading,
+            {
+              textAlign: 'left', // override center
+              flex: 0, // prevents taking full width
+              marginBottom: 0, // spacing fix
+            },
+          ]}
+        >
+          Request Leave
+        </Text>
+      </View>
 
       {/* Leave Balance */}
       <View style={styles.countContainer}>
@@ -199,15 +241,17 @@ export default function RequestLeaveScreen() {
       />
 
       {/* Submit Button */}
-      <TouchableOpacity
-        style={styles.btn}
-        onPress={handleSubmit}
-        disabled={loading}
-      >
-        <Text style={styles.btnText}>
-          {loading ? 'Submitting...' : 'Submit Leave Request'}
-        </Text>
-      </TouchableOpacity>
+      <View style={{ marginTop: 50, marginBottom: 20 }}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.btnText}>
+            {loading ? 'Submitting...' : 'Submit Leave Request'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }

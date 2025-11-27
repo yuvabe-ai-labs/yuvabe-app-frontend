@@ -1,5 +1,4 @@
-import api from "../client/axiosClient";
-
+import api from '../client/axiosClient';
 
 export type AssetDTO = {
   id: string;
@@ -9,6 +8,6 @@ export type AssetDTO = {
 };
 
 export const fetchAssets = async (): Promise<AssetDTO[]> => {
-  const res = await api.get('/profile');
+  const res = await api.get('/profile/assets');
   return res.data.data.assets;
 };

@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,8 +13,11 @@ import {
   cancelLeave,
   fetchMyLeaveHistory,
 } from '../../api/profile-api/profileApi';
+import { showToast } from '../../utils/ToastHelper';
 
 export default function MyLeaveHistoryScreen() {
+  const navigation = useNavigation<any>();
+
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -47,16 +51,17 @@ export default function MyLeaveHistoryScreen() {
         onPress: async () => {
           try {
             await cancelLeave(leave.id);
-            Alert.alert('Success', 'Leave cancelled');
+            showToast('Success', 'Leave cancelled');
             load();
           } catch (err: any) {
-            Alert.alert('Error', err.response?.data?.detail || 'Failed');
+            showToast('Error', err.response?.data?.detail || 'Failed');
           }
         },
       },
     ]);
   };
 
+  // Render Leave Card
   const renderItem = ({ item }: any) => {
     const leaveDate = new Date(item.from_date);
     const today = new Date();
@@ -66,75 +71,74 @@ export default function MyLeaveHistoryScreen() {
       leaveDate > today;
 
     return (
-      <View
-        style={{
-          backgroundColor: '#fff',
-          padding: 15,
-          marginVertical: 10,
-          borderRadius: 12,
-          elevation: 2,
-        }}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() =>
+          navigation.navigate('LeaveDetails', { leaveId: item.id })
+        }
       >
-        {/* HEADER ROW */}
         <View
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginBottom: 6,
+            backgroundColor: '#fff',
+            padding: 15,
+            marginVertical: 10,
+            borderRadius: 12,
           }}
         >
           <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
             {item.leave_type} ({item.status})
           </Text>
-        </View>
 
-        {/* DETAILS */}
-        <Text style={{ marginTop: 2 }}>
-          {item.from_date} → {item.to_date}
-        </Text>
-        <Text style={{ marginTop: 2 }}>Days: {item.days}</Text>
-        <Text style={{ marginTop: 2 }}>Mentor: {item.mentor_name || '—'}</Text>
-
-        {/* UPDATED + CANCEL BUTTON SAME ROW */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: 12,
-          }}
-        >
-          <Text style={{ color: 'gray', fontSize: 13 }}>
-            Updated: {item.updated_at?.slice(0, 10)}
+          <Text style={{ marginTop: 4 }}>
+            {item.from_date} → {item.to_date}
           </Text>
 
-          {canCancel && (
-            <TouchableOpacity
-              onPress={() => handleCancel(item)}
-              style={{
-                backgroundColor: '#E53935',
-                paddingVertical: 6,
-                paddingHorizontal: 14,
-                borderRadius: 20,
-              }}
-            >
-              <Text
+          <Text style={{ marginTop: 2 }}>Days: {item.days}</Text>
+          <Text style={{ marginTop: 2 }}>
+            Mentor: {item.mentor_name || '—'}
+          </Text>
+
+          {/* FOOTER */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 12,
+            }}
+          >
+            <Text style={{ color: 'gray', fontSize: 13 }}>
+              Updated: {item.updated_at?.slice(0, 10)}
+            </Text>
+
+            {canCancel && (
+              <TouchableOpacity
+                onPress={() => handleCancel(item)}
                 style={{
-                  color: '#fff',
-                  fontWeight: 'bold',
-                  fontSize: 13,
+                  backgroundColor: '#E53935',
+                  paddingVertical: 6,
+                  paddingHorizontal: 14,
+                  borderRadius: 20,
                 }}
               >
-                Cancel
-              </Text>
-            </TouchableOpacity>
-          )}
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    fontSize: 13,
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
-  // FIRST LOAD LOADING SCREEN
+  // FIRST LOAD LOADING
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TextInput,
@@ -13,6 +12,7 @@ import {
   getUserLeaveBalance,
   mentorDecision,
 } from '../../api/profile-api/profileApi';
+import { showToast } from '../../utils/ToastHelper';
 
 export default function MentorApprovalScreen({ route, navigation }: any) {
   const { leaveId } = route.params;
@@ -41,7 +41,7 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
       setCasual(bal.data.data.casual_remaining);
     } catch (err) {
       console.log(err);
-      Alert.alert('Error', 'Unable to load leave details');
+      showToast('Error', 'Unable to load leave details');
     } finally {
       setLoading(false);
     }
@@ -51,10 +51,10 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
     setSubmitLoading(true);
     try {
       await mentorDecision(leaveId, { status: 'Approved' });
-      Alert.alert('Success', 'Leave Approved');
+      showToast('Success', 'Leave Approved');
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      showToast('Error', error.message);
     } finally {
       setSubmitLoading(false);
     }
@@ -62,7 +62,7 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
 
   const rejectLeave = async () => {
     if (!rejectComment.trim()) {
-      return Alert.alert('Error', 'Comment required to reject');
+      return showToast('Error', 'Comment required to reject');
     }
     setSubmitLoading(true);
     try {
@@ -70,10 +70,10 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
         status: 'Rejected',
         comment: rejectComment,
       });
-      Alert.alert('Rejected', 'Leave request rejected');
+      showToast('Rejected', 'Leave request rejected');
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      showToast('Error', error.message);
     } finally {
       setSubmitLoading(false);
     }

@@ -56,7 +56,6 @@ export default function LeaveDetailsScreen({ route }: any) {
           backgroundColor: '#fff',
           padding: 20,
           borderRadius: 15,
-          elevation: 3,
         }}
       >
         {/* Leave Type */}

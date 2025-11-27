@@ -9,8 +9,6 @@ import {
 } from 'react-native';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Toast from 'react-native-toast-message';
-
 import { useUserStore } from '../../store/useUserStore';
 import { leaveStyles as styles } from './LeaveStyles';
 
@@ -18,6 +16,7 @@ import {
   getLeaveContacts,
   sendLeaveEmail,
 } from '../../api/leave-api/leave_api';
+import { showToast } from '../../utils/ToastHelper';
 
 export default function LeaveRequestScreen({ navigation }: any) {
   const { user } = useUserStore();
@@ -66,7 +65,7 @@ ${user?.name}
 
       setSubject(`${leaveType} Request - ${user?.name}`);
     } catch (err: any) {
-      Toast.show({ type: 'error', text1: err.message });
+      showToast('error', err.message);
     } finally {
       setLoading(false);
     }
@@ -92,15 +91,11 @@ ${user?.name}
         subject,
         body,
       });
-
-      Toast.show({
-        type: 'success',
-        text1: 'Leave request sent successfully!',
-      });
+      showToast('success', 'Leave request sent successfully!');
 
       navigation.goBack();
     } catch (err: any) {
-      Toast.show({ type: 'error', text1: err.message });
+      showToast('error', err.message);
     } finally {
       setSending(false);
     }
