@@ -1,10 +1,10 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { ChatScreen } from '../screens/chatbot/ChatBotScreen';
+import ChatScreen from '../screens/chatbot/ChatBotScreen';
 import HomeScreen from '../screens/homescreen/HomeScreen';
 import MentorLeaveListScreen from '../screens/mentor/MentorLeaveListScreen';
-import { ProfileScreen } from '../screens/profilescreen/ProfileScreen';
+import ProfileScreen from '../screens/profilescreen/ProfileScreen';
 import RequestLeaveScreen from '../screens/requestLeave/RequestLeave';
 import { useUserStore } from '../store/useUserStore';
 
