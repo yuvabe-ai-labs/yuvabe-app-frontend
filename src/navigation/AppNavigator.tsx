@@ -93,7 +93,7 @@ const AppNavigator = () => {
       <AppStack.Screen
         name="RequestLeave"
         component={RequestLeaveScreen}
-        options={{ headerShown: true, title: 'Request Leave' }}
+        options={{ headerShown: false }}
       />
 
       <AppStack.Screen name="Notifications" component={NotificationScreen} />
