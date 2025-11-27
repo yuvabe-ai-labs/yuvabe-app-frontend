@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
 
   welcomeText: {
     ...TEXT_STYLES.large,
+    marginLeft: 18,
   },
 
   thoughtContainer: {
@@ -91,49 +92,49 @@ const styles = StyleSheet.create({
     ...TEXT_STYLES.title,
   },
   audioContainer: {
-  backgroundColor: COLORS.lightGray,
-  padding: SIZES.base * 2,
-  borderRadius: SIZES.radius,
-  marginBottom: SIZES.base * 2.5,
-},
+    backgroundColor: COLORS.lightGray,
+    padding: SIZES.base * 2,
+    borderRadius: SIZES.radius,
+    marginBottom: SIZES.base * 2.5,
+  },
 
-audioTitle: {
-  ...TEXT_STYLES.title,
-  fontSize: SIZES.lg,
-  marginBottom: 8,
-},
+  audioTitle: {
+    ...TEXT_STYLES.title,
+    fontSize: SIZES.lg,
+    marginBottom: 8,
+  },
 
-audioItem: {
-  backgroundColor: COLORS.background,
-  padding: SIZES.base * 1.5,
-  borderRadius: SIZES.radius,
-  marginTop: SIZES.base,
-  shadowColor: COLORS.textPrimary,
-  shadowOpacity: 0.05,
-  shadowRadius: 2,
-  elevation: 2,
-},
+  audioItem: {
+    backgroundColor: COLORS.background,
+    padding: SIZES.base * 1.5,
+    borderRadius: SIZES.radius,
+    marginTop: SIZES.base,
+    shadowColor: COLORS.textPrimary,
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
 
-audioItemTitle: {
-  ...TEXT_STYLES.large,
-  fontSize: SIZES.md,
-  marginBottom: 10,
-},
+  audioItemTitle: {
+    ...TEXT_STYLES.large,
+    fontSize: SIZES.md,
+    marginBottom: 10,
+  },
 
-audioControls: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginTop: 6,
-},
+  audioControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
 
-audioButton: {
-  marginRight: 20,
-},
+  audioButton: {
+    marginRight: 20,
+  },
 
-audioButtonText: {
-  ...TEXT_STYLES.regular,
-  fontSize: 16,
-},
+  audioButtonText: {
+    ...TEXT_STYLES.regular,
+    fontSize: 16,
+  },
 });
 
 export default styles;

@@ -1,4 +1,5 @@
 import messaging from '@react-native-firebase/messaging';
+import { Menu } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   Image,
@@ -10,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -19,6 +21,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { fetchUserDetails, submitEmotion } from '../../api/auth-api/authApi';
 import { registerDevice } from '../../api/profile-api/profileApi';
 import { getItem, setItem } from '../../store/storage';
+import { COLORS } from '../../utils/theme';
 import styles from './HomeStyles';
 import CalmingAudio from './components/CalmingAudio';
 import EmotionCheckIn from './components/EmotionCheckIn';
@@ -53,6 +56,7 @@ const HomeScreen = ({ navigation }: any) => {
   const [author, setAuthor] = useState<string>('');
 
   const [user, setUser] = useState<any>(null);
+  const [shouldRenderDrawer, setShouldRenderDrawer] = useState(false);
 
   const EMOJI_MAP: { [key: string]: number } = {
     '😀': 1,
@@ -66,14 +70,22 @@ const HomeScreen = ({ navigation }: any) => {
 
   //
   const drawerWidth = 300;
-  const drawerX = useSharedValue(-drawerWidth);
+  // const drawerX = useSharedValue(-drawerWidth);
+
+  const hiddenPosition = -drawerWidth * 1.3;
+  const drawerX = useSharedValue(hiddenPosition);
 
   const openDrawer = () => {
+    setShouldRenderDrawer(true);
     drawerX.value = withTiming(0, { duration: 300 });
   };
 
   const closeDrawer = () => {
-    drawerX.value = withTiming(-drawerWidth, { duration: 300 });
+    drawerX.value = withTiming(-drawerWidth, { duration: 300 }, finished => {
+      if (finished) {
+        runOnJS(setShouldRenderDrawer)(false);
+      }
+    });
   };
 
   const drawerStyle = useAnimatedStyle(() => ({
@@ -118,7 +130,7 @@ const HomeScreen = ({ navigation }: any) => {
           }
         }
 
-        const response = await fetch('https://quotes.domiadi.com/api'); // or try this https://motivational-spark-api.vercel.app/api/quotes/random
+        const response = await fetch('https://quotes.domiadi.com/api');
         if (!response.ok) {
           throw new Error(`HTTP error ${response.status}`);
         }
@@ -189,24 +201,28 @@ const HomeScreen = ({ navigation }: any) => {
             showsVerticalScrollIndicator={false}
             scrollEnabled={scrollEnabled}
           >
+            {/* HEADER */}
             <View style={styles.header}>
+              {/* Hamburger Icon */}
               <TouchableOpacity onPress={openDrawer}>
-                <Image
-                  source={{
-                    uri: profileImage || 'https://i.pravatar.cc/150?img=3',
-                  }}
-                  style={styles.profileImage}
-                />
+                <Menu size={28} color="#000" strokeWidth={1.7} />
               </TouchableOpacity>
 
+              {/* Welcome Text */}
               <Text style={styles.welcomeText}>
                 Welcome, {user?.user.name || 'Loading...'}
               </Text>
 
+              {/* Notification Bell */}
               <TouchableOpacity
                 onPress={() => navigation.navigate('Notifications')}
+                style={{ marginLeft: 'auto' }} // pushes bell fully to the right
               >
-                <Ionicons name="notifications-outline" size={28} />
+                <Ionicons
+                  name="notifications"
+                  size={28}
+                  color={COLORS.secondary}
+                />
               </TouchableOpacity>
             </View>
 
@@ -261,14 +277,13 @@ const HomeScreen = ({ navigation }: any) => {
           }}
           pointerEvents="box-none"
         >
-          {drawerX.value === 0 && (
+          {shouldRenderDrawer && (
             <TouchableOpacity
               onPress={closeDrawer}
-              activeOpacity={1}
               style={{
                 position: 'absolute',
                 top: 0,
-                left: drawerWidth, // <<< IMPORTANT FIX
+                left: drawerWidth,
                 right: 0,
                 bottom: 0,
                 backgroundColor: 'rgba(0,0,0,0.3)',
@@ -291,6 +306,7 @@ const HomeScreen = ({ navigation }: any) => {
                 shadowOpacity: 0.2,
                 shadowRadius: 10,
                 paddingTop: 0,
+                zIndex: 100,
               },
               drawerStyle,
             ]}
