@@ -1,5 +1,14 @@
 import messaging from '@react-native-firebase/messaging';
-import { Menu } from 'lucide-react-native';
+import {
+  Bell,
+  Box,
+  Clock,
+  FilePlus,
+  History,
+  Menu,
+  User,
+  Users,
+} from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   Image,
@@ -10,17 +19,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { fetchUserDetails, submitEmotion } from '../../api/auth-api/authApi';
 import { registerDevice } from '../../api/profile-api/profileApi';
-import { getItem, setItem } from '../../store/storage';
+import AppDrawer from '../../components/AppDrawer';
+import { getItem, removeItem, setItem } from '../../store/storage';
 import { COLORS } from '../../utils/theme';
 import styles from './HomeStyles';
 import CalmingAudio from './components/CalmingAudio';
@@ -56,7 +60,6 @@ const HomeScreen = ({ navigation }: any) => {
   const [author, setAuthor] = useState<string>('');
 
   const [user, setUser] = useState<any>(null);
-  const [shouldRenderDrawer, setShouldRenderDrawer] = useState(false);
 
   const EMOJI_MAP: { [key: string]: number } = {
     '😀': 1,
@@ -68,29 +71,8 @@ const HomeScreen = ({ navigation }: any) => {
     '🤯': 7,
   };
 
-  //
-  const drawerWidth = 300;
-  // const drawerX = useSharedValue(-drawerWidth);
-
-  const hiddenPosition = -drawerWidth * 1.3;
-  const drawerX = useSharedValue(hiddenPosition);
-
-  const openDrawer = () => {
-    setShouldRenderDrawer(true);
-    drawerX.value = withTiming(0, { duration: 300 });
-  };
-
-  const closeDrawer = () => {
-    drawerX.value = withTiming(-drawerWidth, { duration: 300 }, finished => {
-      if (finished) {
-        runOnJS(setShouldRenderDrawer)(false);
-      }
-    });
-  };
-
-  const drawerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: drawerX.value }],
-  }));
+  const role = user?.user?.role ?? 'user';
+  const isMentor = role === 'mentor';
 
   //
   useEffect(() => {
@@ -101,6 +83,11 @@ const HomeScreen = ({ navigation }: any) => {
     const loadUser = async () => {
       try {
         const userData = await fetchUserDetails();
+        removeItem('profile_image');
+        setProfileImage(null);
+
+        console.log('PROFILE IMAGE = ', profileImage);
+
         setUser(userData);
       } catch (error) {
         console.error('Error loading user details:', error);
@@ -171,9 +158,7 @@ const HomeScreen = ({ navigation }: any) => {
     if (savedImage) {
       setProfileImage(savedImage);
     } else {
-      const defaultImage = 'https://i.pravatar.cc/150?img=3';
-      setProfileImage(defaultImage);
-      setItem('profile_image', defaultImage);
+      setProfileImage(null);
     }
   }, []);
 
@@ -190,182 +175,208 @@ const HomeScreen = ({ navigation }: any) => {
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <>
-      <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
-        <View style={{ flex: 1 }}>
-          <Animated.ScrollView
-            style={styles.container}
-            contentContainerStyle={{ paddingBottom: 80 }}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={scrollEnabled}
-          >
-            {/* HEADER */}
-            <View style={styles.header}>
-              {/* Hamburger Icon */}
-              <TouchableOpacity onPress={openDrawer}>
-                <Menu size={28} color="#000" strokeWidth={1.7} />
-              </TouchableOpacity>
-
-              {/* Welcome Text */}
-              <Text style={styles.welcomeText}>
-                Welcome, {user?.user.name || 'Loading...'}
-              </Text>
-
-              {/* Notification Bell */}
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Notifications')}
-                style={{ marginLeft: 'auto' }} // pushes bell fully to the right
-              >
-                <Ionicons
-                  name="notifications"
-                  size={28}
-                  color={COLORS.secondary}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/* Thought */}
-            <View style={styles.thoughtContainer}>
-              <Text style={styles.thoughtTitle}>Thought of the Day</Text>
-              <Text style={styles.thoughtText}>"{quote}"</Text>
-              <Text
-                style={[
-                  styles.thoughtText,
-                  { fontStyle: 'italic', fontSize: 14 },
-                ]}
-              >
-                — {author}
-              </Text>
-            </View>
-
-            <CalmingAudio />
-            <VisionBoard setScrollingEnabled={setScrollEnabled} />
-          </Animated.ScrollView>
-        </View>
-
-        {showNotificationModal && (
-          <EmotionCheckIn
-            visible={showNotificationModal}
-            message={homeAlertMessage}
-            onClose={() => setShowNotificationModal(false)}
-            onSelect={async emoji => {
-              setShowNotificationModal(false);
-              const emojiNumber = emoji ? EMOJI_MAP[emoji] : null;
-              try {
-                const timeOfDay = homeAlertMessage.includes('morning')
-                  ? 'morning'
-                  : 'evening';
-                await submitEmotion(user?.user.id, emojiNumber, timeOfDay);
-              } catch (err) {
-                console.error('Emotion submit failed', err);
-              }
-            }}
-          />
-        )}
-
-        <FloatingActionButton onPress={() => navigation.navigate('Chat')} />
+  const drawerUI = (closeDrawer: any) => (
+    <SafeAreaView style={{ flex: 1, padding: 20 }}>
+      {/* PROFILE HEADER */}
+      <TouchableOpacity
+        onPress={() => {
+          closeDrawer();
+          navigation.navigate('Profile');
+        }}
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30 }}
+      >
         <View
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 50,
+            width: 55,
+            height: 55,
+            borderRadius: 30,
+            backgroundColor: '#e6e6e6',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
           }}
-          pointerEvents="box-none"
         >
-          {shouldRenderDrawer && (
-            <TouchableOpacity
-              onPress={closeDrawer}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: drawerWidth,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0,0,0,0.3)',
+          {profileImage ? (
+            <Image
+              source={{ uri: profileImage }}
+              style={{ width: 55, height: 55, borderRadius: 30 }}
+            />
+          ) : (
+            <User size={28} color="#555" strokeWidth={2} />
+          )}
+        </View>
+
+        <View>
+          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+            {user?.user?.name || 'User'}
+          </Text>
+          <Text style={{ fontSize: 14, color: '#666' }}>View Profile</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Assets */}
+      <TouchableOpacity
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
+        onPress={() => {
+          closeDrawer();
+          navigation.navigate('AssetsScreen');
+        }}
+      >
+        <Box size={20} color="#444" strokeWidth={1.8} />
+        <Text style={{ fontSize: 18, marginLeft: 12 }}>Assets</Text>
+      </TouchableOpacity>
+
+      {/* MENTOR ITEMS */}
+      {isMentor ? (
+        <>
+          {/* Pending Leaves */}
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+            onPress={() => {
+              closeDrawer();
+              navigation.navigate('PendingLeaves');
+            }}
+          >
+            <Clock size={20} color="#444" strokeWidth={1.8} />
+            <Text style={{ fontSize: 18, marginLeft: 12 }}>Pending Leaves</Text>
+          </TouchableOpacity>
+
+          {/* Team Leave History */}
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+            onPress={() => {
+              closeDrawer();
+              navigation.navigate('TeamLeaveHistory');
+            }}
+          >
+            <Users size={20} color="#444" strokeWidth={1.8} />
+            <Text style={{ fontSize: 18, marginLeft: 12 }}>
+              Team Leave History
+            </Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          {/* Request Leave */}
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+            onPress={() => {
+              closeDrawer();
+              navigation.navigate('RequestLeave');
+            }}
+          >
+            <FilePlus size={20} color="#444" strokeWidth={1.8} />
+            <Text style={{ fontSize: 18, marginLeft: 12 }}>Request Leave</Text>
+          </TouchableOpacity>
+
+          {/* Leave History */}
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+            onPress={() => {
+              closeDrawer();
+              navigation.navigate('MyLeaveHistory');
+            }}
+          >
+            <History size={20} color="#444" strokeWidth={1.8} />
+            <Text style={{ fontSize: 18, marginLeft: 12 }}>Leave History</Text>
+          </TouchableOpacity>
+        </>
+      )}
+    </SafeAreaView>
+  );
+
+  return (
+    <AppDrawer drawerContent={drawerUI}>
+      {(openDrawer: any) => (
+        <SafeAreaView style={{ flex: 1 }}>
+          <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
+          <View style={{ flex: 1 }}>
+            <Animated.ScrollView
+              style={styles.container}
+              contentContainerStyle={{ paddingBottom: 80 }}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={scrollEnabled}
+            >
+              {/* HEADER */}
+              <View style={styles.header}>
+                {/* Hamburger Icon */}
+                <TouchableOpacity onPress={openDrawer}>
+                  <Menu size={28} color="#000" strokeWidth={1.7} />
+                </TouchableOpacity>
+
+                {/* Welcome Text */}
+                <Text style={styles.welcomeText}>
+                  Welcome, {user?.user.name || 'Loading...'}
+                </Text>
+
+                {/* Notification Bell */}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Notifications')}
+                  style={{ marginLeft: 'auto' }} // pushes bell fully to the right
+                >
+                  <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Thought */}
+              <View style={styles.thoughtContainer}>
+                <Text style={styles.thoughtTitle}>Thought of the Day</Text>
+                <Text style={styles.thoughtText}>"{quote}"</Text>
+                <Text
+                  style={[
+                    styles.thoughtText,
+                    { fontStyle: 'italic', fontSize: 14 },
+                  ]}
+                >
+                  — {author}
+                </Text>
+              </View>
+
+              <CalmingAudio />
+              <VisionBoard setScrollingEnabled={setScrollEnabled} />
+            </Animated.ScrollView>
+          </View>
+
+          {showNotificationModal && (
+            <EmotionCheckIn
+              visible={showNotificationModal}
+              message={homeAlertMessage}
+              onClose={() => setShowNotificationModal(false)}
+              onSelect={async emoji => {
+                setShowNotificationModal(false);
+                const emojiNumber = emoji ? EMOJI_MAP[emoji] : null;
+                try {
+                  const timeOfDay = homeAlertMessage.includes('morning')
+                    ? 'morning'
+                    : 'evening';
+                  await submitEmotion(user?.user.id, emojiNumber, timeOfDay);
+                } catch (err) {
+                  console.error('Emotion submit failed', err);
+                }
               }}
             />
           )}
 
-          <Animated.View
-            pointerEvents="box-none"
-            style={[
-              {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                bottom: 0,
-                width: drawerWidth,
-                backgroundColor: 'white',
-                elevation: 15,
-                shadowColor: '#000',
-                shadowOpacity: 0.2,
-                shadowRadius: 10,
-                paddingTop: 0,
-                zIndex: 100,
-              },
-              drawerStyle,
-            ]}
-          >
-            <SafeAreaView style={{ flex: 1, padding: 20 }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 30,
-                }}
-              >
-                <Image
-                  source={{
-                    uri: profileImage || 'https://i.pravatar.cc/150?img=3',
-                  }}
-                  style={{
-                    width: 55,
-                    height: 55,
-                    borderRadius: 30,
-                    marginRight: 12,
-                  }}
-                />
-
-                <View>
-                  <Text
-                    style={{ fontSize: 18, fontWeight: 'bold', color: '#000' }}
-                  >
-                    {user?.user.name || 'User'}
-                  </Text>
-                  <Text style={{ fontSize: 14, color: '#666' }}>
-                    View Profile
-                  </Text>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                style={{ marginBottom: 20 }}
-                onPress={() => {
-                  closeDrawer();
-                  navigation.navigate('Profile');
-                }}
-              >
-                <Text style={{ fontSize: 18 }}>Profile</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  closeDrawer();
-                  navigation.navigate('RequestLeave');
-                }}
-              >
-                <Text style={{ fontSize: 18 }}>Request Leave</Text>
-              </TouchableOpacity>
-            </SafeAreaView>
-          </Animated.View>
-        </View>
-      </SafeAreaView>
-    </>
+          <FloatingActionButton onPress={() => navigation.navigate('Chat')} />
+        </SafeAreaView>
+      )}
+    </AppDrawer>
   );
 };
 

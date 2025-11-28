@@ -1,3 +1,4 @@
+import { Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, Text, TouchableOpacity } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -6,7 +7,6 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { scheduleOnRN } from 'react-native-worklets';
 import TileModal from './TileModal';
 import styles, { GAP, TILE_WIDTH } from './VisionBoardStyles';
@@ -203,7 +203,7 @@ const Tile: React.FC<TileProps> = ({
               style={styles.deleteButton}
               onPress={() => onDelete(id)}
             >
-              <Icon name="delete" size={18} color="#fff" />
+              <Trash2 size={18} color="#fff" strokeWidth={2} />
             </TouchableOpacity>
           )}
         </Animated.View>

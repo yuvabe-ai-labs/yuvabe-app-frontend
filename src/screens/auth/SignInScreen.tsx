@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Keyboard,
   Text,
@@ -11,14 +11,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { fetchUserDetails, signIn } from '../../api/auth-api/authApi';
 import { signInSchema, SignInSchemaType } from '../../schemas/authSchema';
 import { setItem, setTokens } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
-import styles from './styles/AuthStyles';
 import { showToast } from '../../utils/ToastHelper';
+import styles from './styles/AuthStyles';
 
 const SignInScreen = ({ navigation }: any) => {
   const { setUser, setIsLoggedIn, setIsVerified } = useUserStore();
@@ -146,11 +145,16 @@ const SignInScreen = ({ navigation }: any) => {
           onPress={() => setShowPassword(!showPassword)}
           style={styles.eyeIconContainer}
         >
-          <Icon
-            name={showPassword ? 'eye' : 'eye-off'}
-            size={22}
-            color={COLORS.primary}
-          />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIconContainer}
+          >
+            {showPassword ? (
+              <Eye size={22} color={COLORS.primary} strokeWidth={2} />
+            ) : (
+              <EyeOff size={22} color={COLORS.primary} strokeWidth={2} />
+            )}
+          </TouchableOpacity>
         </TouchableOpacity>
       </View>
       {errors.password && (

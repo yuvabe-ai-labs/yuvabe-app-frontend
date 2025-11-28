@@ -1,12 +1,12 @@
+import { Plus } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const FloatingActionButton = ({ onPress }: { onPress: () => void }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={onPress}>
-        <Ionicons name="add" size={30} color="#fff" />
+        <Plus size={30} color="#fff" strokeWidth={2} />
       </TouchableOpacity>
     </View>
   );

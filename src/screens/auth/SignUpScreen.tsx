@@ -1,10 +1,10 @@
 // src/screens/SignUpScreen.tsx
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
-  
   Image,
   Keyboard,
   Text,
@@ -12,14 +12,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { fetchUserDetails, signUp } from '../../api/auth-api/authApi';
 import { signUpSchema, SignUpSchemaType } from '../../schemas/authSchema';
 import { setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
-import styles from './styles/AuthStyles';
 import { showToast } from '../../utils/ToastHelper';
+import styles from './styles/AuthStyles';
 
 const SignUpScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(false);
@@ -180,11 +179,11 @@ const SignUpScreen = ({ navigation }: any) => {
           onPress={() => setShowPassword(!showPassword)}
           style={styles.eyeIconContainer}
         >
-          <Icon
-            name={showPassword ? 'eye' : 'eye-off'}
-            size={22}
-            color={COLORS.primary} // 👈 make it visible
-          />
+          {showPassword ? (
+            <Eye size={22} color={COLORS.primary} strokeWidth={2} />
+          ) : (
+            <EyeOff size={22} color={COLORS.primary} strokeWidth={2} />
+          )}
         </TouchableOpacity>
       </View>
 

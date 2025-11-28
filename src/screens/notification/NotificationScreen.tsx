@@ -1,4 +1,5 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { ChevronLeft, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -7,13 +8,10 @@ import {
   View,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/Feather';
-
 import {
   markAllNotificationsRead,
   markNotificationRead,
 } from '../../api/leave-api/leave_api';
-
 import { fetchNotifications } from '../../api/profile-api/profileApi';
 import { useUserStore } from '../../store/useUserStore';
 
@@ -41,8 +39,7 @@ export default function NotificationScreen({ navigation }: any) {
       const res = await fetchNotifications();
       const all = res.data.data;
 
-      // Mentor sees only pending
-      let filtered =
+      const filtered =
         user?.role === 'mentor'
           ? all.filter((n: any) => n.type === 'Pending')
           : all;
@@ -60,48 +57,104 @@ export default function NotificationScreen({ navigation }: any) {
     }
   };
 
-  // Header button
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Notifications',
-      headerRight: () =>
-        notifications.length > 0 ? (
+  // Loading UI
+  if (loading) {
+    return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
+  }
+
+  // Mentor empty UI
+  if (user?.role === 'mentor' && notifications.length === 0) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#fff' }}>
+        {/* Custom header */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            backgroundColor: '#fff',
+          }}
+        >
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ChevronLeft size={28} color="#000" />
+          </TouchableOpacity>
+
+          <Text
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              fontSize: 18,
+              fontWeight: '600',
+            }}
+          >
+            Notifications
+          </Text>
+
+          <View style={{ width: 28 }} />
+        </View>
+
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Text style={{ fontSize: 18, color: 'gray' }}>
+            No new notifications
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      {/* ⭐ CUSTOM HEADER */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          backgroundColor: '#fff',
+        }}
+      >
+        {/* Back Button */}
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <ChevronLeft size={28} color="#000" />
+        </TouchableOpacity>
+
+        {/* Title */}
+        <Text
+          style={{
+            flex: 1,
+            textAlign: 'center',
+            fontSize: 18,
+            fontWeight: '600',
+          }}
+        >
+          Notifications
+        </Text>
+
+        {/* Clear All */}
+        {notifications.length > 0 ? (
           <TouchableOpacity
             onPress={async () => {
               await markAllNotificationsRead();
               setNotifications([]);
             }}
             style={{
-              marginRight: 12,
               backgroundColor: '#ff4d4d',
               padding: 6,
               borderRadius: 20,
             }}
           >
-            <Icon name="x" size={18} color="#fff" />
+            <X size={18} color="#fff" strokeWidth={2} />
           </TouchableOpacity>
-        ) : null,
-    });
-  }, [navigation, notifications.length]);
-
-  // Loading
-  if (loading) {
-    return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
-  }
-
-  // Mentor empty state
-  if (user?.role === 'mentor' && notifications.length === 0) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontSize: 18, color: 'gray' }}>
-          No new notifications
-        </Text>
+        ) : (
+          <View style={{ width: 28 }} />
+        )}
       </View>
-    );
-  }
 
-  return (
-    <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
+      {/* LIST */}
       <FlatList
         data={notifications}
         keyExtractor={item => item.id}
@@ -110,7 +163,6 @@ export default function NotificationScreen({ navigation }: any) {
           <Swipeable
             overshootRight={false}
             onSwipeableOpen={async () => {
-              // Auto delete on swipe
               await markNotificationRead(item.id);
               setNotifications(prev => prev.filter(n => n.id !== item.id));
             }}
@@ -126,11 +178,10 @@ export default function NotificationScreen({ navigation }: any) {
                 );
               }}
               style={{
-                backgroundColor: '#fff',
+                backgroundColor: '#F5F5F5',
                 padding: 18,
                 borderRadius: 12,
                 marginBottom: 12,
-                elevation: 3,
                 position: 'relative',
               }}
             >
@@ -139,7 +190,7 @@ export default function NotificationScreen({ navigation }: any) {
                 {item.title}
               </Text>
 
-              {/* Unread Badge */}
+              {/* Unread badge */}
               {!item.is_read && (
                 <View
                   style={{
