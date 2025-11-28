@@ -1,6 +1,12 @@
+import { Calendar, ChevronLeft, CloudOff } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { fetchPendingLeaves } from '../../api/profile-api/profileApi';
 
 export default function MentorLeaveListScreen({ navigation }: any) {
@@ -57,8 +63,11 @@ export default function MentorLeaveListScreen({ navigation }: any) {
       </View>
 
       {/* Dates */}
-      <View style={{ flexDirection: 'row', marginTop: 10, alignItems: 'center' }}>
-        <Ionicons name="calendar-outline" size={18} color="#555" />
+      <View
+        style={{ flexDirection: 'row', marginTop: 10, alignItems: 'center' }}
+      >
+        <Calendar size={18} color="#555" strokeWidth={2} />
+
         <Text style={{ marginLeft: 6, color: '#555', fontSize: 15 }}>
           {item.from_date} → {item.to_date}
         </Text>
@@ -75,16 +84,30 @@ export default function MentorLeaveListScreen({ navigation }: any) {
 
   return (
     <View style={{ flex: 1, padding: 16, backgroundColor: '#F4F6F9' }}>
-      <Text
-        style={{
-          fontWeight: '800',
-          fontSize: 24,
-          marginBottom: 20,
-          color: '#1C1C1E',
-        }}
+      {/* Header */}
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
       >
-        Pending Leave Requests
-      </Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{
+            padding: 6,
+            marginRight: 10,
+          }}
+        >
+          <ChevronLeft size={28} color="#000" strokeWidth={2} />
+        </TouchableOpacity>
+
+        <Text
+          style={{
+            fontWeight: '800',
+            fontSize: 18,
+            color: '#1C1C1E',
+          }}
+        >
+          Pending Leave Requests
+        </Text>
+      </View>
 
       <FlatList
         data={pendingLeaves}
@@ -97,7 +120,8 @@ export default function MentorLeaveListScreen({ navigation }: any) {
         ListEmptyComponent={
           !loading ? (
             <View style={{ marginTop: 80, alignItems: 'center' }}>
-              <Ionicons name="cloud-offline-outline" size={60} color="gray" />
+              <CloudOff size={60} color="gray" strokeWidth={2} />
+
               <Text
                 style={{
                   marginTop: 10,

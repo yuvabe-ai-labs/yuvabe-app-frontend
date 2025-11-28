@@ -1,5 +1,6 @@
 // src/screens/auth/VerifyEmailScreen.tsx
 import { CommonActions, useNavigation } from '@react-navigation/native';
+import { Mail } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -10,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { sendVerificationEmail } from '../../api/auth-api/authApi';
 import { getItem, removeItem, setItem, setTokens } from '../../store/storage'; // 👈 added clearTokens, removeItem
 import { useUserStore } from '../../store/useUserStore';
@@ -169,12 +169,13 @@ const VerifyEmailScreen = ({ route }: any) => {
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
       <View style={styles.card}>
-        <Icon
-          name="mail"
+        <Mail
           size={40}
           color={COLORS.primary}
+          strokeWidth={2}
           style={styles.icon}
         />
+
         <Text style={styles.title}>Activate Your Account</Text>
         <Text style={styles.description}>
           To continue, please verify your email. Click the button below to

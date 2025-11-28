@@ -1,3 +1,4 @@
+import { Home, Smile, User } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -6,7 +7,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { fetchUserDetails } from '../../api/auth-api/authApi';
 
 const InformationScreen = () => {
@@ -46,14 +46,16 @@ const InformationScreen = () => {
 
       {/* Welcome Message */}
       <View style={styles.card}>
-        <Icon name="smile" size={22} color="#4A90E2" />
+        <Smile size={22} color="#4A90E2" strokeWidth={2} />
+
         <Text style={styles.label}>Message</Text>
         <Text style={styles.value}>{info?.message}</Text>
       </View>
 
       {/* User Information */}
       <View style={styles.card}>
-        <Icon name="user" size={22} color="#4A90E2" />
+        <User size={22} color="#4A90E2" strokeWidth={2} />
+
         <Text style={styles.label}>User Information</Text>
 
         <InfoRow label="Name" value={user?.name} />
@@ -67,7 +69,8 @@ const InformationScreen = () => {
 
       {/* Home Data */}
       <View style={styles.card}>
-        <Icon name="home" size={22} color="#4A90E2" />
+        <Home size={22} color="#4A90E2" strokeWidth={2} />
+
         <Text style={styles.label}>Announcements</Text>
 
         {home?.announcements?.map((item: string, index: number) => (

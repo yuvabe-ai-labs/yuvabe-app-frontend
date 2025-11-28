@@ -2,14 +2,15 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import ChatScreen from '../screens/chatbot/ChatBotScreen';
 import HomeScreen from '../screens/homescreen/HomeScreen';
+import LeaveDetailsScreen from '../screens/leave/LeaveDetailsScreen';
 import MyLeaveHistoryScreen from '../screens/leave/MyLeaveHistoryScreen';
 import TeamLeaveHistoryScreen from '../screens/leave/TeamLeaveHistoryScreen';
 import MentorApprovalScreen from '../screens/mentor/MentorApproveScreen';
+import MentorLeaveListScreen from '../screens/mentor/MentorLeaveListScreen';
 import NotificationScreen from '../screens/notification/NotificationScreen';
 import AssetSection from '../screens/profilescreen/AssetSection';
 import EditProfileScreen from '../screens/profilescreen/EditProfileScreen';
 import InformationScreen from '../screens/profilescreen/InformationScreen';
-import LeaveDetailsScreen from '../screens/profilescreen/LeaveDetailsScreen';
 import LeaveRequestScreen from '../screens/profilescreen/LeaveScreen';
 import ProfileScreen from '../screens/profilescreen/ProfileScreen';
 import RequestLeaveScreen from '../screens/requestLeave/RequestLeave';
@@ -95,19 +96,41 @@ const AppNavigator = () => {
         component={RequestLeaveScreen}
         options={{ headerShown: false }}
       />
+      <AppStack.Screen
+        name="PendingLeaves"
+        component={MentorLeaveListScreen}
+        options={{ headerShown: false }}
+      />
 
-      <AppStack.Screen name="Notifications" component={NotificationScreen} />
+      <AppStack.Screen
+        name="Notifications"
+        component={NotificationScreen}
+        options={{ headerShown: false }}
+      />
       <AppStack.Screen name="EditProfile" component={EditProfileScreen} />
-      <AppStack.Screen name="AssetsScreen" component={AssetSection} />
+      <AppStack.Screen
+        name="AssetsScreen"
+        component={AssetSection}
+        options={{ headerShown: false }}
+      />
       <AppStack.Screen name="InformationScreen" component={InformationScreen} />
       <AppStack.Screen name="LeaveScreen" component={LeaveRequestScreen} />
-      <AppStack.Screen name="LeaveDetails" component={LeaveDetailsScreen} />
+      <AppStack.Screen
+        name="LeaveDetails"
+        component={LeaveDetailsScreen}
+        options={{ headerShown: false }}
+      />
       <AppStack.Screen name="MentorApproval" component={MentorApprovalScreen} />
       <AppStack.Screen
         name="TeamLeaveHistory"
         component={TeamLeaveHistoryScreen}
+        options={{ headerShown: false }}
       />
-      <AppStack.Screen name="MyLeaveHistory" component={MyLeaveHistoryScreen} />
+      <AppStack.Screen
+        name="MyLeaveHistory"
+        component={MyLeaveHistoryScreen}
+        options={{ headerShown: false }}
+      />
     </AppStack.Navigator>
   );
 };

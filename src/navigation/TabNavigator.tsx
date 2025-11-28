@@ -1,6 +1,13 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+  Home as HomeIcon,
+  MessageCircle,
+  FileText,
+  ListChecks,
+  User as UserIcon,
+} from 'lucide-react-native';
+
 import ChatScreen from '../screens/chatbot/ChatBotScreen';
 import HomeScreen from '../screens/homescreen/HomeScreen';
 import MentorLeaveListScreen from '../screens/mentor/MentorLeaveListScreen';
@@ -12,9 +19,7 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   const { user } = useUserStore();
-
   const role = user?.role ?? 'user';
-
   const isMentor = role === 'mentor';
 
   return (
@@ -25,34 +30,36 @@ const TabNavigator = () => {
           headerShown: false,
           tabBarActiveTintColor: 'blue',
           tabBarInactiveTintColor: 'grey',
+
           tabBarIcon: ({ color, focused, size }) => {
-            let iconName = 'home';
+            let IconComponent = HomeIcon;
 
-            if (route.name === 'Home') {
-              iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'ChatBot') {
-              iconName = focused ? 'chatbox' : 'chatbox-outline';
-            } else if (route.name === 'Request Leave') {
-              iconName = focused ? 'newspaper' : 'newspaper-outline';
-            } else if (route.name === 'Pending Leaves') {
-              iconName = focused ? 'list' : 'list-outline';
-            } else if (route.name === 'Profile') {
-              iconName = focused ? 'person' : 'person-outline';
-            }
+            if (route.name === 'Home') IconComponent = HomeIcon;
+            else if (route.name === 'ChatBot') IconComponent = MessageCircle;
+            else if (route.name === 'Request Leave') IconComponent = FileText;
+            else if (route.name === 'Pending Leaves') IconComponent = ListChecks;
+            else if (route.name === 'Profile') IconComponent = UserIcon;
 
-            return <Ionicons name={iconName} color={color} size={size} />;
+            return (
+              <IconComponent
+                size={size}
+                color={color}
+                strokeWidth={focused ? 2.5 : 1.5} // thicker when selected
+              />
+            );
           },
         })}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="ChatBot" component={ChatScreen} />
 
-        {/* Mentor gets ONLY pending leaves */}
         {isMentor && (
-          <Tab.Screen name="Pending Leaves" component={MentorLeaveListScreen} />
+          <Tab.Screen
+            name="Pending Leaves"
+            component={MentorLeaveListScreen}
+          />
         )}
 
-        {/* Everyone who is NOT a mentor gets ONLY Request Leave */}
         {!isMentor && (
           <Tab.Screen name="Request Leave" component={RequestLeaveScreen} />
         )}
@@ -62,36 +69,5 @@ const TabNavigator = () => {
     </SafeAreaView>
   );
 };
-export default TabNavigator;
 
-// function TabNavigator() {
-//   return (
-//     <Tab.Navigator
-//       screenOptions={function ({ route }) {
-//         return {
-//           tabBarIcon: function ({ color, focused, size }) {
-//             var iconName: string = '';
-//             if (route.name === 'Home') {
-//               iconName = focused ? 'home' : 'home-outline';
-//             } else if (route.name === 'ChatBot') {
-//               iconName = focused ? 'chatbubble' : 'chatbubble-outline';
-//             } else if (route.name === 'Feed') {
-//               iconName = focused ? 'newspaper' : 'newspaper-outline';
-//             } else if (route.name === 'Profile') {
-//               iconName = focused ? 'person' : 'person-outline';
-//             }
-//             return <Icon name={iconName} color={color} size={size}></Icon>;
-//           },
-//           tabBarActiveTintColor: '#007aff',
-//           tabBarInactiveTintColor: 'gray',
-//           headerShown: false,
-//         };
-//       }}
-//     >
-//       <Tab.Screen name="Home" component={HomeScreen}></Tab.Screen>
-//       <Tab.Screen name="Profile" component={ProfileScreen}></Tab.Screen>
-//       <Tab.Screen name="Feed" component={FeedScreen}></Tab.Screen>
-//       <Tab.Screen name="ChatBot" component={ChatScreen}></Tab.Screen>
-//     </Tab.Navigator>
-//   );
-// }
+export default TabNavigator;

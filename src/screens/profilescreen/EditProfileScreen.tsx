@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   Easing,
   Image,
@@ -17,15 +17,14 @@ import {
   View,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import Icon from 'react-native-vector-icons/Feather';
 import { updateProfile } from '../../api/profile-api/profileApi';
 import {
   EditProfileForm,
   editProfileSchema,
 } from '../../schemas/profileSchema';
 import { useUserStore } from '../../store/useUserStore';
-import { styles } from './EditProfileStyles';
 import { showToast } from '../../utils/ToastHelper';
+import { styles } from './EditProfileStyles';
 
 // ---------- Password input with eye inside right edge ----------
 const PasswordInput = ({
@@ -62,7 +61,11 @@ const PasswordInput = ({
         }}
         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       >
-        <Icon name={show ? 'eye' : 'eye-off'} size={20} color="#6b6b6b" />
+        {show ? (
+          <Eye size={20} color="#6b6b6b" strokeWidth={2} />
+        ) : (
+          <EyeOff size={20} color="#6b6b6b" strokeWidth={2} />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -344,11 +347,11 @@ const EditProfileScreen = ({ navigation }: any) => {
           onPress={togglePasswordSection}
         >
           <Text style={styles.dropdownHeaderText}>Change Password</Text>
-          <Icon
-            name={showPasswordSection ? 'chevron-up' : 'chevron-down'}
-            size={22}
-            color="#444"
-          />
+          {showPasswordSection ? (
+            <ChevronUp size={22} color="#444" strokeWidth={2} />
+          ) : (
+            <ChevronDown size={22} color="#444" strokeWidth={2} />
+          )}
         </TouchableOpacity>
 
         {/* Animated password content */}

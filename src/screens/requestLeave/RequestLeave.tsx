@@ -105,18 +105,13 @@ export default function RequestLeaveScreen() {
   // UI
   // ---------------------------------------
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 30 }}
-    >
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* HEADER WITH CHEVRON + TITLE */}
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          marginBottom: 15,
-          marginTop: 10,
+          marginBottom: 30,
         }}
       >
         {/* Back Icon */}
@@ -134,7 +129,9 @@ export default function RequestLeaveScreen() {
             {
               textAlign: 'left', // override center
               flex: 0, // prevents taking full width
-              marginBottom: 0, // spacing fix
+              marginBottom: 0,
+              marginLeft: 30,
+              fontSize: 18, // spacing fix
             },
           ]}
         >
@@ -211,6 +208,7 @@ export default function RequestLeaveScreen() {
           value={fromDate}
           mode="date"
           display="default"
+          minimumDate={new Date()}
           onChange={(e, d) => {
             setShowFromPicker(false);
             if (d) setFromDate(d);
@@ -223,6 +221,7 @@ export default function RequestLeaveScreen() {
           value={toDate}
           mode="date"
           display="default"
+          minimumDate={fromDate}
           onChange={(e, d) => {
             setShowToPicker(false);
             if (d) setToDate(d);

@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,6 +15,7 @@ import {
   fetchMyLeaveHistory,
 } from '../../api/profile-api/profileApi';
 import { showToast } from '../../utils/ToastHelper';
+import { formatDate } from './LeaveDetailsScreen';
 
 export default function MyLeaveHistoryScreen() {
   const navigation = useNavigation<any>();
@@ -79,7 +81,7 @@ export default function MyLeaveHistoryScreen() {
       >
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: '#F5F5F5',
             padding: 15,
             marginVertical: 10,
             borderRadius: 12,
@@ -90,7 +92,7 @@ export default function MyLeaveHistoryScreen() {
           </Text>
 
           <Text style={{ marginTop: 4 }}>
-            {item.from_date} → {item.to_date}
+            {formatDate(item.from_date)} → {formatDate(item.to_date)}
           </Text>
 
           <Text style={{ marginTop: 2 }}>Days: {item.days}</Text>
@@ -138,7 +140,7 @@ export default function MyLeaveHistoryScreen() {
     );
   };
 
-  // FIRST LOAD LOADING
+  // FIRST LOAD LOADING UI
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -151,20 +153,51 @@ export default function MyLeaveHistoryScreen() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 15 }}>
-      <FlatList
-        data={leaves}
-        renderItem={renderItem}
-        keyExtractor={(item: any) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={
-          <Text style={{ textAlign: 'center', marginTop: 40, color: 'gray' }}>
-            No leave history found
-          </Text>
-        }
-      />
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      {/* ⭐ CUSTOM HEADER */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 14,
+          paddingHorizontal: 16,
+          backgroundColor: '#fff',
+          marginBottom: 10,
+        }}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <ChevronLeft size={28} color="#000" />
+        </TouchableOpacity>
+
+        <Text
+          style={{
+            flex: 1,
+            textAlign: 'center',
+            fontSize: 18,
+            fontWeight: '600',
+            marginRight: 28, // for symmetry
+          }}
+        >
+          My Leave History
+        </Text>
+      </View>
+
+      {/* LIST */}
+      <View style={{ flex: 1, paddingHorizontal: 15 }}>
+        <FlatList
+          data={leaves}
+          renderItem={renderItem}
+          keyExtractor={(item: any) => item.id}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={
+            <Text style={{ textAlign: 'center', marginTop: 40, color: 'gray' }}>
+              No leave history found
+            </Text>
+          }
+        />
+      </View>
     </View>
   );
 }

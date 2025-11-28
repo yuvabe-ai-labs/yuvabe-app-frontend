@@ -1,9 +1,9 @@
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import { Download, LockOpen, Pencil, Plus } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Share from 'react-native-share';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import ViewShot from 'react-native-view-shot';
 import { getVisionBoard, setVisionBoard } from '../../../store/storage';
 import Tile from './Tile';
@@ -126,17 +126,21 @@ const VisionBoard: React.FC<{
                 style={[styles.pencilButton, { marginRight: 10 }]}
                 onPress={handleAddTile}
               >
-                <Icon name="add" size={24} />
+                <Plus size={24} strokeWidth={2} />
               </TouchableOpacity>
             )}
             <TouchableOpacity
               style={[styles.pencilButton, { marginRight: 10 }]}
               onPress={handleDownload}
             >
-              <Icon name="download" size={24} />
+              <Download size={24} strokeWidth={2} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.pencilButton} onPress={toggleEdit}>
-              <Icon name={editMode ? 'lock-open' : 'edit'} size={20} />
+              {editMode ? (
+                <LockOpen size={20} strokeWidth={2} />
+              ) : (
+                <Pencil size={20} strokeWidth={2} />
+              )}
             </TouchableOpacity>
           </View>
         </View>

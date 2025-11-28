@@ -6,6 +6,19 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 10,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+  },
+  headerTitle: {
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 30,
+  },
 
   assetCard: {
     width: '95%',

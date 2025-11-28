@@ -1,7 +1,12 @@
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import {
+  ChevronLeft,
+  ChevronRight,
+  User as IconLucideUser,
   UserCheck as IconLucideUserCheck,
   Users as IconLucideUsers,
+  LogOut,
+  Pencil,
 } from 'lucide-react-native';
 import React from 'react';
 import {
@@ -13,7 +18,6 @@ import {
   View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/Feather';
 import { fetchProfileDetails } from '../../api/profile-api/profileApi';
 import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
@@ -25,8 +29,11 @@ const ProfileScreen = () => {
   const { setProfileDetails } = useUserStore();
   const { team_name, mentor_name } = useUserStore();
 
+  // Saved image from storage
   const storedImage = getItem('profile_image');
+  const profileSrc = storedImage || user?.profile_picture;
 
+  // Load profile details
   React.useEffect(() => {
     fetchProfileDetails().then(res => {
       if (res.code === 200) {
@@ -70,37 +77,59 @@ const ProfileScreen = () => {
       contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      {/* Gradient Header */}
-      <LinearGradient colors={['#4A90E2', '#5A6FF0']} style={styles.headerBg}>
-        {/* <Text style={styles.headerTitle}>My Profile</Text> */}
-      </LinearGradient>
+      {/* 🔵 Gradient Header */}
+      <LinearGradient colors={['#4A90E2', '#5A6FF0']} style={styles.headerBg} />
 
-      {/* Profile Card */}
+      {/* 🔙 Back Button */}
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{
+          position: 'absolute',
+          top: 15,
+          left: 15,
+          zIndex: 10,
+          padding: 5,
+        }}
+      >
+        <ChevronLeft size={32} color="#fff" strokeWidth={2.5} />
+      </TouchableOpacity>
+
+      {/* 🧍 Profile Card */}
       <View
         style={[
           styles.profileCard,
           { flexDirection: 'row', alignItems: 'center' },
         ]}
       >
-        {/* LEFT – PROFILE IMAGE */}
-        <Image
-          source={{
-            uri:
-              storedImage ||
-              user?.profile_picture ||
-              'https://i.pravatar.cc/150?img=3',
+        <View
+          style={{
+            width: 65,
+            height: 65,
+            borderRadius: 32.5,
+            backgroundColor: '#e6e6e6',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 20,
+            overflow: 'hidden',
           }}
-          style={[styles.profileImage, { marginRight: 20 }]}
-        />
-
-        {/* RIGHT – DETAILS */}
+        >
+          {profileSrc ? (
+            <Image
+              source={{ uri: profileSrc }}
+              style={{ width: 65, height: 65, borderRadius: 32.5 }}
+            />
+          ) : (
+            <IconLucideUser size={34} color="#4A90E2" strokeWidth={2.5} />
+          )}
+        </View>
+        {/* Details */}
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{user?.name || 'User'}</Text>
           <Text style={styles.email}>
             {user?.email || 'example@yuvabe.com'}
           </Text>
 
-          {/* TEAM */}
+          {/* Team */}
           <View style={[styles.infoRow, { marginTop: 8 }]}>
             <IconLucideUsers
               size={18}
@@ -111,7 +140,7 @@ const ProfileScreen = () => {
             <Text style={styles.infoValue}>{team_name || '—'}</Text>
           </View>
 
-          {/* MENTOR */}
+          {/* Mentor */}
           <View style={[styles.infoRow, { marginTop: 4 }]}>
             <IconLucideUserCheck
               size={18}
@@ -124,46 +153,33 @@ const ProfileScreen = () => {
         </View>
       </View>
 
-      {/* Sections */}
+      {/* ⚙️ Only Edit Profile Section */}
       <View style={styles.sectionWrapper}>
         <SectionItem
           icon="edit-3"
           label="Edit Profile"
           onPress={() => navigation.navigate('EditProfile')}
         />
-        <SectionItem
-          icon="briefcase"
-          label="My Assets"
-          onPress={() => navigation.navigate('AssetsScreen')}
-        />
-        <SectionItem
-          icon="calendar"
-          label={user?.role === 'mentor' ? 'Team Leaves' : 'My Leaves'}
-          onPress={() =>
-            user?.role === 'mentor'
-              ? navigation.navigate('TeamLeaveHistory')
-              : navigation.navigate('MyLeaveHistory')
-          }
-        />
       </View>
 
-      {/* Spacer to make design full */}
+      {/* Spacer */}
       <View style={{ flex: 1 }} />
 
-      {/* Logout */}
+      {/* 🔴 Logout */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Icon name="log-out" size={18} color="#FF3B30" />
+        <LogOut size={18} color="#FF3B30" strokeWidth={2} />
+
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
 
-const SectionItem = ({ label, icon, onPress }: any) => (
+const SectionItem = ({ label, onPress }: any) => (
   <TouchableOpacity style={styles.sectionRow} onPress={onPress}>
-    <Icon name={icon} size={22} color="#4A90E2" />
+    <Pencil size={20} color="#4A90E2" strokeWidth={2} style={{ marginRight: 12 }} />
     <Text style={styles.sectionLabel}>{label}</Text>
-    <Icon name="chevron-right" size={22} color="#C4C4C4" />
+    <ChevronRight size={22} color="#C4C4C4" strokeWidth={2} />
   </TouchableOpacity>
 );
 

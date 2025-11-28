@@ -1,5 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { ChevronLeft } from 'lucide-react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { AssetDTO, fetchAssets } from '../../api/profile-api/assetsApi';
 import { styles } from './AssetStyle';
 
@@ -14,8 +23,11 @@ export const ASSET_ICONS: Record<string, string> = {
 };
 
 const AssetSection = () => {
+  const navigation = useNavigation();
+
   const [loading, setLoading] = useState(true);
   const [assets, setAssets] = useState<AssetDTO[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadAssets = async () => {
     try {
@@ -27,6 +39,12 @@ const AssetSection = () => {
       setLoading(false);
     }
   };
+
+  const refreshAssets = useCallback(async () => {
+    setRefreshing(true);
+    await loadAssets();
+    setRefreshing(false);
+  }, []);
 
   useEffect(() => {
     loadAssets();
@@ -53,17 +71,42 @@ const AssetSection = () => {
 
   if (loading) return <ActivityIndicator style={{ marginTop: 20 }} />;
 
-  if (assets.length === 0)
-    return <Text style={styles.empty}>No assets assigned</Text>;
-
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={assets}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        scrollEnabled={false}
-      />
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      {/* ⭐ CUSTOM HEADER */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <ChevronLeft size={28} color="#000" />
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>My Assets</Text>
+
+        <View style={{ width: 28 }} />
+      </View>
+
+      {/* ⭐ IF NO ASSETS SHOW MESSAGE */}
+      {assets.length === 0 ? (
+        <FlatList
+          data={[]}
+          renderItem={() => null}
+          ListEmptyComponent={
+            <Text style={styles.empty}>No assets assigned</Text>
+          }
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refreshAssets} />
+          }
+        />
+      ) : (
+        <FlatList
+          data={assets}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refreshAssets} />
+          }
+          contentContainerStyle={{ paddingBottom: 50, paddingTop: 30 }}
+        />
+      )}
     </View>
   );
 };

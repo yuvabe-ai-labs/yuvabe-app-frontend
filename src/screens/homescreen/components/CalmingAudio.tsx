@@ -1,8 +1,8 @@
 import * as RNFS from '@dr.pogodin/react-native-fs';
+import { Pause, Play, Square } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Sound from 'react-native-nitro-sound';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from '../HomeStyles';
 
 const tracks = [
@@ -129,14 +129,14 @@ const CalmingAudio = () => {
                 style={{ marginRight: 16 }}
               >
                 {isActive && isPlaying ? (
-                  <Ionicons name="pause" size={24} color="black" />
+                  <Pause size={24} color="black" strokeWidth={2} />
                 ) : (
-                  <Ionicons name="play" size={24} color="black" />
+                  <Play size={24} color="black" strokeWidth={2} />
                 )}
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleReset}>
-                <Ionicons name="stop" size={24} color="black" />
+                <Square size={24} color="black" strokeWidth={2} />
               </TouchableOpacity>
 
               {isActive ? (
