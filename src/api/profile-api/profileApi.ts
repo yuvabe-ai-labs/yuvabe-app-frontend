@@ -13,6 +13,16 @@ export async function registerDevice() {
   });
 }
 
+export async function logoutDevice() {
+  const device_token = await messaging().getToken();
+
+  await api.post('/notifications/logout', {
+    device_token,
+    platform: Platform.OS,
+    device_model: DeviceInfo.getModel(),
+  });
+}
+
 export const requestLeave = (body: any) => {
   return api.post('/profile/request', body);
 };

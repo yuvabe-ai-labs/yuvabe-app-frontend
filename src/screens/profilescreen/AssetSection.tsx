@@ -4,11 +4,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   RefreshControl,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AssetDTO, fetchAssets } from '../../api/profile-api/assetsApi';
 import { styles } from './AssetStyle';
 
@@ -72,42 +74,68 @@ const AssetSection = () => {
   if (loading) return <ActivityIndicator style={{ marginTop: 20 }} />;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      {/* ⭐ CUSTOM HEADER */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ChevronLeft size={28} color="#000" />
-        </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: '#fff' }}>
+        {/* ⭐ CUSTOM HEADER */}
+        <View
+          style={[
+            styles.header,
+            { flexDirection: 'row', alignItems: 'center' },
+          ]}
+        >
+          {/* LEFT SIDE: Back button + Title */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ChevronLeft size={28} color="#000" />
+            </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>My Assets</Text>
+            <Text style={[styles.headerTitle, { marginLeft: 10 }]}>
+              My Assets
+            </Text>
+          </View>
 
-        <View style={{ width: 28 }} />
+          {/* RIGHT SIDE: Logo in corner */}
+          <Image
+            source={require('../../assets/logo/yuvabe-logo.png')}
+            style={{
+              width: 40,
+              height: 40,
+              resizeMode: 'contain',
+            }}
+          />
+        </View>
+
+        {/* ⭐ IF NO ASSETS SHOW MESSAGE */}
+        {assets.length === 0 ? (
+          <FlatList
+            data={[]}
+            renderItem={() => null}
+            ListEmptyComponent={
+              <Text style={styles.empty}>No assets assigned</Text>
+            }
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={refreshAssets}
+              />
+            }
+          />
+        ) : (
+          <FlatList
+            data={assets}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={refreshAssets}
+              />
+            }
+            contentContainerStyle={{ paddingBottom: 50, paddingTop: 30 }}
+          />
+        )}
       </View>
-
-      {/* ⭐ IF NO ASSETS SHOW MESSAGE */}
-      {assets.length === 0 ? (
-        <FlatList
-          data={[]}
-          renderItem={() => null}
-          ListEmptyComponent={
-            <Text style={styles.empty}>No assets assigned</Text>
-          }
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={refreshAssets} />
-          }
-        />
-      ) : (
-        <FlatList
-          data={assets}
-          keyExtractor={item => item.id}
-          renderItem={renderItem}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={refreshAssets} />
-          }
-          contentContainerStyle={{ paddingBottom: 50, paddingTop: 30 }}
-        />
-      )}
-    </View>
+    </SafeAreaView>
   );
 };
 
