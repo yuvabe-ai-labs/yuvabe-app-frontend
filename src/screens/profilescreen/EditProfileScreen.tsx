@@ -231,7 +231,7 @@ const EditProfileScreen = ({ navigation }: any) => {
       </View>
 
       <ScrollView
-        style={{ paddingTop: 80 }}
+        style={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
