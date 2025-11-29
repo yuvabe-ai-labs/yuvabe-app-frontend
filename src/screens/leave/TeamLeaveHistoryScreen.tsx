@@ -1,7 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchTeamLeaveHistory } from '../../api/profile-api/profileApi';
 import { formatDate } from './LeaveDetailsScreen';
 
@@ -44,7 +45,8 @@ export default function TeamLeaveHistoryScreen() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      {/* ⭐ CUSTOM HEADER */}
       {/* ⭐ CUSTOM HEADER */}
       <View
         style={{
@@ -55,22 +57,33 @@ export default function TeamLeaveHistoryScreen() {
           backgroundColor: '#fff',
         }}
       >
-        {/* Back Button */}
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ChevronLeft size={28} color="#000" />
-        </TouchableOpacity>
-        {/* Title */}
-        <Text
+        {/* LEFT: Back + Title */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ChevronLeft size={28} color="#000" />
+          </TouchableOpacity>
+
+          <Text
+            style={{
+              marginLeft: 15,
+              fontSize: 18,
+              fontWeight: '600',
+              color: '#000',
+            }}
+          >
+            Team Leave History
+          </Text>
+        </View>
+
+        {/* RIGHT: Logo */}
+        <Image
+          source={require('../../assets/logo/yuvabe-logo.png')}
           style={{
-            marginLeft: 30,
-            textAlign: 'center',
-            fontSize: 18,
-            fontWeight: '600',
+            width: 40,
+            height: 40,
+            resizeMode: 'contain',
           }}
-        >
-          Team Leave History
-        </Text>
-        <View style={{ width: 28 }} /> {/* dummy space */}
+        />
       </View>
 
       {/* LIST */}
@@ -81,6 +94,6 @@ export default function TeamLeaveHistoryScreen() {
           keyExtractor={(_, index) => index.toString()}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

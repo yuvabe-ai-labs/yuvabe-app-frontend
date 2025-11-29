@@ -2,11 +2,13 @@ import { Calendar, ChevronLeft, CloudOff } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
+  Image,
   RefreshControl,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchPendingLeaves } from '../../api/profile-api/profileApi';
 
 export default function MentorLeaveListScreen({ navigation }: any) {
@@ -48,7 +50,6 @@ export default function MentorLeaveListScreen({ navigation }: any) {
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3,
       }}
     >
       {/* Leave Type + User */}
@@ -83,59 +84,88 @@ export default function MentorLeaveListScreen({ navigation }: any) {
   );
 
   return (
-    <View style={{ flex: 1, padding: 16, backgroundColor: '#F4F6F9' }}>
-      {/* Header */}
-      <View
-        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F4F6F9' }}>
+      <View style={{ flex: 1, padding: 16 }}>
+        {/* Header */}
+        {/* Header */}
+        <View
           style={{
-            padding: 6,
-            marginRight: 10,
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 20,
           }}
         >
-          <ChevronLeft size={28} color="#000" strokeWidth={2} />
-        </TouchableOpacity>
+          {/* LEFT: Back + Title */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flex: 1,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{
+                padding: 6,
+                marginRight: 10,
+              }}
+            >
+              <ChevronLeft size={28} color="#000" strokeWidth={2} />
+            </TouchableOpacity>
 
-        <Text
-          style={{
-            fontWeight: '800',
-            fontSize: 18,
-            color: '#1C1C1E',
-          }}
-        >
-          Pending Leave Requests
-        </Text>
+            <Text
+              style={{
+                fontWeight: '800',
+                fontSize: 18,
+                color: '#1C1C1E',
+              }}
+            >
+              Pending Leave Requests
+            </Text>
+          </View>
+
+          {/* RIGHT: Logo */}
+          <Image
+            source={require('../../assets/logo/yuvabe-logo.png')}
+            style={{
+              width: 40,
+              height: 40,
+              resizeMode: 'contain',
+            }}
+          />
+        </View>
+
+        <FlatList
+          data={pendingLeaves}
+          keyExtractor={(item: any) => item.id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={loadPendingLeaves}
+            />
+          }
+          ListEmptyComponent={
+            !loading ? (
+              <View style={{ marginTop: 80, alignItems: 'center' }}>
+                <CloudOff size={60} color="gray" strokeWidth={2} />
+
+                <Text
+                  style={{
+                    marginTop: 10,
+                    fontSize: 16,
+                    color: 'gray',
+                    textAlign: 'center',
+                  }}
+                >
+                  No pending requests
+                </Text>
+              </View>
+            ) : null
+          }
+        />
       </View>
-
-      <FlatList
-        data={pendingLeaves}
-        keyExtractor={(item: any) => item.id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={loadPendingLeaves} />
-        }
-        ListEmptyComponent={
-          !loading ? (
-            <View style={{ marginTop: 80, alignItems: 'center' }}>
-              <CloudOff size={60} color="gray" strokeWidth={2} />
-
-              <Text
-                style={{
-                  marginTop: 10,
-                  fontSize: 16,
-                  color: 'gray',
-                  textAlign: 'center',
-                }}
-              >
-                No pending requests
-              </Text>
-            </View>
-          ) : null
-        }
-      />
-    </View>
+    </SafeAreaView>
   );
 }

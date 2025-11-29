@@ -11,7 +11,6 @@ import NotificationScreen from '../screens/notification/NotificationScreen';
 import AssetSection from '../screens/profilescreen/AssetSection';
 import EditProfileScreen from '../screens/profilescreen/EditProfileScreen';
 import InformationScreen from '../screens/profilescreen/InformationScreen';
-import LeaveRequestScreen from '../screens/profilescreen/LeaveScreen';
 import ProfileScreen from '../screens/profilescreen/ProfileScreen';
 import RequestLeaveScreen from '../screens/requestLeave/RequestLeave';
 
@@ -107,20 +106,31 @@ const AppNavigator = () => {
         component={NotificationScreen}
         options={{ headerShown: false }}
       />
-      <AppStack.Screen name="EditProfile" component={EditProfileScreen} />
+      <AppStack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ headerShown: false }}
+      />
       <AppStack.Screen
         name="AssetsScreen"
         component={AssetSection}
         options={{ headerShown: false }}
       />
-      <AppStack.Screen name="InformationScreen" component={InformationScreen} />
-      <AppStack.Screen name="LeaveScreen" component={LeaveRequestScreen} />
+      <AppStack.Screen
+        name="InformationScreen"
+        component={InformationScreen}
+        options={{ headerShown: false }}
+      />
       <AppStack.Screen
         name="LeaveDetails"
         component={LeaveDetailsScreen}
         options={{ headerShown: false }}
       />
-      <AppStack.Screen name="MentorApproval" component={MentorApprovalScreen} />
+      <AppStack.Screen
+        name="MentorApproval"
+        component={MentorApprovalScreen}
+        options={{ headerShown: false }}
+      />
       <AppStack.Screen
         name="TeamLeaveHistory"
         component={TeamLeaveHistoryScreen}

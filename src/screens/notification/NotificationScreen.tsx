@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   markAllNotificationsRead,
   markNotificationRead,
@@ -59,21 +60,24 @@ export default function NotificationScreen({ navigation }: any) {
 
   // Loading UI
   if (loading) {
-    return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <ActivityIndicator size="large" style={{ marginTop: 50 }} />
+      </SafeAreaView>
+    );
   }
 
   // Mentor empty UI
   if (user?.role === 'mentor' && notifications.length === 0) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        {/* Custom header */}
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+        {/* Header */}
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
             paddingVertical: 12,
             paddingHorizontal: 16,
-            backgroundColor: '#fff',
           }}
         >
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -101,13 +105,13 @@ export default function NotificationScreen({ navigation }: any) {
             No new notifications
           </Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      {/* ⭐ CUSTOM HEADER */}
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      {/* ⭐ HEADER */}
       <View
         style={{
           flexDirection: 'row',
@@ -154,7 +158,7 @@ export default function NotificationScreen({ navigation }: any) {
         )}
       </View>
 
-      {/* LIST */}
+      {/* ⭐ LIST */}
       <FlatList
         data={notifications}
         keyExtractor={item => item.id}
@@ -190,7 +194,7 @@ export default function NotificationScreen({ navigation }: any) {
                 {item.title}
               </Text>
 
-              {/* Unread badge */}
+              {/* Unread Badge */}
               {!item.is_read && (
                 <View
                   style={{
@@ -223,6 +227,6 @@ export default function NotificationScreen({ navigation }: any) {
           </Swipeable>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }

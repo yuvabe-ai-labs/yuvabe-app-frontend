@@ -5,11 +5,13 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Image,
   RefreshControl,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   cancelLeave,
   fetchMyLeaveHistory,
@@ -153,51 +155,72 @@ export default function MyLeaveHistoryScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      {/* ⭐ CUSTOM HEADER */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingVertical: 14,
-          paddingHorizontal: 16,
-          backgroundColor: '#fff',
-          marginBottom: 10,
-        }}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ChevronLeft size={28} color="#000" />
-        </TouchableOpacity>
-
-        <Text
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: '#fff' }}>
+        {/* ⭐ CUSTOM HEADER */}
+        <View
           style={{
-            flex: 1,
-            textAlign: 'center',
-            fontSize: 18,
-            fontWeight: '600',
-            marginRight: 28, // for symmetry
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            backgroundColor: '#fff',
+            marginBottom: 10,
           }}
         >
-          My Leave History
-        </Text>
-      </View>
+          {/* LEFT SIDE: Arrow + Title */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flex: 1,
+            }}
+          >
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ChevronLeft size={28} color="#000" />
+            </TouchableOpacity>
 
-      {/* LIST */}
-      <View style={{ flex: 1, paddingHorizontal: 15 }}>
-        <FlatList
-          data={leaves}
-          renderItem={renderItem}
-          keyExtractor={(item: any) => item.id}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          ListEmptyComponent={
-            <Text style={{ textAlign: 'center', marginTop: 40, color: 'gray' }}>
-              No leave history found
+            <Text
+              style={{
+                marginLeft: 15, // 👈 spacing between arrow & title
+                fontSize: 18,
+                fontWeight: '600',
+              }}
+            >
+              My Leave History
             </Text>
-          }
-        />
+          </View>
+
+          {/* RIGHT SIDE: LOGO */}
+          <Image
+            source={require('../../assets/logo/yuvabe-logo.png')}
+            style={{
+              width: 40,
+              height: 40,
+              resizeMode: 'contain',
+            }}
+          />
+        </View>
+
+        {/* LIST */}
+        <View style={{ flex: 1, paddingHorizontal: 15 }}>
+          <FlatList
+            data={leaves}
+            renderItem={renderItem}
+            keyExtractor={(item: any) => item.id}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            ListEmptyComponent={
+              <Text
+                style={{ textAlign: 'center', marginTop: 40, color: 'gray' }}
+              >
+                No leave history found
+              </Text>
+            }
+          />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

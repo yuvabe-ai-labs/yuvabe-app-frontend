@@ -326,12 +326,29 @@ const HomeScreen = ({ navigation }: any) => {
                 </Text>
 
                 {/* Notification Bell */}
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Notifications')}
-                  style={{ marginLeft: 'auto' }} // pushes bell fully to the right
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 'auto',
+                  }}
                 >
-                  <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Notifications')}
+                  >
+                    <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
+                  </TouchableOpacity>
+
+                  <Image
+                    source={require('../../assets/logo/yuvabe-logo.png')}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      resizeMode: 'contain',
+                      marginLeft: 10,
+                    }}
+                  />
+                </View>
               </View>
 
               {/* Thought */}
