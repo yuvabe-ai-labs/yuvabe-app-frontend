@@ -9,12 +9,12 @@ const tracks = [
   {
     id: 'wellness',
     file: 'audio/MindfullnessExcercise.mp3',
-    title: 'PQ Reps',
+    title: 'Mindfull Meditation',
   },
   {
     id: 'selfRealisation',
     file: 'audio/PQReps.mp3',
-    title: 'Mindfull Meditation',
+    title: 'PQ Reps',
   },
 ];
 

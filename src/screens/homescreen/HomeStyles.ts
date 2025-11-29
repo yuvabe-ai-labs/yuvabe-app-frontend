@@ -135,6 +135,22 @@ const styles = StyleSheet.create({
     ...TEXT_STYLES.regular,
     fontSize: 16,
   },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginTop: 40,
+    paddingVertical: 15,
+    borderRadius: 12,
+    backgroundColor: '#FFE8E8',
+  },
+  logoutText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#FF3B30',
+    fontWeight: '600',
+  },
 });
 
 export default styles;

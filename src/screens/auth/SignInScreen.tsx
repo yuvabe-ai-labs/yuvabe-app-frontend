@@ -6,11 +6,15 @@ import {
   ActivityIndicator,
   Image,
   Keyboard,
+  KeyboardAvoidingView,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchUserDetails, signIn } from '../../api/auth-api/authApi';
 import { signInSchema, SignInSchemaType } from '../../schemas/authSchema';
 import { setItem, setTokens } from '../../store/storage';
@@ -92,95 +96,126 @@ const SignInScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require('../../assets/logo/yuvabe-logo.png')}
-        style={styles.logo}
-      />
-
-      <Text style={styles.title}>Welcome Back </Text>
-      <Text style={styles.subtitle}>Sign in to continue to Yuvabe</Text>
-
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Email"
-            value={value}
-            onChangeText={onChange}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            style={[
-              styles.input,
-              errors.email && { borderColor: COLORS.error },
-            ]}
-            placeholderTextColor={COLORS.textSecondary}
-          />
-        )}
-      />
-      {errors.email && (
-        <Text style={styles.errorText}>{errors.email.message}</Text>
-      )}
-
-      <View style={styles.passwordContainer}>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              placeholder="Password"
-              secureTextEntry={!showPassword}
-              value={value}
-              onChangeText={onChange}
-              style={[
-                styles.passwordInput,
-                errors.password && { borderColor: COLORS.error },
-              ]}
-              placeholderTextColor={COLORS.textSecondary}
-            />
-          )}
-        />
-        <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={styles.eyeIconContainer}
+    <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            style={styles.eyeIconContainer}
-          >
-            {showPassword ? (
-              <Eye size={22} color={COLORS.primary} strokeWidth={2} />
-            ) : (
-              <EyeOff size={22} color={COLORS.primary} strokeWidth={2} />
-            )}
-          </TouchableOpacity>
-        </TouchableOpacity>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView
+              contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: 'center',
+              }}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.container}>
+                <Image
+                  source={require('../../assets/logo/yuvabe-logo.png')}
+                  style={styles.logo}
+                />
+
+                <Text style={styles.title}>Welcome Back</Text>
+                <Text style={styles.subtitle}>
+                  Sign in to continue to Yuvabe
+                </Text>
+
+                {/* Email */}
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, value } }) => (
+                    <TextInput
+                      placeholder="Email"
+                      value={value}
+                      onChangeText={onChange}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      style={[
+                        styles.input,
+                        errors.email && { borderColor: COLORS.error },
+                      ]}
+                      placeholderTextColor={COLORS.textSecondary}
+                    />
+                  )}
+                />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email.message}</Text>
+                )}
+
+                {/* Password */}
+                <View style={styles.passwordContainer}>
+                  <Controller
+                    control={control}
+                    name="password"
+                    render={({ field: { onChange, value } }) => (
+                      <TextInput
+                        placeholder="Password"
+                        secureTextEntry={!showPassword}
+                        value={value}
+                        onChangeText={onChange}
+                        style={[
+                          styles.passwordInput,
+                          errors.password && { borderColor: COLORS.error },
+                        ]}
+                        placeholderTextColor={COLORS.textSecondary}
+                      />
+                    )}
+                  />
+
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeIconContainer}
+                  >
+                    {showPassword ? (
+                      <Eye size={22} color={COLORS.primary} strokeWidth={2} />
+                    ) : (
+                      <EyeOff
+                        size={22}
+                        color={COLORS.primary}
+                        strokeWidth={2}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+
+                {errors.password && (
+                  <Text style={styles.errorText}>
+                    {errors.password.message}
+                  </Text>
+                )}
+
+                {/* Login Button */}
+                <TouchableOpacity
+                  style={[styles.button, loading && { opacity: 0.6 }]}
+                  onPress={handleSubmit(onSubmit)}
+                  disabled={loading}
+                  activeOpacity={0.8}
+                >
+                  {loading ? (
+                    <ActivityIndicator color={COLORS.white} />
+                  ) : (
+                    <Text style={styles.buttonText}>Sign In</Text>
+                  )}
+                </TouchableOpacity>
+
+                <Text style={styles.footerText}>
+                  Don’t have an account?{' '}
+                  <Text
+                    style={styles.link}
+                    onPress={() => navigation.navigate('SignUp')}
+                  >
+                    Sign Up
+                  </Text>
+                </Text>
+              </View>
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </View>
-      {errors.password && (
-        <Text style={styles.errorText}>{errors.password.message}</Text>
-      )}
-
-      <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.6 }]}
-        onPress={handleSubmit(onSubmit)}
-        disabled={loading}
-        activeOpacity={0.8}
-      >
-        {loading ? (
-          <ActivityIndicator color={COLORS.white} />
-        ) : (
-          <Text style={styles.buttonText}>Sign In</Text>
-        )}
-      </TouchableOpacity>
-
-      <Text style={styles.footerText}>
-        Don’t have an account?{' '}
-        <Text style={styles.link} onPress={() => navigation.navigate('SignUp')}>
-          Sign Up
-        </Text>
-      </Text>
-    </View>
+    </SafeAreaView>
   );
 };
 
