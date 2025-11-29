@@ -1,6 +1,7 @@
 import messaging from '@react-native-firebase/messaging';
 import {
   Bell,
+  Bot,
   Box,
   Clock,
   FilePlus,
@@ -22,14 +23,17 @@ import {
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchUserDetails, submitEmotion } from '../../api/auth-api/authApi';
-import { registerDevice } from '../../api/profile-api/profileApi';
+import {
+  fetchProfileDetails,
+  registerDevice,
+} from '../../api/profile-api/profileApi';
 import AppDrawer from '../../components/AppDrawer';
 import { getItem, removeItem, setItem } from '../../store/storage';
+import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './HomeStyles';
 import CalmingAudio from './components/CalmingAudio';
 import EmotionCheckIn from './components/EmotionCheckIn';
-import FloatingActionButton from './components/FloatingActionButton';
 import VisionBoard from './components/VisionBoard';
 
 export async function requestNotificationPermission() {
@@ -163,6 +167,21 @@ const HomeScreen = ({ navigation }: any) => {
   }, []);
 
   useEffect(() => {
+    const loadProfileDetails = async () => {
+      try {
+        const res = await fetchProfileDetails();
+        if (res.code === 200) {
+          useUserStore.getState().setProfileDetails(res.data);
+        }
+      } catch (err) {
+        console.log('Profile fetch failed in HomeScreen:', err);
+      }
+    };
+
+    loadProfileDetails();
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       if ((globalThis as any).homeAlert?.visible) {
         setHomeAlertMessage((globalThis as any).homeAlert.message);
@@ -224,6 +243,18 @@ const HomeScreen = ({ navigation }: any) => {
       >
         <Box size={20} color="#444" strokeWidth={1.8} />
         <Text style={{ fontSize: 18, marginLeft: 12 }}>Assets</Text>
+      </TouchableOpacity>
+
+      {/* Chatbot */}
+      <TouchableOpacity
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
+        onPress={() => {
+          closeDrawer();
+          navigation.navigate('Chat');
+        }}
+      >
+        <Bot size={20} color="#444" strokeWidth={1.8} />
+        <Text style={{ fontSize: 18, marginLeft: 12 }}>Chatbot</Text>
       </TouchableOpacity>
 
       {/* MENTOR ITEMS */}
@@ -338,16 +369,17 @@ const HomeScreen = ({ navigation }: any) => {
                   >
                     <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
                   </TouchableOpacity>
-
-                  <Image
-                    source={require('../../assets/logo/yuvabe-logo.png')}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      resizeMode: 'contain',
-                      marginLeft: 10,
-                    }}
-                  />
+                  <TouchableOpacity onPress={() => navigation.navigate('Chat')}>
+                    <Image
+                      source={require('../../assets/logo/yuvabe-logo.png')}
+                      style={{
+                        width: 40,
+                        height: 40,
+                        resizeMode: 'contain',
+                        marginLeft: 10,
+                      }}
+                    />
+                  </TouchableOpacity>
                 </View>
               </View>
 
@@ -389,8 +421,6 @@ const HomeScreen = ({ navigation }: any) => {
               }}
             />
           )}
-
-          <FloatingActionButton onPress={() => navigation.navigate('Chat')} />
         </SafeAreaView>
       )}
     </AppDrawer>
