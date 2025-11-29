@@ -1,14 +1,20 @@
 import messaging from '@react-native-firebase/messaging';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/components/customToast';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
+import { useModelDownloadStore } from './src/store/modelDownloadStore';
 import { getDeviceToken } from './src/utils/pushNotifications';
 import { showToast } from './src/utils/ToastHelper';
 
 function App(): React.JSX.Element {
+  const startDownload = useModelDownloadStore(state => state.startDownload);
+
+  useEffect(() => {
+    startDownload();
+  }, []);
+
   function safeNavigate(screen: string, leaveId: string) {
     const tryNav = () => {
       if (navigationRef.current?.isReady()) {

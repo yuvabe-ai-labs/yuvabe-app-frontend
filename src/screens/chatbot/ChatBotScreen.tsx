@@ -1,29 +1,24 @@
 import { InferenceSession } from 'onnxruntime-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './ChatbotStyles';
 
+import { useModelDownloadStore } from '../../store/modelDownloadStore';
 import { SYSTEM_PROMPT } from '../../utils/constants';
 import { loadLlama, qwenChat } from '../chatbot/llama/llamaManager';
-import {
-  checkModelsExist,
-  downloadAllModels,
-} from '../chatbot/models/modelDownloader';
 import { MODEL_3_PATH } from '../chatbot/models/modelPaths';
 import { loadOnnxModel } from '../chatbot/models/onnxLoader';
 import { retrieveContextForQuery } from '../chatbot/rag/ragPipeline';
+import ChatDownloadIndicator from './models/modelDownloadIndicator';
 type Message = {
   id: string;
   text: string;
@@ -41,6 +36,9 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [session, setSession] = useState<InferenceSession | null>(null);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+
+  const downloadState = useModelDownloadStore(state => state.downloadState);
 
   const [chatHistory, setChatHistory] = useState<ChatTurn[]>([
     {
@@ -49,74 +47,104 @@ const ChatScreen = () => {
     },
   ]);
 
-  const [checking, setChecking] = useState(true);
-  const [showDownloadPrompt, setShowDownloadPrompt] = useState(false);
-  const [showDownloadingModal, setShowDownloadingModal] = useState(false);
+  const flatListRef = useRef<FlatList<Message>>(null);
 
-  const [p1, setP1] = useState(0);
-  const [p2, setP2] = useState(0);
-  const [p3, setP3] = useState(0);
-
-  const flatListRef = useRef<FlatList>(null);
-
+  // Auto-scroll on new messages
   useEffect(() => {
-    init();
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 50);
+    return () => clearTimeout(timeout);
   }, [messages]);
 
-  const init = async () => {
-    setChecking(true);
-
-    const exists = await checkModelsExist();
-
-    if (exists) {
-      const s = await loadOnnxModel();
-      setSession(s);
-      await loadLlama(MODEL_3_PATH);
-    } else {
-      setShowDownloadPrompt(true);
+  // React to download state: show status message
+  useEffect(() => {
+    if (downloadState === 'downloading') {
+      setMessages([
+        {
+          id: 'sys-downloading',
+          text: 'Models are downloading. Chat will be ready soon.',
+          from: 'bot',
+        },
+      ]);
+    } else if (downloadState === 'error') {
+      setMessages([
+        {
+          id: 'sys-error',
+          text: 'Model download failed. Please restart the app to try again.',
+          from: 'bot',
+        },
+      ]);
+    } else if (downloadState === 'completed') {
+      setMessages(prev => {
+        if (prev.length === 0) return prev;
+        return prev;
+      });
     }
+  }, [downloadState]);
 
-    setChecking(false);
-  };
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const s = await loadOnnxModel();
+        setSession(s);
+        await loadLlama(MODEL_3_PATH);
+        setModelsLoaded(true);
+      } catch (err) {
+        console.log('Error loading models in ChatScreen:', err);
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            text: 'Models are downloaded but failed to load. Please restart the app.',
+            from: 'bot',
+          },
+        ]);
+      }
+    };
 
-  const handleModalDismiss = () => {
-    setShowDownloadPrompt(false);
-
-    setMessages(prev => [
-      ...prev,
-      {
-        id: `${Date.now()}`,
-        text: 'You must download the models before using the chatbot.',
-        from: 'bot',
-      },
-    ]);
-  };
-
-  const startDownload = async () => {
-    setShowDownloadPrompt(false);
-    setShowDownloadingModal(true);
-
-    await downloadAllModels(setP1, setP2, setP3);
-
-    const s = await loadOnnxModel();
-    setSession(s);
-    await loadLlama(MODEL_3_PATH);
-
-    setShowDownloadingModal(false);
-  };
+    if (downloadState === 'completed' && !modelsLoaded) {
+      loadModels();
+    }
+    if (downloadState === 'completed' && modelsLoaded) {
+      setMessages(prev => {
+        if (prev.length === 0 || prev[0].id === 'sys-downloading') {
+          return [
+            {
+              id: 'welcome-msg',
+              from: 'bot',
+              text: 'Hey! I’m your Yuvabe Assistant. What would you like to know?',
+            },
+          ];
+        }
+        return prev;
+      });
+    }
+  }, [downloadState, modelsLoaded]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+
+    if (downloadState !== 'completed') {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: `${Date.now()}`,
+          text: 'Models are not ready yet. Please wait until download finishes.',
+          from: 'bot',
+        },
+      ]);
+      return;
+    }
+
     if (!session) {
       setMessages(prev => [
         ...prev,
-        { id: `${Date.now()}`, text: 'Model not ready yet.', from: 'bot' },
+        {
+          id: `${Date.now()}`,
+          text: 'Models are loading. Please wait a moment and try again.',
+          from: 'bot',
+        },
       ]);
       return;
     }
@@ -139,44 +167,44 @@ const ChatScreen = () => {
 
     try {
       const contextText = await retrieveContextForQuery(session, text);
+      console.log('===== MODEL INPUT DEBUG START =====');
+
+      console.log('SYSTEM PROMPT:\n', SYSTEM_PROMPT);
+      console.log('-------------------------------');
+
+      console.log('USER QUERY:\n', text);
+      console.log('-------------------------------');
+
+      if (contextText) {
+        console.log('RETRIEVED CONTEXT:\n', contextText);
+      } else {
+        console.log('RETRIEVED CONTEXT: <none>');
+      }
+      console.log('-------------------------------');
 
       const modelUserMessage = contextText
-        ? `You are answering a question for Yuvabe User. Below is some context information retrieved from our knowledge base. --START OF CONTEXT--${contextText}--END OF CONTEXT--\n Here is the User Question: ${text} \n Instructions:
-- Do NOT write phrases like “Here is the response”, “Based on the context”, or anything similar.
-- Do NOT mention context, sources, documents, or where the information came from.
-- Use simple, short sentences.
-- If the context does not have the answer, reply exactly: “I don't have this information.”
-`
-        : `UserQuery: ${text}`;
-      console.log(`Model User Message: ${modelUserMessage}`);
+        ? `Context:\n${contextText}\n\nUser Question: ${text}`
+        : text;
+
+      console.log('MODEL-FORMATTED USER MESSAGE:\n', modelUserMessage);
+      console.log('-------------------------------');
 
       const messagesForModel: ChatTurn[] = [
         ...chatHistory,
         { role: 'user', content: modelUserMessage },
       ];
-      // console.log('===== MODEL INPUT START =====');
 
-      // messagesForModel.forEach((msg, index) => {
-      //   console.log(
-      //     `#${index} | ROLE: ${msg.role.toUpperCase()}\nCONTENT:\n${
-      //       msg.content
-      //     }\n-------------------`,
-      //   );
-      // });
+      console.log('FULL MESSAGE ARRAY SENT TO MODEL:');
 
-      // console.log('===== MODEL INPUT END =====');
+      messagesForModel.forEach((msg, index) => {
+        console.log(
+          `#${index} | ROLE: ${msg.role.toUpperCase()}\nCONTENT:\n${
+            msg.content
+          }\n-------------------`,
+        );
+      });
 
-      // const finalText = await llamaChat(messagesForModel, token => {
-      //   setMessages(prev => {
-      //     const copy = [...prev];
-      //     const idx = copy.findIndex(m => m.id === botMsgId);
-      //     if (idx !== -1) {
-      //       if (copy[idx].text === 'Thinking...') copy[idx].text = token;
-      //       else copy[idx].text += token;
-      //     }
-      //     return copy;
-      //   });
-      // });
+      console.log('===== MODEL INPUT DEBUG END =====');
 
       const finalText = await qwenChat(messagesForModel, token => {
         setMessages(prev => {
@@ -221,57 +249,12 @@ const ChatScreen = () => {
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
-      {/* MODALS */}
-      {!checking && showDownloadPrompt && (
-        <Modal
-          visible
-          transparent
-          animationType="fade"
-          onRequestClose={handleModalDismiss}
-        >
-          <TouchableWithoutFeedback onPress={handleModalDismiss}>
-            <View style={styles.modalContainer}>
-              <TouchableWithoutFeedback onPress={() => {}}>
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>Download Models</Text>
-                  <Text style={styles.modalInfo}>
-                    To enable on-device offline inference, the required model
-                    files must be downloaded.
-                  </Text>
-
-                  <TouchableOpacity
-                    onPress={startDownload}
-                    style={styles.downloadBtn}
-                  >
-                    <Text style={styles.downloadText}>Download</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      )}
-
-      {showDownloadingModal && (
-        <Modal visible transparent animationType="fade">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContentSmall}>
-              <Text style={styles.downloadProgressText}>Downloading...</Text>
-              <Text>Model1: {p1.toFixed(1)}%</Text>
-              <Text>Model2: {p2.toFixed(1)}%</Text>
-              <Text>Model3: {p3.toFixed(1)}%</Text>
-              <ActivityIndicator style={{ marginTop: 10 }} />
-            </View>
-          </View>
-        </Modal>
-      )}
-
-      {/* CHAT AREA */}
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
       >
+        <ChatDownloadIndicator />
         <FlatList
           ref={flatListRef}
           data={messages}
@@ -286,12 +269,17 @@ const ChatScreen = () => {
         <View style={styles.inputRow}>
           <TextInput
             value={input}
+            editable={downloadState === 'completed' && !!session}
             onChangeText={setInput}
             placeholder="Type a message..."
             placeholderTextColor="#999"
             style={styles.input}
           />
-          <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
+          <TouchableOpacity
+            disabled={downloadState !== 'completed' || !session}
+            style={styles.sendBtn}
+            onPress={sendMessage}
+          >
             <Text style={styles.sendText}>Send</Text>
           </TouchableOpacity>
         </View>
