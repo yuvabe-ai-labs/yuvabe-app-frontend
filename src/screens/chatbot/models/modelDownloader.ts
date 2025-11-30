@@ -16,6 +16,12 @@ export const checkModelsExist = async () => {
   return e1 && e2 && e3;
 };
 
+export const cleanAllModels = async () => {
+  await RNFS.unlink(MODEL_1_PATH).catch(() => {});
+  await RNFS.unlink(MODEL_2_PATH).catch(() => {});
+  await RNFS.unlink(MODEL_3_PATH).catch(() => {});
+};
+
 const downloadFile = (url: string, path: string, cb: (p: number) => void) =>
   RNFS.downloadFile({
     fromUrl: url,

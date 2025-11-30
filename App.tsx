@@ -1,6 +1,8 @@
 import messaging from '@react-native-firebase/messaging';
 import React, { useEffect } from 'react';
+import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/components/customToast';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
@@ -13,7 +15,7 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     startDownload();
-  }, []);
+  }, [startDownload]);
 
   function safeNavigate(screen: string, leaveId: string) {
     const tryNav = () => {
@@ -109,10 +111,14 @@ function App(): React.JSX.Element {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <RootNavigator />
-      <Toast config={toastConfig} />
-    </GestureHandlerRootView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
+
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <RootNavigator />
+        <Toast config={toastConfig} />
+      </GestureHandlerRootView>
+    </SafeAreaView>
   );
 }
 

@@ -10,14 +10,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './ChatbotStyles';
-
 import { useModelDownloadStore } from '../../store/modelDownloadStore';
 import { SYSTEM_PROMPT } from '../../utils/constants';
 import { loadLlama, qwenChat } from '../chatbot/llama/llamaManager';
 import { MODEL_3_PATH } from '../chatbot/models/modelPaths';
 import { loadOnnxModel } from '../chatbot/models/onnxLoader';
 import { retrieveContextForQuery } from '../chatbot/rag/ragPipeline';
+import { styles } from './ChatbotStyles';
+import DefaultSuggestions from './models/DefaultSuggestions';
 import ChatDownloadIndicator from './models/modelDownloadIndicator';
 type Message = {
   id: string;
@@ -49,7 +49,6 @@ const ChatScreen = () => {
 
   const flatListRef = useRef<FlatList<Message>>(null);
 
-  // Auto-scroll on new messages
   useEffect(() => {
     const timeout = setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
@@ -57,7 +56,6 @@ const ChatScreen = () => {
     return () => clearTimeout(timeout);
   }, [messages]);
 
-  // React to download state: show status message
   useEffect(() => {
     if (downloadState === 'downloading') {
       setMessages([
@@ -167,44 +165,15 @@ const ChatScreen = () => {
 
     try {
       const contextText = await retrieveContextForQuery(session, text);
-      console.log('===== MODEL INPUT DEBUG START =====');
-
-      console.log('SYSTEM PROMPT:\n', SYSTEM_PROMPT);
-      console.log('-------------------------------');
-
-      console.log('USER QUERY:\n', text);
-      console.log('-------------------------------');
-
-      if (contextText) {
-        console.log('RETRIEVED CONTEXT:\n', contextText);
-      } else {
-        console.log('RETRIEVED CONTEXT: <none>');
-      }
-      console.log('-------------------------------');
 
       const modelUserMessage = contextText
         ? `Context:\n${contextText}\n\nUser Question: ${text}`
         : text;
 
-      console.log('MODEL-FORMATTED USER MESSAGE:\n', modelUserMessage);
-      console.log('-------------------------------');
-
       const messagesForModel: ChatTurn[] = [
         ...chatHistory,
         { role: 'user', content: modelUserMessage },
       ];
-
-      console.log('FULL MESSAGE ARRAY SENT TO MODEL:');
-
-      messagesForModel.forEach((msg, index) => {
-        console.log(
-          `#${index} | ROLE: ${msg.role.toUpperCase()}\nCONTENT:\n${
-            msg.content
-          }\n-------------------`,
-        );
-      });
-
-      console.log('===== MODEL INPUT DEBUG END =====');
 
       const finalText = await qwenChat(messagesForModel, token => {
         setMessages(prev => {
@@ -255,6 +224,16 @@ const ChatScreen = () => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
       >
         <ChatDownloadIndicator />
+        {downloadState === 'completed' &&
+          modelsLoaded &&
+          messages.length < 3 && (
+            <DefaultSuggestions
+              onSelect={text => {
+                setInput(text);
+                sendMessage();
+              }}
+            />
+          )}
         <FlatList
           ref={flatListRef}
           data={messages}
