@@ -11,3 +11,5 @@ export const MODEL_URL_3 =
 export const MODEL_1_PATH = RNFS.DocumentDirectoryPath + '/model.onnx';
 export const MODEL_2_PATH = RNFS.DocumentDirectoryPath + '/model.onnx_data';
 export const MODEL_3_PATH = RNFS.DocumentDirectoryPath + '/model3.gguf';
+export const MODELS_DIR = RNFS.DocumentDirectoryPath; 
+export const COMPLETE_FLAG_PATH = `${MODELS_DIR}/.complete`;
