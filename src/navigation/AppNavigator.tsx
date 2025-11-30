@@ -13,6 +13,7 @@ import EditProfileScreen from '../screens/profilescreen/EditProfileScreen';
 import InformationScreen from '../screens/profilescreen/InformationScreen';
 import ProfileScreen from '../screens/profilescreen/ProfileScreen';
 import RequestLeaveScreen from '../screens/requestLeave/RequestLeave';
+import WaterTrackerScreen from '../screens/wellbeing/water/WaterTrackingScreen';
 
 const AppStack = createNativeStackNavigator();
 
@@ -139,6 +140,11 @@ const AppNavigator = () => {
       <AppStack.Screen
         name="MyLeaveHistory"
         component={MyLeaveHistoryScreen}
+        options={{ headerShown: false }}
+      />
+      <AppStack.Screen
+        name="WaterTracker"
+        component={WaterTrackerScreen}
         options={{ headerShown: false }}
       />
     </AppStack.Navigator>
