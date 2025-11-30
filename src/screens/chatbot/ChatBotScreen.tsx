@@ -10,14 +10,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './ChatbotStyles';
-
 import { useModelDownloadStore } from '../../store/modelDownloadStore';
 import { SYSTEM_PROMPT } from '../../utils/constants';
 import { loadLlama, qwenChat } from '../chatbot/llama/llamaManager';
 import { MODEL_3_PATH } from '../chatbot/models/modelPaths';
 import { loadOnnxModel } from '../chatbot/models/onnxLoader';
 import { retrieveContextForQuery } from '../chatbot/rag/ragPipeline';
+import { styles } from './ChatbotStyles';
+import DefaultSuggestions from './models/DefaultSuggestions';
 import ChatDownloadIndicator from './models/modelDownloadIndicator';
 type Message = {
   id: string;
@@ -224,6 +224,16 @@ const ChatScreen = () => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
       >
         <ChatDownloadIndicator />
+        {downloadState === 'completed' &&
+          modelsLoaded &&
+          messages.length < 3 && (
+            <DefaultSuggestions
+              onSelect={text => {
+                setInput(text);
+                sendMessage();
+              }}
+            />
+          )}
         <FlatList
           ref={flatListRef}
           data={messages}
