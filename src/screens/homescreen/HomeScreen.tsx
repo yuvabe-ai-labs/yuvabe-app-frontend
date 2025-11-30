@@ -4,6 +4,7 @@ import {
   Bot,
   Box,
   Clock,
+  Droplet,
   FilePlus,
   History,
   Menu,
@@ -255,6 +256,16 @@ const HomeScreen = ({ navigation }: any) => {
       >
         <Bot size={20} color="#444" strokeWidth={1.8} />
         <Text style={{ fontSize: 18, marginLeft: 12 }}>Chatbot</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
+        onPress={() => {
+          closeDrawer();
+          navigation.navigate('WaterTracker');
+        }}
+      >
+        <Droplet size={20} color="#444" strokeWidth={1.8} />
+        <Text style={{ fontSize: 18, marginLeft: 12 }}>Water Track</Text>
       </TouchableOpacity>
 
       {/* MENTOR ITEMS */}
