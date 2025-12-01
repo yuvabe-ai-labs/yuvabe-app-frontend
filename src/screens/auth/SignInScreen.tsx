@@ -57,8 +57,8 @@ const SignInScreen = ({ navigation }: any) => {
 
       // ✅ Store tokens locally
       setTokens(res.access_token, res.refresh_token);
-      await setItem('is_verified', res.user.is_verified ? 'true' : 'false');
-      await setItem('pending_email', data.email);
+      setItem('is_verified', res.user.is_verified ? 'true' : 'false');
+      setItem('pending_email', data.email);
       console.log('💾 Saved is_verified:', res.user.is_verified);
       console.log('💾 Saved pending_email:', data.email);
 
@@ -85,7 +85,7 @@ const SignInScreen = ({ navigation }: any) => {
       ) {
         setIsVerified(false);
         setItem('is_verified', 'false');
-        await setItem('pending_email', data.email);
+        setItem('pending_email', data.email);
         navigation.navigate('VerifyEmail', { email: data.email });
       } else {
         showToast('Error', error.message || 'Something went wrong');

@@ -1,18 +1,8 @@
 import messaging from '@react-native-firebase/messaging';
-import {
-  Bell,
-  Bot,
-  Box,
-  Clock,
-  Droplet,
-  FilePlus,
-  History,
-  Menu,
-  User,
-  Users,
-} from 'lucide-react-native';
+import { Bell, Menu } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Image,
   PermissionsAndroid,
   Platform,
@@ -29,6 +19,7 @@ import {
   registerDevice,
 } from '../../api/profile-api/profileApi';
 import AppDrawer from '../../components/AppDrawer';
+import DrawerContent from '../../components/DrawerContent';
 import { getItem, removeItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
@@ -63,6 +54,7 @@ const HomeScreen = ({ navigation }: any) => {
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [quote, setQuote] = useState<string>('');
   const [author, setAuthor] = useState<string>('');
+  const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
 
   const [user, setUser] = useState<any>(null);
 
@@ -75,9 +67,6 @@ const HomeScreen = ({ navigation }: any) => {
     '😡': 6,
     '🤯': 7,
   };
-
-  const role = user?.user?.role ?? 'user';
-  const isMentor = role === 'mentor';
 
   //
   useEffect(() => {
@@ -195,156 +184,12 @@ const HomeScreen = ({ navigation }: any) => {
     return () => clearInterval(interval);
   }, []);
 
-  const drawerUI = (closeDrawer: any) => (
-    <SafeAreaView style={{ flex: 1, padding: 20 }}>
-      {/* PROFILE HEADER */}
-      <TouchableOpacity
-        onPress={() => {
-          closeDrawer();
-          navigation.navigate('Profile');
-        }}
-        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30 }}
-      >
-        <View
-          style={{
-            width: 55,
-            height: 55,
-            borderRadius: 30,
-            backgroundColor: '#e6e6e6',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginRight: 12,
-          }}
-        >
-          {profileImage ? (
-            <Image
-              source={{ uri: profileImage }}
-              style={{ width: 55, height: 55, borderRadius: 30 }}
-            />
-          ) : (
-            <User size={28} color="#555" strokeWidth={2} />
-          )}
-        </View>
-
-        <View>
-          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-            {user?.user?.name || 'User'}
-          </Text>
-          <Text style={{ fontSize: 14, color: '#666' }}>View Profile</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Assets */}
-      <TouchableOpacity
-        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
-        onPress={() => {
-          closeDrawer();
-          navigation.navigate('AssetsScreen');
-        }}
-      >
-        <Box size={20} color="#444" strokeWidth={1.8} />
-        <Text style={{ fontSize: 18, marginLeft: 12 }}>Assets</Text>
-      </TouchableOpacity>
-
-      {/* Chatbot */}
-      <TouchableOpacity
-        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
-        onPress={() => {
-          closeDrawer();
-          navigation.navigate('Chat');
-        }}
-      >
-        <Bot size={20} color="#444" strokeWidth={1.8} />
-        <Text style={{ fontSize: 18, marginLeft: 12 }}>Chatbot</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
-        onPress={() => {
-          closeDrawer();
-          navigation.navigate('WaterTracker');
-        }}
-      >
-        <Droplet size={20} color="#444" strokeWidth={1.8} />
-        <Text style={{ fontSize: 18, marginLeft: 12 }}>Water Track</Text>
-      </TouchableOpacity>
-
-      {/* MENTOR ITEMS */}
-      {isMentor ? (
-        <>
-          {/* Pending Leaves */}
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-            onPress={() => {
-              closeDrawer();
-              navigation.navigate('PendingLeaves');
-            }}
-          >
-            <Clock size={20} color="#444" strokeWidth={1.8} />
-            <Text style={{ fontSize: 18, marginLeft: 12 }}>Pending Leaves</Text>
-          </TouchableOpacity>
-
-          {/* Team Leave History */}
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-            onPress={() => {
-              closeDrawer();
-              navigation.navigate('TeamLeaveHistory');
-            }}
-          >
-            <Users size={20} color="#444" strokeWidth={1.8} />
-            <Text style={{ fontSize: 18, marginLeft: 12 }}>
-              Team Leave History
-            </Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <>
-          {/* Request Leave */}
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-            onPress={() => {
-              closeDrawer();
-              navigation.navigate('RequestLeave');
-            }}
-          >
-            <FilePlus size={20} color="#444" strokeWidth={1.8} />
-            <Text style={{ fontSize: 18, marginLeft: 12 }}>Request Leave</Text>
-          </TouchableOpacity>
-
-          {/* Leave History */}
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-            onPress={() => {
-              closeDrawer();
-              navigation.navigate('MyLeaveHistory');
-            }}
-          >
-            <History size={20} color="#444" strokeWidth={1.8} />
-            <Text style={{ fontSize: 18, marginLeft: 12 }}>Leave History</Text>
-          </TouchableOpacity>
-        </>
-      )}
-    </SafeAreaView>
-  );
-
   return (
-    <AppDrawer drawerContent={drawerUI}>
+    <AppDrawer
+      drawerContent={(closeDrawer: any) => (
+        <DrawerContent navigation={navigation} closeDrawer={closeDrawer} />
+      )}
+    >
       {(openDrawer: any) => (
         <SafeAreaView style={{ flex: 1 }}>
           <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
@@ -431,6 +276,35 @@ const HomeScreen = ({ navigation }: any) => {
                 }
               }}
             />
+          )}
+          {isLogoutLoading && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.3)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 999,
+              }}
+            >
+              <View
+                style={{
+                  padding: 25,
+                  backgroundColor: '#fff',
+                  borderRadius: 10,
+                  elevation: 4,
+                }}
+              >
+                <Text style={{ fontSize: 16, marginBottom: 15 }}>
+                  Logging out...
+                </Text>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+              </View>
+            </View>
           )}
         </SafeAreaView>
       )}

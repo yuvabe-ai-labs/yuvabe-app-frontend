@@ -77,12 +77,12 @@ const SignUpScreen = ({ navigation }: any) => {
       // );
 
       // Navigate to verification screen
-      await setItem('is_verified', 'true');
-      await setItem('pending_email', data.email);
+      setItem('is_verified', 'true');
+      setItem('pending_email', data.email);
 
       // If your API returns token
       if (res?.data?.access_token) {
-        await setItem('access_token', res.data.access_token);
+         setItem('access_token', res.data.access_token);
       }
 
       const userData = await fetchUserDetails();

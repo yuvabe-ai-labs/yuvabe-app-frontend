@@ -23,15 +23,18 @@ type ProfileDetails = {
 };
 
 type UserStore = {
+  userDetails: any;
   user: User | null;
   isLoggedIn: boolean;
   isVerified: boolean;
+  isLogoutLoading: boolean;
   team_name?: string;
   mentor_name?: string;
   setUser: (userData: User) => void;
   setProfileDetails: (details: ProfileDetails) => void;
   setIsLoggedIn: (status: boolean) => void;
   setIsVerified: (status: boolean) => void;
+  setLogoutLoading: (value: boolean) => void;
   resetUser: () => void;
 };
 
@@ -39,6 +42,7 @@ export const useUserStore = create<UserStore>(set => ({
   user: null,
   isLoggedIn: false,
   isVerified: false,
+  isLogoutLoading: false,
   team_name: '',
   mentor_name: '',
 
@@ -72,5 +76,8 @@ export const useUserStore = create<UserStore>(set => ({
 
   setIsLoggedIn: status => set({ isLoggedIn: status }),
   setIsVerified: status => set({ isVerified: status }),
+
+  setLogoutLoading: (value: boolean) => set({ isLogoutLoading: value }),
+
   resetUser: () => set({ user: null, isLoggedIn: false, isVerified: false }),
 }));

@@ -70,10 +70,10 @@ const VerifyEmailScreen = ({ route }: any) => {
     try {
       setIsLoggedIn(false);
       setIsVerified(false);
-      await setItem('is_verified', 'false');
-      await setItem('pending_email', '');
-      await setItem('access_token', '');
-      await setItem('refresh_token', '');
+      setItem('is_verified', 'false');
+      setItem('pending_email', '');
+      setItem('access_token', '');
+      setItem('refresh_token', '');
 
       console.log('🚪 Logged out successfully');
       navigation.dispatch(
@@ -134,8 +134,8 @@ const VerifyEmailScreen = ({ route }: any) => {
 
       if (token) {
         console.log('✅ JWT token received:', token);
-        await setTokens(token, '');
-        await setItem('is_verified', 'true');
+        setTokens(token, '');
+        setItem('is_verified', 'true');
         removeItem('pending_email');
         setIsVerified(true);
         setIsLoggedIn(true);
