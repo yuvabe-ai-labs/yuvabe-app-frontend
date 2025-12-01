@@ -2,6 +2,7 @@ import { InferenceSession } from 'onnxruntime-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -23,6 +24,7 @@ type Message = {
   id: string;
   text: string;
   from: 'user' | 'bot';
+  image_url?: string | null;
 };
 
 type ChatRole = 'system' | 'user' | 'assistant';
@@ -158,13 +160,40 @@ const ChatScreen = () => {
     setMessages(prev => [...prev, userMsg]);
 
     const botMsgId = `${Date.now() + 1}`;
+
     setMessages(prev => [
       ...prev,
-      { id: botMsgId, text: 'Thinking...', from: 'bot' },
+      {
+        id: botMsgId,
+        text: 'Thinking...',
+        from: 'bot',
+      },
     ]);
 
     try {
-      const contextText = await retrieveContextForQuery(session, text);
+      const { contextText, image_url } = await retrieveContextForQuery(
+        session,
+        text,
+      );
+      const lowerQ = text.toLowerCase();
+
+      const isImageRelevant =
+        image_url &&
+        (lowerQ.includes('values') ||
+          lowerQ.includes('core values') ||
+          lowerQ.includes('three cs') ||
+          lowerQ.includes('3 cs'));
+
+      if (image_url) {
+        setMessages(prev => {
+          const copy = [...prev];
+          const idx = copy.findIndex(m => m.id === botMsgId);
+          if (idx !== -1) {
+            copy[idx].image_url = image_url;
+          }
+          return copy;
+        });
+      }
 
       const modelUserMessage = contextText
         ? `Context:\n${contextText}\n\nUser Question: ${text}`
@@ -192,6 +221,16 @@ const ChatScreen = () => {
         { role: 'user', content: text },
         { role: 'assistant', content: finalText },
       ]);
+      if (isImageRelevant) {
+        setMessages(prev => {
+          const copy = [...prev];
+          const idx = copy.findIndex(m => m.id === botMsgId);
+          if (idx !== -1) {
+            copy[idx].image_url = image_url;
+          }
+          return copy;
+        });
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       setMessages(prev => {
@@ -213,6 +252,19 @@ const ChatScreen = () => {
       <Text style={item.from === 'user' ? styles.text : styles.botText}>
         {item.text}
       </Text>
+
+      {item.image_url && (
+        <Image
+          source={{ uri: item.image_url }}
+          style={{
+            width: 240,
+            height: 240,
+            borderRadius: 12,
+            marginTop: 8,
+          }}
+          resizeMode="contain"
+        />
+      )}
     </View>
   );
 
