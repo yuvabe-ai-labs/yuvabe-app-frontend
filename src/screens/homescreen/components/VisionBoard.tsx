@@ -119,7 +119,8 @@ const VisionBoard: React.FC<{
     <View style={styles.boardContainer}>
       <ViewShot ref={ref} options={{ format: 'png', quality: 0.8 }}>
         <View style={styles.header}>
-          <Text>Vision Board</Text>
+          <Text style={styles.thoughtTitle}>Vision Board</Text>
+
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {editMode && tiles.length < TILE_HEIGHTS.length && (
               <TouchableOpacity
@@ -147,7 +148,13 @@ const VisionBoard: React.FC<{
 
         <GestureHandlerRootView style={styles.columnsWrapper}>
           {columns.map((col, colIndex) => (
-            <View key={colIndex} style={styles.column}>
+            <View
+              key={colIndex}
+              style={[
+                styles.column,
+                colIndex === columns.length - 1 && styles.lastColumn,
+              ]}
+            >
               {col.map(tile => (
                 <Tile
                   key={tile.id}

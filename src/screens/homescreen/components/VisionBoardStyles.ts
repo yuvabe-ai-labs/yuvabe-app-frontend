@@ -1,41 +1,64 @@
 import { Dimensions, StyleSheet } from 'react-native';
+import { SIZES, TEXT_STYLES } from '../../../utils/theme';
 
+export const GAP = 2;
 export const SCREEN_WIDTH = Dimensions.get('window').width;
-export const GAP = 4;
 export const COLUMN_COUNT = 2;
-export const BOARD_PADDING = GAP;
+
+export const BOARD_PADDING_HORIZONTAL = 16;
+export const BOARD_PADDING_VERTICAL = 14;
+
 export const TILE_WIDTH =
-  (SCREEN_WIDTH - GAP * (COLUMN_COUNT + 1)) / COLUMN_COUNT;
+  (SCREEN_WIDTH - BOARD_PADDING_HORIZONTAL * 2 - GAP * (COLUMN_COUNT - 1)) /
+    COLUMN_COUNT -
+  16;
 
 const styles = StyleSheet.create({
   boardContainer: {
     width: '100%',
-    padding: BOARD_PADDING,
-    backgroundColor: '#f2f2f2',
+    paddingHorizontal: BOARD_PADDING_HORIZONTAL,
+    paddingVertical: BOARD_PADDING_VERTICAL,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
   },
+  thoughtTitle: {
+    ...TEXT_STYLES.title,
+    fontSize: SIZES.lg,
+    marginBottom: 4,
+  },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: GAP,
   },
+
   pencilButton: {
     padding: 6,
   },
+
   columnsWrapper: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
   },
+
   column: {
-    flex: 1,
+    width: TILE_WIDTH,
+    marginRight: GAP,
   },
+
+  lastColumn: {
+    marginRight: 0,
+  },
+
   tile: {
-    width: TILE_WIDTH - 30,
+    width: TILE_WIDTH,
     marginBottom: GAP,
     backgroundColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   deleteButton: {
     position: 'absolute',
     top: 4,
