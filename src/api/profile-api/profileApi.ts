@@ -12,7 +12,7 @@ export async function registerDevice() {
     device_model: DeviceInfo.getModel(),
   });
 }
-
+  
 export async function logoutDevice() {
   const device_token = await messaging().getToken();
 

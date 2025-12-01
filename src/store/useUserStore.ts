@@ -40,6 +40,7 @@ type UserStore = {
 
 export const useUserStore = create<UserStore>(set => ({
   user: null,
+  userDetails: null,
   isLoggedIn: false,
   isVerified: false,
   isLogoutLoading: false,
@@ -72,6 +73,7 @@ export const useUserStore = create<UserStore>(set => ({
       team_name: details.team_name,
       mentor_name: details.mentor_name,
       mentor_email: details.mentor_email,
+      userDetails: details,
     })),
 
   setIsLoggedIn: status => set({ isLoggedIn: status }),

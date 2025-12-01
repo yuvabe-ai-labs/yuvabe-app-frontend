@@ -1,26 +1,29 @@
 import messaging from '@react-native-firebase/messaging';
 
-export async function getDeviceToken() {
-  try {
-    // Request permission
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+export async function checkNotificationPermission() {
+  const status = await messaging().hasPermission();
+  return status === messaging.AuthorizationStatus.AUTHORIZED;
+}
 
-    if (!enabled) {
-      console.log('Push permission denied');
-      return null;
+export async function getDeviceToken() {
+  const currentStatus = await messaging().hasPermission();
+
+  // 1) Allowed
+  if (currentStatus === messaging.AuthorizationStatus.AUTHORIZED) {
+    return await messaging().getToken();
+  }
+
+  // 2) Ask permission only if never asked
+  if (currentStatus === messaging.AuthorizationStatus.NOT_DETERMINED) {
+    const requestStatus = await messaging().requestPermission();
+
+    if (requestStatus === messaging.AuthorizationStatus.AUTHORIZED) {
+      return await messaging().getToken();
     }
 
-    // Get token
-    const token = await messaging().getToken();
-
-    console.log('🔥 FCM DEVICE TOKEN:', token);
-
-    return token;
-  } catch (e) {
-    console.log('Error getting FCM token:', e);
     return null;
   }
+
+  // 3) Denied → don't ask again
+  return null;
 }

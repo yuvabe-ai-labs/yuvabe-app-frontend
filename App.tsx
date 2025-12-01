@@ -1,17 +1,37 @@
 import messaging from '@react-native-firebase/messaging';
 import React, { useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import { AppState, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/components/customToast';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
 import { useModelDownloadStore } from './src/store/modelDownloadStore';
-import { getDeviceToken } from './src/utils/pushNotifications';
+import { useNotificationStore } from './src/store/notificationStore';
+import {
+  checkNotificationPermission,
+  getDeviceToken,
+} from './src/utils/pushNotifications';
 import { showToast } from './src/utils/ToastHelper';
-
 function App(): React.JSX.Element {
   const startDownload = useModelDownloadStore(state => state.startDownload);
+
+  useEffect(() => {
+    const updatePermission = async () => {
+      const enabled = await checkNotificationPermission();
+      useNotificationStore.getState().setNotificationEnabled(enabled);
+    };
+
+    updatePermission();
+
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        updatePermission(); // re-check when returning from Settings
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     startDownload();
