@@ -1,18 +1,28 @@
-import { ChevronLeft, Droplets, TrendingUp } from 'lucide-react-native';
+'use client';
+
+import {
+  ChevronLeft,
+  ChevronRight,
+  Droplets,
+  TrendingUp,
+} from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   Animated,
+  Dimensions,
   Image,
   Modal,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { BarChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { storage } from '../../../store/storage';
 import { showToast } from '../../../utils/ToastHelper';
+import { useWeeklyWaterChart } from './useWeeklyWaterChart';
 
-// ⬅️ BACKEND API FILE
 import {
   fetchWaterLogs,
   logWater,
@@ -30,14 +40,12 @@ const WaterTrackerScreen = ({ navigation }: any) => {
   const [todayTotal, setTodayTotal] = useState(0);
   const [lastLogId, setLastLogId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [showSave, setShowSave] = useState(false);
 
   const fillAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
-  // 🔵 Load water from backend first, fallback to storage
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -68,7 +76,6 @@ const WaterTrackerScreen = ({ navigation }: any) => {
     loadData();
   }, []);
 
-  // 🔵 Animate water level when todayTotal changes
   useEffect(() => {
     Animated.timing(fillAnim, {
       toValue: todayTotal / DAILY_GOAL,
@@ -109,7 +116,6 @@ const WaterTrackerScreen = ({ navigation }: any) => {
     setShowSave(true);
   };
 
-  // 🔵 Save to database (POST first time → PUT next time)
   const handleSaveToDB = async () => {
     setIsSaving(true);
     try {
@@ -142,153 +148,268 @@ const WaterTrackerScreen = ({ navigation }: any) => {
 
   const progressPercent = Math.round((todayTotal / DAILY_GOAL) * 100);
   const remaining = Math.max(DAILY_GOAL - todayTotal, 0);
+  const { weekOffset, setWeekOffset, chartData, isLoading, error } =
+    useWeeklyWaterChart();
+
+  const screenWidth = Dimensions.get('window').width;
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <ChevronLeft size={28} color="#000" />
-          </TouchableOpacity>
-
-          <Text style={[TEXT_STYLES.title, { marginLeft: 10 }]}>
-            Water Intake
-          </Text>
-        </View>
-
-        <Image
-          source={require('../../../assets/logo/yuvabe-logo.png')}
-          style={{
-            width: 40,
-            height: 40,
-            resizeMode: 'contain',
-          }}
-        />
-      </View>
-
-      {/* Percentage Boxes */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Today's Intake</Text>
-          <Text style={styles.statValue}>{todayTotal}</Text>
-          <Text style={styles.statUnit}>ml</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Remaining</Text>
-          <Text style={styles.statValue}>{remaining}</Text>
-          <Text style={styles.statUnit}>ml</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Progress</Text>
-          <Text style={styles.statValue}>{progressPercent}%</Text>
-          <Text style={styles.statUnit}>done</Text>
-        </View>
-      </View>
-
-      {/* Glass UI */}
-      <Animated.View
-        style={[styles.glassWrapper, { transform: [{ scale: scaleAnim }] }]}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View style={styles.glassOuter}>
-          <View style={styles.glassInner}>
-            <Animated.View
-              style={[
-                styles.waterFill,
-                { height: waterHeight },
-                todayTotal >= DAILY_GOAL && styles.waterFillComplete,
-              ]}
-            />
-            <View style={styles.centerTextWrapper}>
-              <Text style={styles.centerText}>{todayTotal} ml</Text>
-              <Text style={styles.centerSubtext}>of {DAILY_GOAL} ml</Text>
-            </View>
-          </View>
-        </View>
-      </Animated.View>
+        <View style={styles.header}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ChevronLeft size={28} color="#000" />
+            </TouchableOpacity>
 
-      {/* Progress bar */}
-      <View style={styles.progressBarContainer}>
-        <View style={styles.progressBarBackground}>
-          <Animated.View
-            style={[styles.progressBarFill, { width: `${progressPercent}%` }]}
+            <Text style={[TEXT_STYLES.title, { marginLeft: 10 }]}>
+              Water Intake
+            </Text>
+          </View>
+
+          <Image
+            source={require('../../../assets/logo/yuvabe-logo.png')}
+            style={{
+              width: 40,
+              height: 40,
+              resizeMode: 'contain',
+            }}
           />
         </View>
-      </View>
 
-      {/* Plus / Minus buttons */}
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.removeButton]}
-          onPress={removeWater}
-        >
-          <Text style={styles.buttonText}>−</Text>
-          <Text style={styles.buttonLabel}>Remove</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, styles.addButton]}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.buttonText}>+</Text>
-          <Text style={styles.buttonLabel}>Add</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* SAVE BUTTON */}
-      {showSave && (
-        <Animated.View style={styles.saveButtonContainer}>
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSaveToDB}
-            disabled={isSaving}
-          >
-            <TrendingUp size={20} color="white" />
-            <Text style={styles.saveText}>
-              {isSaving ? 'Saving...' : 'Save Progress'}
-            </Text>
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-
-      {/* MODAL */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalBackground}>
-          <View style={styles.modalBox}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>Select Amount</Text>
-            <Text style={styles.modalSubtitle}>
-              How much water did you drink?
-            </Text>
-
-            <View style={styles.optionsContainer}>
-              {presetAmounts.map(ml => (
-                <TouchableOpacity
-                  key={ml}
-                  style={styles.mlButton}
-                  onPress={() => addWater(ml)}
-                >
-                  <View style={styles.mlIconContainer}>
-                    <Droplets size={24} color="#3b82f6" />
-                  </View>
-                  <View style={styles.mlTextContainer}>
-                    <Text style={styles.mlText}>{ml}</Text>
-                    <Text style={styles.mlLabel}>milliliters</Text>
-                  </View>
-                  <Text style={styles.mlArrow}>›</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.closeButton}
-            >
-              <Text style={styles.closeText}>Close</Text>
-            </TouchableOpacity>
+        <View style={styles.statsContainer}>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Today's Intake</Text>
+            <Text style={styles.statValue}>{todayTotal}</Text>
+            <Text style={styles.statUnit}>ml</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Remaining</Text>
+            <Text style={styles.statValue}>{remaining}</Text>
+            <Text style={styles.statUnit}>ml</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Progress</Text>
+            <Text style={styles.statValue}>{progressPercent}%</Text>
+            <Text style={styles.statUnit}>done</Text>
           </View>
         </View>
-      </Modal>
+
+        <Animated.View
+          style={[styles.glassWrapper, { transform: [{ scale: scaleAnim }] }]}
+        >
+          <View style={styles.glassOuter}>
+            <View style={styles.glassInner}>
+              <Animated.View
+                style={[
+                  styles.waterFill,
+                  { height: waterHeight },
+                  todayTotal >= DAILY_GOAL && styles.waterFillComplete,
+                ]}
+              />
+              <View style={styles.centerTextWrapper}>
+                <Text style={styles.centerText}>{todayTotal} ml</Text>
+                <Text style={styles.centerSubtext}>of {DAILY_GOAL} ml</Text>
+              </View>
+            </View>
+          </View>
+        </Animated.View>
+
+        <View style={styles.progressBarContainer}>
+          <View style={styles.progressBarBackground}>
+            <Animated.View
+              style={[styles.progressBarFill, { width: `${progressPercent}%` }]}
+            />
+          </View>
+        </View>
+
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.removeButton]}
+            onPress={removeWater}
+          >
+            <Text style={styles.buttonText}>−</Text>
+            <Text style={styles.buttonLabel}>Remove</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.addButton]}
+            onPress={() => setModalVisible(true)}
+          >
+            <Text style={styles.buttonText}>+</Text>
+            <Text style={styles.buttonLabel}>Add</Text>
+          </TouchableOpacity>
+        </View>
+
+        {showSave && (
+          <Animated.View style={styles.saveButtonContainer}>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSaveToDB}
+              disabled={isSaving}
+            >
+              <TrendingUp size={20} color="white" />
+              <Text style={styles.saveText}>
+                {isSaving ? 'Saving...' : 'Save Progress'}
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        <View style={{ marginTop: 30 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => setWeekOffset(prev => prev - 1)}
+              disabled={isLoading}
+            >
+              <ChevronLeft size={28} color={isLoading ? '#ccc' : '#000'} />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 18, fontWeight: '700' }}>
+              Weekly Intake
+            </Text>
+            <TouchableOpacity
+              disabled={weekOffset === 0 || isLoading}
+              onPress={() => setWeekOffset(prev => prev + 1)}
+            >
+              <ChevronRight
+                size={28}
+                color={weekOffset === 0 || isLoading ? '#999' : '#000'}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {isLoading ? (
+            <View
+              style={{
+                height: 280,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 14, color: '#999' }}>
+                Loading chart...
+              </Text>
+            </View>
+          ) : error ? (
+            <View
+              style={{
+                height: 280,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 14, color: '#ef4444' }}>{error}</Text>
+            </View>
+          ) : chartData ? (
+            <View style={{ marginVertical: 10}}>
+              <BarChart
+                data={chartData}
+                width={screenWidth - 30}
+                height={280}
+                yAxisLabel=""
+                yAxisSuffix="ml"
+                yAxisInterval={500}
+                fromZero={true}
+                segments={5}
+                chartConfig={{
+                  backgroundColor: '#ffffff',
+                  backgroundGradientFrom: '#ffffff',
+                  backgroundGradientTo: '#f8fafc',
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+                  labelColor: (opacity = 1) =>
+                    `rgba(100, 116, 139, ${opacity})`,
+                  style: {
+                    marginVertical: 8,
+                    borderRadius: 12,
+                    paddingRight: 30,
+                    marginHorizontal: 30,
+                  },
+                  propsForDots: {
+                    r: '4',
+                    strokeWidth: '2',
+                    stroke: '#3b82f6',
+                  },
+                  propsForLabels: {
+                    fontSize: 12,
+                    fontWeight: '600',
+                  },
+                  propsForBackgroundLines: {
+                    strokeDasharray: '5,5',
+                    stroke: '#e2e8f0',
+                  },
+                }}
+                withVerticalLabels={true}
+                withHorizontalLabels={true}
+                withInnerLines={false}
+                showValuesOnTopOfBars={true}
+                flatColor={true}
+                
+              />
+            </View>
+          ) : (
+            <View
+              style={{
+                height: 280,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 14, color: '#999' }}>
+                No data for this week
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <Modal visible={modalVisible} transparent animationType="slide">
+          <View style={styles.modalBackground}>
+            <View style={styles.modalBox}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>Select Amount</Text>
+              <Text style={styles.modalSubtitle}>
+                How much water did you drink?
+              </Text>
+
+              <View style={styles.optionsContainer}>
+                {presetAmounts.map(ml => (
+                  <TouchableOpacity
+                    key={ml}
+                    style={styles.mlButton}
+                    onPress={() => addWater(ml)}
+                  >
+                    <View style={styles.mlIconContainer}>
+                      <Droplets size={24} color="#3b82f6" />
+                    </View>
+                    <View style={styles.mlTextContainer}>
+                      <Text style={styles.mlText}>{ml}</Text>
+                      <Text style={styles.mlLabel}>milliliters</Text>
+                    </View>
+                    <Text style={styles.mlArrow}>›</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </ScrollView>
     </SafeAreaView>
   );
 };

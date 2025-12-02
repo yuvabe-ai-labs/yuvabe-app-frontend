@@ -57,3 +57,8 @@ export const deleteWaterLog = async (
   );
   return response.data;
 };
+
+export const fetchWaterLogsForChart = async () => {
+  const res = await api.get('/wellbeing/water_logs/');
+  return res.data;
+};

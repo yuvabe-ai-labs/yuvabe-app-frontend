@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
+import NotificationIndicator from '../components/NotificationIndicator';
 import ChatScreen from '../screens/chatbot/ChatBotScreen';
 import HomeScreen from '../screens/homescreen/HomeScreen';
 import LeaveDetailsScreen from '../screens/leave/LeaveDetailsScreen';
@@ -72,82 +73,85 @@ const AppStack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   return (
-    <AppStack.Navigator initialRouteName="Home">
-      <AppStack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ headerShown: false }}
-      />
+    <>
+      <NotificationIndicator />
+      <AppStack.Navigator initialRouteName="Home">
+        <AppStack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
 
-      <AppStack.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{ headerShown: false }}
-      />
+        <AppStack.Screen
+          name="Chat"
+          component={ChatScreen}
+          options={{ headerShown: false }}
+        />
 
-      <AppStack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ headerShown: false }}
-      />
+        <AppStack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{ headerShown: false }}
+        />
 
-      <AppStack.Screen
-        name="RequestLeave"
-        component={RequestLeaveScreen}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="PendingLeaves"
-        component={MentorLeaveListScreen}
-        options={{ headerShown: false }}
-      />
+        <AppStack.Screen
+          name="RequestLeave"
+          component={RequestLeaveScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="PendingLeaves"
+          component={MentorLeaveListScreen}
+          options={{ headerShown: false }}
+        />
 
-      <AppStack.Screen
-        name="Notifications"
-        component={NotificationScreen}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="EditProfile"
-        component={EditProfileScreen}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="AssetsScreen"
-        component={AssetSection}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="InformationScreen"
-        component={InformationScreen}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="LeaveDetails"
-        component={LeaveDetailsScreen}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="MentorApproval"
-        component={MentorApprovalScreen}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="TeamLeaveHistory"
-        component={TeamLeaveHistoryScreen}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="MyLeaveHistory"
-        component={MyLeaveHistoryScreen}
-        options={{ headerShown: false }}
-      />
-      <AppStack.Screen
-        name="WaterTracker"
-        component={WaterTrackerScreen}
-        options={{ headerShown: false }}
-      />
-    </AppStack.Navigator>
+        <AppStack.Screen
+          name="Notifications"
+          component={NotificationScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="EditProfile"
+          component={EditProfileScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="AssetsScreen"
+          component={AssetSection}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="InformationScreen"
+          component={InformationScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="LeaveDetails"
+          component={LeaveDetailsScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="MentorApproval"
+          component={MentorApprovalScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="TeamLeaveHistory"
+          component={TeamLeaveHistoryScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="MyLeaveHistory"
+          component={MyLeaveHistoryScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="WaterTracker"
+          component={WaterTrackerScreen}
+          options={{ headerShown: false }}
+        />
+      </AppStack.Navigator>
+    </>
   );
 };
 
