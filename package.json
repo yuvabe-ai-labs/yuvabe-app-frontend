@@ -12,6 +12,7 @@
   "dependencies": {
     "@dr.pogodin/react-native-fs": "^2.36.1",
     "@hookform/resolvers": "^5.2.2",
+    "@notifee/react-native": "^9.1.8",
     "@react-native-camera-roll/camera-roll": "^7.10.2",
     "@react-native-community/datetimepicker": "^8.5.0",
     "@react-native-community/netinfo": "^11.4.1",

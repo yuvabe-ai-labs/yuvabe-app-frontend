@@ -311,10 +311,10 @@ const WaterTrackerScreen = ({ navigation }: any) => {
               <Text style={{ fontSize: 14, color: '#ef4444' }}>{error}</Text>
             </View>
           ) : chartData ? (
-            <View style={{ marginVertical: 10 }}>
+            <View style={{ marginVertical: 10}}>
               <BarChart
                 data={chartData}
-                width={screenWidth - 70}
+                width={screenWidth - 30}
                 height={280}
                 yAxisLabel=""
                 yAxisSuffix="ml"
@@ -332,7 +332,8 @@ const WaterTrackerScreen = ({ navigation }: any) => {
                   style: {
                     marginVertical: 8,
                     borderRadius: 12,
-                    paddingRight: 40,
+                    paddingRight: 30,
+                    marginHorizontal: 30,
                   },
                   propsForDots: {
                     r: '4',
@@ -348,16 +349,12 @@ const WaterTrackerScreen = ({ navigation }: any) => {
                     stroke: '#e2e8f0',
                   },
                 }}
-                style={{
-                  marginVertical: 8,
-                  borderRadius: 12,
-                  paddingRight: 60,
-                }}
                 withVerticalLabels={true}
                 withHorizontalLabels={true}
                 withInnerLines={false}
                 showValuesOnTopOfBars={true}
                 flatColor={true}
+                
               />
             </View>
           ) : (
