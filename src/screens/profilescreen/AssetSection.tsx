@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   RefreshControl,
   Text,
   TouchableOpacity,
@@ -95,14 +94,14 @@ const AssetSection = () => {
           </View>
 
           {/* RIGHT SIDE: Logo in corner */}
-          <Image
+          {/* <Image
             source={require('../../assets/logo/yuvabe-logo.png')}
             style={{
               width: 40,
               height: 40,
               resizeMode: 'contain',
             }}
-          />
+          /> */}
         </View>
 
         {/* ⭐ IF NO ASSETS SHOW MESSAGE */}

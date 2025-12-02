@@ -136,7 +136,7 @@ const ProfileScreen = () => {
         >
           <ChevronLeft size={32} color="#fff" strokeWidth={2.5} />
         </TouchableOpacity>
-        <Image
+        {/* <Image
           source={require('../../assets/logo/yuvabe-logo.png')}
           style={{
             position: 'absolute',
@@ -147,7 +147,7 @@ const ProfileScreen = () => {
             resizeMode: 'contain',
             zIndex: 0,
           }}
-        />
+        /> */}
 
         {/* 🧍 Profile Card */}
         <View

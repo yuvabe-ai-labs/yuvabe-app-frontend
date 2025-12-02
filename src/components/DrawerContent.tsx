@@ -9,7 +9,7 @@ import {
   User,
   Users,
 } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -25,10 +25,17 @@ import { COLORS } from '../utils/theme';
 
 const DrawerContent = ({ navigation, closeDrawer }: any) => {
   const profileImage = getItem('profile_image');
-  const userData = useUserStore.getState().userDetails;
-  const role = userData?.user?.role ?? 'user';
+  const userData = useUserStore(state => state.user);
+
+  const role = userData?.role ?? 'user';
   const isMentor = role === 'mentor';
+
   const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
+
+  useEffect(() => {
+    console.log('User role:', role);
+    console.log('Is mentor:', isMentor);
+  }, [isMentor, role]);
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 20 }}>
@@ -69,7 +76,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
 
           <View>
             <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              {userData?.user?.name || 'User'}
+              {userData?.name || 'User'}
             </Text>
             <Text style={{ fontSize: 14, color: '#666' }}>View Profile</Text>
           </View>

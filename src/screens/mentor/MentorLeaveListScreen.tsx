@@ -2,7 +2,6 @@ import { Calendar, ChevronLeft, CloudOff } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
-  Image,
   RefreshControl,
   Text,
   TouchableOpacity,
@@ -125,14 +124,14 @@ export default function MentorLeaveListScreen({ navigation }: any) {
           </View>
 
           {/* RIGHT: Logo */}
-          <Image
+          {/* <Image
             source={require('../../assets/logo/yuvabe-logo.png')}
             style={{
               width: 40,
               height: 40,
               resizeMode: 'contain',
             }}
-          />
+          /> */}
         </View>
 
         <FlatList

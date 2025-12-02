@@ -190,8 +190,11 @@ const HomeScreen = ({ navigation }: any) => {
         <DrawerContent navigation={navigation} closeDrawer={closeDrawer} />
       )}
     >
-      {(openDrawer: any) => (
+      {(openDrawer: any, isDrawerOpen: boolean) => (
         <SafeAreaView style={{ flex: 1 }}>
+          {isDrawerOpen && (
+            <View style={styles.dimOverlay} pointerEvents="none" />
+          )}
           <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
           <View style={{ flex: 1 }}>
             <Animated.ScrollView
@@ -200,44 +203,28 @@ const HomeScreen = ({ navigation }: any) => {
               showsVerticalScrollIndicator={false}
               scrollEnabled={scrollEnabled}
             >
-              {/* HEADER */}
-              <View style={styles.header}>
-                {/* Hamburger Icon */}
+              <View
+                style={[styles.header, { justifyContent: 'space-between' }]}
+              >
                 <TouchableOpacity onPress={openDrawer}>
                   <Menu size={28} color="#000" strokeWidth={1.7} />
                 </TouchableOpacity>
 
-                {/* Welcome Text */}
-                <Text style={styles.welcomeText}>
-                  Welcome, {user?.user.name || 'Loading...'}
-                </Text>
+                <Image
+                  source={require('../../assets/logo/yuvabe-logo.png')}
+                  style={{ width: 45, height: 45, resizeMode: 'contain' }}
+                />
 
-                {/* Notification Bell */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginLeft: 'auto',
-                  }}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Notifications')}
                 >
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate('Notifications')}
-                  >
-                    <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => navigation.navigate('Chat')}>
-                    <Image
-                      source={require('../../assets/logo/yuvabe-logo.png')}
-                      style={{
-                        width: 40,
-                        height: 40,
-                        resizeMode: 'contain',
-                        marginLeft: 10,
-                      }}
-                    />
-                  </TouchableOpacity>
-                </View>
+                  <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
+                </TouchableOpacity>
               </View>
+
+              <Text style={[styles.welcomeText]}>
+                Welcome, {user?.user.name || 'Loading...'}
+              </Text>
 
               {/* Thought */}
               <View style={styles.thoughtContainer}>

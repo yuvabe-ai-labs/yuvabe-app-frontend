@@ -1,6 +1,9 @@
+'use client';
+
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import messaging from '@react-native-firebase/messaging';
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { AppState, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,15 +16,49 @@ import { createDefaultChannel } from './src/utils/noificationChannel';
 import {
   checkNotificationPermission,
   getDeviceToken,
+  requestNotificationPermission,
 } from './src/utils/pushNotifications';
 import { showToast } from './src/utils/ToastHelper';
+
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('[v0] Background message received:', remoteMessage);
+
+  const channelId = await notifee.createChannel({
+    id: 'default',
+    name: 'Default Notifications',
+    importance: AndroidImportance.HIGH,
+  });
+
+  await notifee.displayNotification({
+    title: String(remoteMessage.data?.title),
+    body: String(remoteMessage.data?.body),
+
+    data: remoteMessage.data,
+    android: {
+      channelId,
+      importance: AndroidImportance.HIGH,
+      pressAction: { id: 'default' },
+    },
+  });
+});
 
 function App(): React.JSX.Element {
   const startDownload = useModelDownloadStore(state => state.startDownload);
 
-  // Create High Importance Notification Channel
   useEffect(() => {
-    createDefaultChannel();
+    const initializeNotifee = async () => {
+      try {
+        await createDefaultChannel();
+        console.log('[v0] Notification channel created');
+
+        await requestNotificationPermission();
+        console.log('[v0] Notification permissions requested');
+      } catch (error) {
+        console.error('[v0] Failed to initialize notifications:', error);
+      }
+    };
+
+    initializeNotifee();
   }, []);
 
   // Notification Permission Listener
@@ -29,6 +66,7 @@ function App(): React.JSX.Element {
     const updatePermission = async () => {
       const enabled = await checkNotificationPermission();
       useNotificationStore.getState().setNotificationEnabled(enabled);
+      console.log('[v0] Notification enabled:', enabled);
     };
     updatePermission();
     const subscription = AppState.addEventListener('change', state => {
@@ -72,14 +110,33 @@ function App(): React.JSX.Element {
 
   // FCM LISTENERS
   useEffect(() => {
-    getDeviceToken();
+    // Get device token
+    getDeviceToken().then(token => {
+      console.log('[v0] Device token:', token);
+    });
 
-    // <CHANGE> HANDLE NOTIFEE NOTIFICATION TAP
+    notifee.onBackgroundEvent(async ({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        const data = detail.notification?.data;
+        console.log('[v0] Notification pressed (background):', data);
+
+        if (data?.screen && data?.leave_id) {
+          navigationRef.current?.navigate(String(data.screen), {
+            leaveId: String(data.leave_id),
+          });
+        }
+      }
+    });
+
     const unsubscribeNotifeeEvent = notifee.onForegroundEvent(
       ({ type, detail }) => {
+        console.log('[v0] Notifee event:', type);
+
         if (type === EventType.PRESS) {
           const { notification } = detail;
           const customData = notification?.data;
+
+          console.log('[v0] Notification pressed with data:', customData);
 
           if (customData?.type === 'home_alert') {
             (globalThis as any).homeAlert = {
@@ -103,43 +160,48 @@ function App(): React.JSX.Element {
     // Opened from Background State
     const unsubscribeBackground = messaging().onNotificationOpenedApp(
       remoteMessage => {
+        console.log('[v0] Notification opened from background:', remoteMessage);
+
         if (!remoteMessage?.data) return;
-        const { type, screen, leave_id, message } = remoteMessage.data;
+        const { screen, leave_id } = remoteMessage.data;
         showToast(
-          remoteMessage.notification?.title ?? 'Notification',
-          remoteMessage.notification?.body ?? '',
+          String(remoteMessage.data?.title),
+          String(remoteMessage.data?.body),
         );
-        if (type === 'home_alert') {
-          (globalThis as any).homeAlert = {
-            visible: true,
-            message: message || 'Hello!',
-          };
-          safeNavigateToHome();
-          return;
+
+        if (screen && leave_id) {
+          safeNavigate(String(screen), String(leave_id));
         }
-        safeNavigate(String(screen), String(leave_id));
       },
     );
 
-    // <CHANGE> FOREGROUND NOTIFICATION → SHOW BANNER (FIXED)
     const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-      // Use the pre-created channel instead of creating one each time
-      await notifee.displayNotification({
-        title: remoteMessage.notification?.title,
-        body: remoteMessage.notification?.body,
-        data: remoteMessage.data, // <CHANGE> ADD DATA FOR TAP HANDLING
-        android: {
-          channelId: 'default',
-          importance: AndroidImportance.HIGH,
-          pressAction: { id: 'default' },
-        },
-      });
+      console.log('[v0] Foreground message received:', remoteMessage);
+
+      try {
+        await notifee.displayNotification({
+          title: String(remoteMessage.data?.title),
+          body: String(remoteMessage.data?.body),
+
+          data: remoteMessage.data,
+          android: {
+            channelId: 'default',
+            importance: AndroidImportance.HIGH,
+            pressAction: { id: 'default' },
+          },
+        });
+        console.log('[v0] Notification displayed successfully');
+      } catch (error) {
+        console.error('[v0] Failed to display notification:', error);
+      }
     });
 
     // App Opened From Quit State
     messaging()
       .getInitialNotification()
       .then(remoteMessage => {
+        console.log('[v0] Initial notification:', remoteMessage);
+
         if (!remoteMessage?.data) return;
         const { type, screen, leave_id, message } = remoteMessage.data;
         setTimeout(() => {

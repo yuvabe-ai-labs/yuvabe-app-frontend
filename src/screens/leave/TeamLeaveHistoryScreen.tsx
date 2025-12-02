@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchTeamLeaveHistory } from '../../api/profile-api/profileApi';
 import { formatDate } from './LeaveDetailsScreen';
@@ -76,14 +76,14 @@ export default function TeamLeaveHistoryScreen() {
         </View>
 
         {/* RIGHT: Logo */}
-        <Image
+        {/* <Image
           source={require('../../assets/logo/yuvabe-logo.png')}
           style={{
             width: 40,
             height: 40,
             resizeMode: 'contain',
           }}
-        />
+        /> */}
       </View>
 
       {/* LIST */}

@@ -5,7 +5,6 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Image,
   RefreshControl,
   Text,
   TouchableOpacity,
@@ -192,14 +191,14 @@ export default function MyLeaveHistoryScreen() {
           </View>
 
           {/* RIGHT SIDE: LOGO */}
-          <Image
+          {/* <Image
             source={require('../../assets/logo/yuvabe-logo.png')}
             style={{
               width: 40,
               height: 40,
               resizeMode: 'contain',
             }}
-          />
+          /> */}
         </View>
 
         {/* LIST */}

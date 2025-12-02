@@ -23,7 +23,8 @@ const styles = StyleSheet.create({
 
   welcomeText: {
     ...TEXT_STYLES.large,
-    marginLeft: 18,
+    marginLeft: 8,
+    marginBottom: 10,
   },
 
   thoughtContainer: {
@@ -150,6 +151,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#FF3B30',
     fontWeight: '600',
+  },
+  dimOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    opacity: 0.3,
+    zIndex: 20,
   },
 });
 
