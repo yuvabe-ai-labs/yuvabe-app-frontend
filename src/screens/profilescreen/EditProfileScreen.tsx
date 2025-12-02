@@ -224,10 +224,10 @@ const EditProfileScreen = ({ navigation }: any) => {
         </Text>
 
         {/* Logo */}
-        <Image
+        {/* <Image
           source={require('../../assets/logo/yuvabe-logo.png')}
           style={{ width: 35, height: 35, resizeMode: 'contain' }}
-        />
+        /> */}
       </View>
 
       <ScrollView

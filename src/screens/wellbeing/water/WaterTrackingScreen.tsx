@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Animated,
   Dimensions,
-  Image,
   Modal,
   ScrollView,
   Text,
@@ -42,6 +41,7 @@ const WaterTrackerScreen = ({ navigation }: any) => {
   const [isSaving, setIsSaving] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [showSave, setShowSave] = useState(false);
+  const [mode, setMode] = useState<'add' | 'remove'>('add');
 
   const fillAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
@@ -108,12 +108,13 @@ const WaterTrackerScreen = ({ navigation }: any) => {
     setModalVisible(false);
   };
 
-  const removeWater = () => {
+  const removeWater = (ml = 250) => {
     pulseAnimation();
-    const newTotal = Math.max(todayTotal - 250, 0);
+    const newTotal = Math.max(todayTotal - ml, 0);
     setTodayTotal(newTotal);
     storage.set(WATER_TODAY, newTotal);
     setShowSave(true);
+    setModalVisible(false);
   };
 
   const handleSaveToDB = async () => {
@@ -170,14 +171,14 @@ const WaterTrackerScreen = ({ navigation }: any) => {
             </Text>
           </View>
 
-          <Image
+          {/* <Image
             source={require('../../../assets/logo/yuvabe-logo.png')}
             style={{
               width: 40,
               height: 40,
               resizeMode: 'contain',
             }}
-          />
+          /> */}
         </View>
 
         <View style={styles.statsContainer}>
@@ -229,7 +230,10 @@ const WaterTrackerScreen = ({ navigation }: any) => {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[styles.actionButton, styles.removeButton]}
-            onPress={removeWater}
+            onPress={() => {
+              setMode('remove');
+              setModalVisible(true);
+            }}
           >
             <Text style={styles.buttonText}>−</Text>
             <Text style={styles.buttonLabel}>Remove</Text>
@@ -237,7 +241,10 @@ const WaterTrackerScreen = ({ navigation }: any) => {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.addButton]}
-            onPress={() => setModalVisible(true)}
+            onPress={() => {
+              setMode('add');
+              setModalVisible(true);
+            }}
           >
             <Text style={styles.buttonText}>+</Text>
             <Text style={styles.buttonLabel}>Add</Text>
@@ -311,7 +318,7 @@ const WaterTrackerScreen = ({ navigation }: any) => {
               <Text style={{ fontSize: 14, color: '#ef4444' }}>{error}</Text>
             </View>
           ) : chartData ? (
-            <View style={{ marginVertical: 10}}>
+            <View style={{ marginVertical: 10 }}>
               <BarChart
                 data={chartData}
                 width={screenWidth - 30}
@@ -354,7 +361,6 @@ const WaterTrackerScreen = ({ navigation }: any) => {
                 withInnerLines={false}
                 showValuesOnTopOfBars={true}
                 flatColor={true}
-                
               />
             </View>
           ) : (
@@ -372,42 +378,51 @@ const WaterTrackerScreen = ({ navigation }: any) => {
           )}
         </View>
 
-        <Modal visible={modalVisible} transparent animationType="slide">
-          <View style={styles.modalBackground}>
-            <View style={styles.modalBox}>
-              <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Select Amount</Text>
-              <Text style={styles.modalSubtitle}>
-                How much water did you drink?
-              </Text>
+        <Modal visible={modalVisible} transparent animationType="fade">
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.modalBackground}
+            onPress={() => setModalVisible(false)} // CLOSE ON TAP OUTSIDE
+          >
+            <View style={styles.modalBackground}>
+              <View style={styles.modalBox}>
+                <View style={styles.modalHandle} />
+                <Text style={styles.modalTitle}>Select Amount</Text>
+                <Text style={styles.modalSubtitle}>
+                  How much water did you drink?
+                </Text>
 
-              <View style={styles.optionsContainer}>
-                {presetAmounts.map(ml => (
-                  <TouchableOpacity
-                    key={ml}
-                    style={styles.mlButton}
-                    onPress={() => addWater(ml)}
-                  >
-                    <View style={styles.mlIconContainer}>
-                      <Droplets size={24} color="#3b82f6" />
-                    </View>
-                    <View style={styles.mlTextContainer}>
-                      <Text style={styles.mlText}>{ml}</Text>
-                      <Text style={styles.mlLabel}>milliliters</Text>
-                    </View>
-                    <Text style={styles.mlArrow}>›</Text>
-                  </TouchableOpacity>
-                ))}
+                <View style={styles.optionsContainer}>
+                  {presetAmounts.map(ml => (
+                    <TouchableOpacity
+                      key={ml}
+                      style={styles.mlButton}
+                      onPress={() => {
+                        if (mode === 'add') addWater(ml);
+                        else removeWater(ml);
+                      }}
+                    >
+                      <View style={styles.mlIconContainer}>
+                        <Droplets size={24} color="#3b82f6" />
+                      </View>
+                      <View style={styles.mlTextContainer}>
+                        <Text style={styles.mlText}>{ml}</Text>
+                        <Text style={styles.mlLabel}>milliliters</Text>
+                      </View>
+                      <Text style={styles.mlArrow}>›</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={styles.closeButton}
+                >
+                  <Text style={styles.closeText}>Close</Text>
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={styles.closeButton}
-              >
-                <Text style={styles.closeText}>Close</Text>
-              </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
         </Modal>
       </ScrollView>
     </SafeAreaView>

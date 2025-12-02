@@ -1,8 +1,14 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Drawer from 'react-native-drawer';
 
-export default function AppDrawer({ drawerContent, children }: any) {
+type AppDrawerProps = {
+  drawerContent: (closeDrawer: () => void) => React.ReactNode;
+  children: (openDrawer: () => void, isDrawerOpen: boolean) => React.ReactNode;
+};
+
+export default function AppDrawer({ drawerContent, children }: AppDrawerProps) {
   const drawerRef = useRef<any>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const openDrawer = () => {
     drawerRef.current?.open();
@@ -15,17 +21,18 @@ export default function AppDrawer({ drawerContent, children }: any) {
   return (
     <Drawer
       ref={drawerRef}
-      type="displace"     // <-- pushes screen to right
+      type="displace" // pushes screen to right
       tapToClose={true}
-      openDrawerOffset={0.3}   // 70% drawer width
+      openDrawerOffset={0.3} // 70% main visible
       panCloseMask={0.3}
       panOpenMask={0.1}
       tweenDuration={250}
       content={drawerContent(closeDrawer)}
       styles={drawerStyles}
+      onOpen={() => setIsDrawerOpen(true)}
+      onClose={() => setIsDrawerOpen(false)}
     >
-      {/* children(openDrawer) gives HomeScreen access to openDrawer() */}
-      {children(openDrawer)}
+      {children(openDrawer, isDrawerOpen)}
     </Drawer>
   );
 }

@@ -3,7 +3,6 @@ import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -108,14 +107,14 @@ export default function LeaveDetailsScreen({ route }: any) {
               Leave Details
             </Text>
           </View>
-          <Image
+          {/* <Image
             source={require('../../assets/logo/yuvabe-logo.png')}
             style={{
               width: 40,
               height: 40,
               resizeMode: 'contain',
             }}
-          />
+          /> */}
         </View>
 
         <View style={{ padding: 20 }}>
