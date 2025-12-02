@@ -39,26 +39,24 @@ type SearchResult = {
 export const retrieveContextForQuery = async (
   session: InferenceSession,
   text: string,
-): Promise<{ contextText: string; image_url: string | null }> => {
+): Promise<{ contextText: string }> => {
   const embedding = await generateEmbedding(session, text);
 
   const results: SearchResult[] = await semanticSearch(embedding);
 
   if (!results || results.length === 0) {
-    return { contextText: '', image_url: null };
+    return { contextText: '' };
   }
-
-  // 1️⃣ Combine all text chunks
-  const contextText = results
+  const merged = results
     .filter(r => r.text)
-    .map(r => r.text)
+    .map(r => {
+      if (r.image_url) {
+        return `${r.text}\n\n![image](${r.image_url})`; // MD embedding
+      }
+      return r.text;
+    })
     .join('\n\n');
 
-  // 2️⃣ Find the FIRST chunk that has an image_url
-  const imageChunk = results.find(r => r.image_url);
-
-  return {
-    contextText,
-    image_url: imageChunk ? imageChunk.image_url! : null,
-  };
+  console.log(`The context of the sematic search is : ${merged}`);
+  return { contextText: merged };
 };

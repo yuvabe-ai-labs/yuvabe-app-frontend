@@ -1,8 +1,8 @@
+// ChatScreen.tsx
 import { InferenceSession } from 'onnxruntime-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useModelDownloadStore } from '../../store/modelDownloadStore';
 import { SYSTEM_PROMPT } from '../../utils/constants';
@@ -20,11 +21,12 @@ import { retrieveContextForQuery } from '../chatbot/rag/ragPipeline';
 import { styles } from './ChatbotStyles';
 import DefaultSuggestions from './models/DefaultSuggestions';
 import ChatDownloadIndicator from './models/modelDownloadIndicator';
+
 type Message = {
   id: string;
-  text: string;
+  text: string; // either streaming plain text or final markdown
   from: 'user' | 'bot';
-  image_url?: string | null;
+  streaming?: boolean; // true while generation is in progress
 };
 
 type ChatRole = 'system' | 'user' | 'assistant';
@@ -41,6 +43,9 @@ const ChatScreen = () => {
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
   const downloadState = useModelDownloadStore(state => state.downloadState);
+
+  const streamedTextRef = useRef<string>(''); // persistent buffer for current stream
+  const currentBotMsgIdRef = useRef<string | null>(null); // id of currently streaming bot message
 
   const [chatHistory, setChatHistory] = useState<ChatTurn[]>([
     {
@@ -65,6 +70,7 @@ const ChatScreen = () => {
           id: 'sys-downloading',
           text: 'Models are downloading. Chat will be ready soon.',
           from: 'bot',
+          streaming: false,
         },
       ]);
     } else if (downloadState === 'error') {
@@ -73,6 +79,7 @@ const ChatScreen = () => {
           id: 'sys-error',
           text: 'Model download failed. Please restart the app to try again.',
           from: 'bot',
+          streaming: false,
         },
       ]);
     } else if (downloadState === 'completed') {
@@ -98,6 +105,7 @@ const ChatScreen = () => {
             id: `err-${Date.now()}`,
             text: 'Models are downloaded but failed to load. Please restart the app.',
             from: 'bot',
+            streaming: false,
           },
         ]);
       }
@@ -114,12 +122,14 @@ const ChatScreen = () => {
               id: 'welcome-msg',
               from: 'bot',
               text: 'Hey! I’m your Yuvabe Assistant. What would you like to know?',
+              streaming: false,
             },
           ];
         }
         return prev;
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [downloadState, modelsLoaded]);
 
   const sendMessage = async () => {
@@ -132,6 +142,7 @@ const ChatScreen = () => {
           id: `${Date.now()}`,
           text: 'Models are not ready yet. Please wait until download finishes.',
           from: 'bot',
+          streaming: false,
         },
       ]);
       return;
@@ -144,6 +155,7 @@ const ChatScreen = () => {
           id: `${Date.now()}`,
           text: 'Models are loading. Please wait a moment and try again.',
           from: 'bot',
+          streaming: false,
         },
       ]);
       return;
@@ -156,47 +168,31 @@ const ChatScreen = () => {
       id: `${Date.now()}`,
       text,
       from: 'user',
+      streaming: false,
     };
     setMessages(prev => [...prev, userMsg]);
 
     const botMsgId = `${Date.now() + 1}`;
+    currentBotMsgIdRef.current = botMsgId;
+    streamedTextRef.current = '';
 
+    // push a streaming placeholder
     setMessages(prev => [
       ...prev,
       {
         id: botMsgId,
         text: 'Thinking...',
         from: 'bot',
+        streaming: true,
       },
     ]);
 
     try {
-      const { contextText, image_url } = await retrieveContextForQuery(
-        session,
-        text,
-      );
-      const lowerQ = text.toLowerCase();
-
-      const isImageRelevant =
-        image_url &&
-        (lowerQ.includes('values') ||
-          lowerQ.includes('core values') ||
-          lowerQ.includes('three cs') ||
-          lowerQ.includes('3 cs'));
-
-      if (image_url) {
-        setMessages(prev => {
-          const copy = [...prev];
-          const idx = copy.findIndex(m => m.id === botMsgId);
-          if (idx !== -1) {
-            copy[idx].image_url = image_url;
-          }
-          return copy;
-        });
-      }
+      const { contextText } = await retrieveContextForQuery(session, text);
 
       const modelUserMessage = contextText
-        ? `Context:\n${contextText}\n\nUser Question: ${text}`
+        ? `Context:\n${contextText}\n\nUser Question: ${text} 
+Your goal: To generate accurate, short answers, and include image urls in markdown format whenever it is relevant to user's query. Do not create or assume internal company data unless provided.If you don't know an answer, say “I don’t have any information on that” instead of guessing.`
         : text;
 
       const messagesForModel: ChatTurn[] = [
@@ -204,41 +200,66 @@ const ChatScreen = () => {
         { role: 'user', content: modelUserMessage },
       ];
 
+      // streaming callback: accumulate tokens in streamedTextRef and update the placeholder text
       const finalText = await qwenChat(messagesForModel, token => {
+        // append token to buffer
+        streamedTextRef.current += token;
+
+        // update placeholder message with plain text (no markdown rendering yet)
         setMessages(prev => {
           const copy = [...prev];
           const idx = copy.findIndex(m => m.id === botMsgId);
           if (idx !== -1) {
-            if (copy[idx].text === 'Thinking...') copy[idx].text = token;
-            else copy[idx].text += token;
+            copy[idx] = {
+              ...copy[idx],
+              text: streamedTextRef.current,
+              streaming: true,
+            };
           }
           return copy;
         });
       });
 
+      // model finished: replace placeholder with final markdown-rendered text
+      setMessages(prev => {
+        const copy = [...prev];
+        const idx = copy.findIndex(m => m.id === botMsgId);
+        if (idx !== -1) {
+          copy[idx] = {
+            ...copy[idx],
+            text: finalText,
+            streaming: false,
+          };
+        }
+        return copy;
+      });
+
+      // add to chat history for future turns
       setChatHistory(prev => [
         ...prev,
         { role: 'user', content: text },
         { role: 'assistant', content: finalText },
       ]);
-      if (isImageRelevant) {
-        setMessages(prev => {
-          const copy = [...prev];
-          const idx = copy.findIndex(m => m.id === botMsgId);
-          if (idx !== -1) {
-            copy[idx].image_url = image_url;
-          }
-          return copy;
-        });
-      }
+
+      // cleanup
+      streamedTextRef.current = '';
+      currentBotMsgIdRef.current = null;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       setMessages(prev => {
         const copy = [...prev];
         const idx = copy.findIndex(m => m.id === botMsgId);
-        if (idx !== -1) copy[idx].text = `Error: ${msg}`;
+        if (idx !== -1) {
+          copy[idx] = {
+            ...copy[idx],
+            text: `Error: ${msg}`,
+            streaming: false,
+          };
+        }
         return copy;
       });
+      streamedTextRef.current = '';
+      currentBotMsgIdRef.current = null;
     }
   };
 
@@ -249,32 +270,37 @@ const ChatScreen = () => {
         item.from === 'user' ? styles.userBubble : styles.botBubble,
       ]}
     >
-      <Text style={item.from === 'user' ? styles.text : styles.botText}>
-        {item.text}
-      </Text>
-
-      {item.image_url && (
-        <Image
-          source={{ uri: item.image_url }}
+      {item.from === 'user' ? (
+        <Text style={styles.text}>{item.text}</Text>
+      ) : item.streaming ? (
+        // While streaming: show plain text (no markdown render)
+        <Text style={styles.botText}>{item.text}</Text>
+      ) : (
+        // Final message: render markdown (images, links etc.)
+        <Markdown
           style={{
-            width: 240,
-            height: 240,
-            borderRadius: 12,
-            marginTop: 8,
+            body: styles.botText,
+            image: {
+              width: 240,
+              height: 240,
+              borderRadius: 12,
+              marginTop: 8,
+            },
           }}
-          resizeMode="contain"
-        />
+        >
+          {item.text}
+        </Markdown>
       )}
     </View>
   );
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
-      >
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
+    >
+      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
         <ChatDownloadIndicator />
         {downloadState === 'completed' &&
           modelsLoaded &&
@@ -290,8 +316,8 @@ const ChatScreen = () => {
           ref={flatListRef}
           data={messages}
           renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={{ padding: 16 }}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{ padding: 12 }}
           onContentSizeChange={() =>
             flatListRef.current?.scrollToEnd({ animated: true })
           }
@@ -314,8 +340,8 @@ const ChatScreen = () => {
             <Text style={styles.sendText}>Send</Text>
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 

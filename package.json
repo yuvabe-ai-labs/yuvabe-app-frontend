@@ -39,6 +39,7 @@
     "react-native-gifted-charts": "^1.4.69",
     "react-native-image-picker": "^8.2.1",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-markdown-display": "^7.0.2",
     "react-native-mmkv": "^4.0.0",
     "react-native-nitro-modules": "^0.31.9",
     "react-native-nitro-sound": "^0.2.9",
