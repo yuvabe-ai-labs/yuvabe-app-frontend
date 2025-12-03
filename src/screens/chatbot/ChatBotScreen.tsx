@@ -1,10 +1,14 @@
-// ChatScreen.tsx
+import { useNavigation } from '@react-navigation/native';
+import { Bot, ChevronLeft, User } from 'lucide-react-native';
 import { InferenceSession } from 'onnxruntime-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
+  Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -12,336 +16,310 @@ import {
 } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ChatDownloadIndicator from './models/modelDownloadIndicator';
+
+import { Message, useChatStore } from '../../store/chatStore';
 import { useModelDownloadStore } from '../../store/modelDownloadStore';
-import { SYSTEM_PROMPT } from '../../utils/constants';
+
 import { loadLlama, qwenChat } from '../chatbot/llama/llamaManager';
 import { MODEL_3_PATH } from '../chatbot/models/modelPaths';
 import { loadOnnxModel } from '../chatbot/models/onnxLoader';
 import { retrieveContextForQuery } from '../chatbot/rag/ragPipeline';
+
 import { styles } from './ChatbotStyles';
 import DefaultSuggestions from './models/DefaultSuggestions';
-import ChatDownloadIndicator from './models/modelDownloadIndicator';
-
-type Message = {
-  id: string;
-  text: string; // either streaming plain text or final markdown
-  from: 'user' | 'bot';
-  streaming?: boolean; // true while generation is in progress
-};
-
-type ChatRole = 'system' | 'user' | 'assistant';
-
-type ChatTurn = {
-  role: ChatRole;
-  content: string;
-};
 
 const ChatScreen = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    messages,
+    chatHistory,
+    addMessage,
+    updateMessage,
+    addTurn,
+    suggestionsUsed,
+    setSuggestionsUsed,
+  } = useChatStore();
+
   const [input, setInput] = useState('');
   const [session, setSession] = useState<InferenceSession | null>(null);
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
   const downloadState = useModelDownloadStore(state => state.downloadState);
 
-  const streamedTextRef = useRef<string>(''); // persistent buffer for current stream
-  const currentBotMsgIdRef = useRef<string | null>(null); // id of currently streaming bot message
-
-  const [chatHistory, setChatHistory] = useState<ChatTurn[]>([
-    {
-      role: 'system',
-      content: SYSTEM_PROMPT,
-    },
-  ]);
-
-  const flatListRef = useRef<FlatList<Message>>(null);
+  const streamedTextRef = useRef('');
+  const currentBotMsgIdRef = useRef<string | null>(null);
+  const isDisabled = downloadState !== 'completed' || !session;
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () =>
+      setKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener('keyboardDidHide', () =>
+      setKeyboardVisible(false),
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const flatListRef = useRef<FlatList>(null);
+  useEffect(() => {
+    setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
-    }, 50);
-    return () => clearTimeout(timeout);
+    }, 40);
   }, [messages]);
 
   useEffect(() => {
-    if (downloadState === 'downloading') {
-      setMessages([
-        {
-          id: 'sys-downloading',
-          text: 'Models are downloading. Chat will be ready soon.',
-          from: 'bot',
-          streaming: false,
-        },
-      ]);
-    } else if (downloadState === 'error') {
-      setMessages([
-        {
-          id: 'sys-error',
-          text: 'Model download failed. Please restart the app to try again.',
-          from: 'bot',
-          streaming: false,
-        },
-      ]);
-    } else if (downloadState === 'completed') {
-      setMessages(prev => {
-        if (prev.length === 0) return prev;
-        return prev;
-      });
-    }
-  }, [downloadState]);
+    StatusBar.setBackgroundColor('#ffffff', true);
+    StatusBar.setBarStyle('dark-content', true);
+  }, []);
 
   useEffect(() => {
     const loadModels = async () => {
       try {
         const s = await loadOnnxModel();
         setSession(s);
+
         await loadLlama(MODEL_3_PATH);
         setModelsLoaded(true);
       } catch (err) {
-        console.log('Error loading models in ChatScreen:', err);
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `err-${Date.now()}`,
-            text: 'Models are downloaded but failed to load. Please restart the app.',
-            from: 'bot',
-            streaming: false,
-          },
-        ]);
+        console.log('Model load error:', err);
       }
     };
 
     if (downloadState === 'completed' && !modelsLoaded) {
       loadModels();
     }
-    if (downloadState === 'completed' && modelsLoaded) {
-      setMessages(prev => {
-        if (prev.length === 0 || prev[0].id === 'sys-downloading') {
-          return [
-            {
-              id: 'welcome-msg',
-              from: 'bot',
-              text: 'Hey! I’m your Yuvabe Assistant. What would you like to know?',
-              streaming: false,
-            },
-          ];
-        }
-        return prev;
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [downloadState, modelsLoaded]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    if (downloadState !== 'completed') {
-      setMessages(prev => [
-        ...prev,
-        {
-          id: `${Date.now()}`,
-          text: 'Models are not ready yet. Please wait until download finishes.',
-          from: 'bot',
-          streaming: false,
-        },
-      ]);
-      return;
-    }
+    setSuggestionsUsed(true);
 
-    if (!session) {
-      setMessages(prev => [
-        ...prev,
-        {
-          id: `${Date.now()}`,
-          text: 'Models are loading. Please wait a moment and try again.',
-          from: 'bot',
-          streaming: false,
-        },
-      ]);
-      return;
-    }
+    if (!session) return;
 
-    const text = input;
+    const text = input.trim();
     setInput('');
 
-    const userMsg: Message = {
+    const userMsg = {
       id: `${Date.now()}`,
       text,
-      from: 'user',
-      streaming: false,
+      from: 'user' as const,
     };
-    setMessages(prev => [...prev, userMsg]);
+
+    addMessage(userMsg);
 
     const botMsgId = `${Date.now() + 1}`;
     currentBotMsgIdRef.current = botMsgId;
     streamedTextRef.current = '';
 
-    // push a streaming placeholder
-    setMessages(prev => [
-      ...prev,
-      {
-        id: botMsgId,
-        text: 'Thinking...',
-        from: 'bot',
-        streaming: true,
-      },
-    ]);
+    addMessage({
+      id: botMsgId,
+      text: 'Thinking...',
+      from: 'bot' as const,
+      streaming: true,
+    });
 
     try {
       const { contextText } = await retrieveContextForQuery(session, text);
 
       const modelUserMessage = contextText
-        ? `Context:\n${contextText}\n\nUser Question: ${text} 
-Your goal: To generate accurate, short answers, and include image urls in markdown format whenever it is relevant to user's query. Do not create or assume internal company data unless provided.If you don't know an answer, say “I don’t have any information on that” instead of guessing.`
+        ? `Context:\n${contextText}\n\nUser Question: ${text}`
         : text;
 
-      const messagesForModel: ChatTurn[] = [
-        ...chatHistory,
-        { role: 'user', content: modelUserMessage },
-      ];
+      const finalText = await qwenChat(
+        [...chatHistory, { role: 'user', content: modelUserMessage }],
+        token => {
+          streamedTextRef.current += token;
+          updateMessage(botMsgId, {
+            text: streamedTextRef.current,
+            streaming: true,
+          });
+        },
+      );
 
-      // streaming callback: accumulate tokens in streamedTextRef and update the placeholder text
-      const finalText = await qwenChat(messagesForModel, token => {
-        // append token to buffer
-        streamedTextRef.current += token;
-
-        // update placeholder message with plain text (no markdown rendering yet)
-        setMessages(prev => {
-          const copy = [...prev];
-          const idx = copy.findIndex(m => m.id === botMsgId);
-          if (idx !== -1) {
-            copy[idx] = {
-              ...copy[idx],
-              text: streamedTextRef.current,
-              streaming: true,
-            };
-          }
-          return copy;
-        });
+      updateMessage(botMsgId, {
+        text: finalText,
+        streaming: false,
+        renderKey: Date.now(),
       });
 
-      // model finished: replace placeholder with final markdown-rendered text
-      setMessages(prev => {
-        const copy = [...prev];
-        const idx = copy.findIndex(m => m.id === botMsgId);
-        if (idx !== -1) {
-          copy[idx] = {
-            ...copy[idx],
-            text: finalText,
-            streaming: false,
-          };
-        }
-        return copy;
+      addTurn({ role: 'user', content: text });
+      addTurn({ role: 'assistant', content: finalText });
+    } catch (e) {
+      updateMessage(botMsgId, {
+        text: `Error: ${e}`,
+        streaming: false,
       });
-
-      // add to chat history for future turns
-      setChatHistory(prev => [
-        ...prev,
-        { role: 'user', content: text },
-        { role: 'assistant', content: finalText },
-      ]);
-
-      // cleanup
-      streamedTextRef.current = '';
-      currentBotMsgIdRef.current = null;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      setMessages(prev => {
-        const copy = [...prev];
-        const idx = copy.findIndex(m => m.id === botMsgId);
-        if (idx !== -1) {
-          copy[idx] = {
-            ...copy[idx],
-            text: `Error: ${msg}`,
-            streaming: false,
-          };
-        }
-        return copy;
-      });
-      streamedTextRef.current = '';
-      currentBotMsgIdRef.current = null;
     }
   };
 
-  const renderItem = ({ item }: { item: Message }) => (
-    <View
-      style={[
-        styles.bubble,
-        item.from === 'user' ? styles.userBubble : styles.botBubble,
-      ]}
-    >
-      {item.from === 'user' ? (
-        <Text style={styles.text}>{item.text}</Text>
-      ) : item.streaming ? (
-        // While streaming: show plain text (no markdown render)
-        <Text style={styles.botText}>{item.text}</Text>
-      ) : (
-        // Final message: render markdown (images, links etc.)
-        <Markdown
-          style={{
-            body: styles.botText,
-            image: {
-              width: 240,
-              height: 240,
-              borderRadius: 12,
-              marginTop: 8,
-            },
-          }}
+  const renderItem = ({ item }: { item: Message }) => {
+    const isUser = item.from === 'user';
+
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: isUser ? 'flex-end' : 'flex-start',
+          marginVertical: 6,
+          alignItems: 'flex-start',
+        }}
+      >
+        {!isUser && (
+          <Bot
+            size={30}
+            color="#555"
+            style={{
+              marginRight: 8,
+              marginTop: 4,
+            }}
+          />
+        )}
+
+        <View
+          style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}
         >
-          {item.text}
-        </Markdown>
-      )}
-    </View>
-  );
+          {item.from === 'bot' && !item.streaming ? (
+            <Markdown
+              style={{
+                body: {
+                  color: 'black',
+                  fontSize: 14,
+                  fontFamily: 'gilroy-regular',
+                },
+                image: {
+                  width: 240,
+                  height: 240,
+                  borderRadius: 12,
+                  marginTop: 8,
+                },
+              }}
+            >
+              {item.text}
+            </Markdown>
+          ) : (
+            <Text style={isUser ? styles.text : styles.botText}>
+              {item.text}
+            </Text>
+          )}
+        </View>
+
+        {/* USER ICON */}
+        {isUser && (
+          <User
+            size={30}
+            color="#555"
+            style={{
+              marginLeft: 8,
+              marginTop: 4,
+            }}
+          />
+        )}
+      </View>
+    );
+  };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
-    >
-      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
-        <ChatDownloadIndicator />
-        {downloadState === 'completed' &&
-          modelsLoaded &&
-          messages.length < 3 && (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          backgroundColor: '#fff',
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ChevronLeft size={28} color="#000" />
+          </TouchableOpacity>
+
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '600',
+              marginLeft: 10,
+            }}
+          >
+            Yuvabot
+          </Text>
+        </View>
+        <Image
+          source={require('../../assets/logo/yuvabe-logo.png')}
+          style={{
+            width: 40,
+            height: 40,
+            resizeMode: 'contain',
+          }}
+        />
+      </View>
+      <ChatDownloadIndicator />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={
+          keyboardVisible ? StatusBar.currentHeight ?? 10 : 0
+        }
+      >
+        {modelsLoaded && !suggestionsUsed && messages.length === 0 && (
+          <View style={{ flex: 1 }}>
             <DefaultSuggestions
               onSelect={text => {
+                setSuggestionsUsed(true);
                 setInput(text);
                 sendMessage();
               }}
             />
-          )}
+          </View>
+        )}
+
         <FlatList
           ref={flatListRef}
           data={messages}
           renderItem={renderItem}
           keyExtractor={item => item.id}
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ padding: 12 }}
-          onContentSizeChange={() =>
-            flatListRef.current?.scrollToEnd({ animated: true })
-          }
+          style={{ flex: 1 }}
         />
 
         <View style={styles.inputRow}>
           <TextInput
             value={input}
-            editable={downloadState === 'completed' && !!session}
             onChangeText={setInput}
-            placeholder="Type a message..."
+            placeholder={
+              isDisabled ? 'Downloading models...' : 'Type a message...'
+            }
             placeholderTextColor="#999"
-            style={styles.input}
+            style={[
+              styles.input,
+              isDisabled && { backgroundColor: '#e5e5e5', color: '#999' },
+            ]}
+            editable={!isDisabled}
+            returnKeyType="send"
+            onSubmitEditing={!isDisabled ? sendMessage : undefined}
           />
+
           <TouchableOpacity
-            disabled={downloadState !== 'completed' || !session}
-            style={styles.sendBtn}
-            onPress={sendMessage}
+            style={[
+              styles.sendBtn,
+              isDisabled && { backgroundColor: '#b5b5b5' },
+            ]}
+            onPress={!isDisabled ? sendMessage : undefined}
+            disabled={isDisabled}
           >
             <Text style={styles.sendText}>Send</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
