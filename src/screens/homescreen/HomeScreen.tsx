@@ -24,8 +24,10 @@ import { getItem, removeItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './HomeStyles';
+import BreathingModal from './components/BreathingModal';
 import CalmingAudio from './components/CalmingAudio';
 import EmotionCheckIn from './components/EmotionCheckIn';
+import GroundingExerciseModal from './components/GroundingExerciseModal';
 import VisionBoard from './components/VisionBoard';
 
 export async function requestNotificationPermission() {
@@ -48,6 +50,9 @@ export async function requestNotificationPermission() {
 
 const HomeScreen = ({ navigation }: any) => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showGroundingModal, setShowGroundingModal] = useState(false);
+  const [showBreathingModal, setShowBreathingModal] = useState(false);
+
   const [homeAlertMessage, setHomeAlertMessage] = useState('');
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -59,14 +64,14 @@ const HomeScreen = ({ navigation }: any) => {
   const [user, setUser] = useState<any>(null);
 
   const EMOJI_TO_EMOTION: Record<string, string> = {
-  '😄': 'joyful',
-  '😀': 'happy',
-  '🙂': 'calm',
-  '😐': 'neutral',
-  '😢': 'anxious',
-  '😡': 'sad',
-  '🤯': 'frustrated',
-};
+    '😄': 'joyful',
+    '😀': 'happy',
+    '🙂': 'calm',
+    '😐': 'neutral',
+    '😢': 'anxious',
+    '😡': 'sad',
+    '🤯': 'frustrated',
+  };
 
   //
   useEffect(() => {
@@ -145,7 +150,7 @@ const HomeScreen = ({ navigation }: any) => {
     };
 
     fetchQuote();
-  }, [author,quote]);
+  }, [author, quote]);
 
   useEffect(() => {
     const savedImage = getItem('profile_image');
@@ -253,17 +258,36 @@ const HomeScreen = ({ navigation }: any) => {
               onSelect={async emoji => {
                 setShowNotificationModal(false);
                 const emotion = emoji ? EMOJI_TO_EMOTION[emoji] : null;
+
                 try {
                   const timeOfDay = homeAlertMessage.includes('morning')
                     ? 'morning'
                     : 'evening';
+
                   await submitEmotion(user?.user.id, emotion, timeOfDay);
                 } catch (err) {
                   console.error('Emotion submit failed', err);
                 }
+
+                // Open grounding modal AFTER emotion selection
+                setShowGroundingModal(true);
               }}
             />
           )}
+          <GroundingExerciseModal
+            visible={showGroundingModal}
+            onDone={() => {
+              setShowGroundingModal(false);
+              setShowBreathingModal(true); // open breathing modal
+            }}
+            onClose={() => setShowGroundingModal(false)}
+          />
+          <BreathingModal
+            visible={showBreathingModal}
+            onClose={() => setShowBreathingModal(false)}
+            onFinish={() => setShowBreathingModal(false)}
+          />
+
           {isLogoutLoading && (
             <View
               style={{
