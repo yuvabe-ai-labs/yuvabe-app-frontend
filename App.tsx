@@ -157,7 +157,6 @@ function App(): React.JSX.Element {
       },
     );
 
-    // Opened from Background State
     const unsubscribeBackground = messaging().onNotificationOpenedApp(
       remoteMessage => {
         console.log('[v0] Notification opened from background:', remoteMessage);

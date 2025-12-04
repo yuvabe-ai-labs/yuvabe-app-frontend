@@ -96,7 +96,7 @@ const SignInScreen = ({ navigation }: any) => {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}

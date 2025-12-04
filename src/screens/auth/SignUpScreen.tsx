@@ -106,7 +106,7 @@ const SignUpScreen = ({ navigation }: any) => {
   return (
     <>
       {/* Only top safe area to avoid bottom spacing bug */}
-      <SafeAreaView edges={['top']} style={{ flex: 0 }} />
+      <SafeAreaView style={{ flex: 0 }} />
 
       {/* Main screen wrapper */}
       <View style={{ flex: 1 }}>
