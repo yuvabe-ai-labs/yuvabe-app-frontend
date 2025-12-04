@@ -2,7 +2,6 @@ import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   Text,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AssetDTO, fetchAssets } from '../../api/profile-api/assetsApi';
+import { useLoadingStore } from '../../store/useLoadingStore';
 import { styles } from './AssetStyle';
 
 export const ASSET_ICONS: Record<string, string> = {
@@ -26,18 +26,20 @@ export const ASSET_ICONS: Record<string, string> = {
 const AssetSection = () => {
   const navigation = useNavigation();
 
-  const [loading, setLoading] = useState(true);
   const [assets, setAssets] = useState<AssetDTO[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadAssets = async () => {
+    const { showLoading, hideLoading } = useLoadingStore.getState();
+
+    showLoading('assets', 'Loading assets...');
     try {
       const res = await fetchAssets();
       setAssets(res);
     } catch (e) {
       console.error('Failed to load assets', e);
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   };
 
@@ -69,8 +71,6 @@ const AssetSection = () => {
       </View>
     );
   };
-
-  if (loading) return <ActivityIndicator style={{ marginTop: 20 }} />;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

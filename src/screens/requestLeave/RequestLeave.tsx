@@ -1,7 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useEffect, useState } from 'react';
 import {
-  Image,
   ScrollView,
   Text,
   TextInput,
@@ -58,11 +57,15 @@ export default function RequestLeaveScreen() {
 
   const handleSubmit = async () => {
     if (!reason.trim()) {
-      return showToast('Error', 'Please enter a reason.');
+      return showToast('Error', 'Please enter a reason.', 'error');
     }
 
     if (toDate < fromDate) {
-      return showToast('Error', '"To date" must be after "From date".');
+      return showToast(
+        'Error',
+        '"To date" must be after "From date".',
+        'error',
+      );
     }
 
     const mappedType = leaveType === 'Sick Leave' ? 'Sick' : 'Casual';
@@ -85,7 +88,7 @@ export default function RequestLeaveScreen() {
 
       const response = await requestLeave(body);
 
-      showToast('Success', 'Leave request submitted!');
+      showToast('Success', 'Leave request submitted!', 'success');
       console.log('Leave created:', response);
 
       // Reset form
@@ -96,8 +99,13 @@ export default function RequestLeaveScreen() {
 
       // refresh balance after applying leave
       loadBalance();
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
     } catch (err: any) {
-      showToast('Error', err.message);
+      showToast('Error', err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -131,7 +139,7 @@ export default function RequestLeaveScreen() {
               style={[
                 styles.heading,
                 {
-                  marginLeft: 30,
+                  marginLeft: 0,
                   marginBottom: 0,
                   fontSize: 18,
                   textAlign: 'left',
@@ -143,14 +151,14 @@ export default function RequestLeaveScreen() {
           </View>
 
           {/* RIGHT SECTION: LOGO IN CORNER */}
-          <Image
+          {/* <Image
             source={require('../../assets/logo/yuvabe-logo.png')}
             style={{
               width: 40,
               height: 40,
               resizeMode: 'contain',
             }}
-          />
+          /> */}
         </View>
 
         {/* Leave Balance */}

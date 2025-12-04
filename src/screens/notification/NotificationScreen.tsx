@@ -1,12 +1,6 @@
 import { ChevronLeft, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -15,6 +9,10 @@ import {
 } from '../../api/leave-api/leave_api';
 import { fetchNotifications } from '../../api/profile-api/profileApi';
 import { useUserStore } from '../../store/useUserStore';
+
+// ⭐ Horizontal slide animation
+import Animated, { Layout, SlideOutRight } from 'react-native-reanimated';
+import { useLoadingStore } from '../../store/useLoadingStore';
 
 type NotificationItem = {
   id: string;
@@ -28,7 +26,6 @@ type NotificationItem = {
 
 export default function NotificationScreen({ navigation }: any) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useUserStore();
 
   useEffect(() => {
@@ -36,14 +33,16 @@ export default function NotificationScreen({ navigation }: any) {
   }, []);
 
   const loadNotifications = async () => {
+    const { showLoading, hideLoading } = useLoadingStore.getState();
+    showLoading('notification', 'Loading...');
     try {
       const res = await fetchNotifications();
       const all = res.data.data;
 
       const filtered =
         user?.role === 'mentor'
-          ? all.filter((n: any) => n.type === 'Pending')
-          : all;
+          ? all.filter((n: any) => n.type === 'Pending' && !n.is_read)
+          : all.filter((n: any) => !n.is_read);
 
       const sorted = filtered.sort(
         (a: NotificationItem, b: NotificationItem) =>
@@ -54,79 +53,45 @@ export default function NotificationScreen({ navigation }: any) {
     } catch (e) {
       console.log('notif error:', e);
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   };
 
-  // Loading UI
-  if (loading) {
-    return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <ActivityIndicator size="large" style={{ marginTop: 50 }} />
-      </SafeAreaView>
-    );
-  }
+  // ⭐ clear all animation (slower now)
+  const clearAllWithAnimation = async () => {
+    try {
+      await markAllNotificationsRead();
 
-  // Mentor empty UI
-  if (user?.role === 'mentor' && notifications.length === 0) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-        {/* Header */}
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 12,
-            paddingHorizontal: 16,
-          }}
-        >
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <ChevronLeft size={28} color="#000" />
-          </TouchableOpacity>
+      const count = notifications.length;
 
-          <Text
-            style={{
-              flex: 1,
-              textAlign: 'center',
-              fontSize: 18,
-              fontWeight: '600',
-            }}
-          >
-            Notifications
-          </Text>
+      for (let i = 0; i < count; i++) {
+        // ⏳ make this a bit slower (was 120)
+        await new Promise(res => setTimeout(res, 220));
+        setNotifications(prev => prev.slice(1));
+      }
+    } catch (e) {
+      console.log('markAllNotificationsRead error:', e);
+    }
+  };
 
-          <View style={{ width: 28 }} />
-        </View>
-
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Text style={{ fontSize: 18, color: 'gray' }}>
-            No new notifications
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // ⭐ Invisible right action (required for swipe)
+  const EmptyAction = () => <View style={{ width: 1 }} />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      {/* ⭐ HEADER */}
+      {/* HEADER */}
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
           paddingVertical: 12,
           paddingHorizontal: 16,
-          backgroundColor: '#fff',
         }}
       >
-        {/* Back Button */}
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeft size={28} color="#000" />
         </TouchableOpacity>
 
-        {/* Title */}
         <Text
           style={{
             flex: 1,
@@ -138,13 +103,9 @@ export default function NotificationScreen({ navigation }: any) {
           Notifications
         </Text>
 
-        {/* Clear All */}
         {notifications.length > 0 ? (
           <TouchableOpacity
-            onPress={async () => {
-              await markAllNotificationsRead();
-              setNotifications([]);
-            }}
+            onPress={clearAllWithAnimation}
             style={{
               backgroundColor: '#ff4d4d',
               padding: 6,
@@ -158,73 +119,102 @@ export default function NotificationScreen({ navigation }: any) {
         )}
       </View>
 
-      {/* ⭐ LIST */}
+      {/* LIST */}
       <FlatList
         data={notifications}
         keyExtractor={item => item.id}
-        contentContainerStyle={{ padding: 15 }}
-        renderItem={({ item }) => (
-          <Swipeable
-            overshootRight={false}
-            onSwipeableOpen={async () => {
-              await markNotificationRead(item.id);
-              setNotifications(prev => prev.filter(n => n.id !== item.id));
+        contentContainerStyle={{
+          padding: 15,
+          flexGrow: 1, // ✅ so empty state can center
+        }}
+        ListEmptyComponent={() => (
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingTop: 40,
             }}
           >
-            <TouchableOpacity
-              onPress={async () => {
-                await markNotificationRead(item.id);
+            <Text style={{ fontSize: 16, fontWeight: '500', marginBottom: 6 }}>
+              No new notifications
+            </Text>
+            <Text style={{ fontSize: 13, color: 'gray', textAlign: 'center' }}>
+              You’re all caught up.
+            </Text>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <Animated.View
+            // ⭐ smoother layout animation
+            layout={Layout.springify().damping(18)}
+            // ⭐ slower exit (was 200)
+            exiting={SlideOutRight.duration(380)}
+          >
+            <Swipeable
+              overshootRight={false}
+              renderLeftActions={EmptyAction}
+              onSwipeableOpen={() => {
+                // ⭐ Instant delete from UI
                 setNotifications(prev => prev.filter(n => n.id !== item.id));
 
-                navigation.navigate(
-                  user?.role === 'mentor' ? 'MentorApproval' : 'LeaveDetails',
-                  { leaveId: item.id },
+                // ⭐ API in background (no delay)
+                markNotificationRead(item.id).catch(err =>
+                  console.log('API failed:', err),
                 );
               }}
-              style={{
-                backgroundColor: '#F5F5F5',
-                padding: 18,
-                borderRadius: 12,
-                marginBottom: 12,
-                position: 'relative',
-              }}
             >
-              {/* Title */}
-              <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
-                {item.title}
-              </Text>
+              <TouchableOpacity
+                onPress={async () => {
+                  await markNotificationRead(item.id);
+                  setNotifications(prev => prev.filter(n => n.id !== item.id));
 
-              {/* Unread Badge */}
-              {!item.is_read && (
-                <View
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: 'dodgerblue',
-                    position: 'absolute',
-                    right: 12,
-                    top: 12,
-                  }}
-                />
-              )}
-
-              {/* Body */}
-              <Text style={{ marginTop: 5 }}>{item.body}</Text>
-
-              {/* Date */}
-              <Text
+                  navigation.navigate(
+                    user?.role === 'mentor' ? 'MentorApproval' : 'LeaveDetails',
+                    { leaveId: item.id },
+                  );
+                }}
                 style={{
-                  fontSize: 12,
-                  color: 'gray',
-                  marginTop: 8,
-                  textAlign: 'right',
+                  backgroundColor: '#F5F5F5',
+                  padding: 18,
+                  borderRadius: 12,
+                  marginBottom: 12,
+                  position: 'relative',
                 }}
               >
-                {item.updated_at.slice(0, 10)}
-              </Text>
-            </TouchableOpacity>
-          </Swipeable>
+                <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                  {item.title}
+                </Text>
+
+                {!item.is_read && (
+                  <View
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 5,
+                      backgroundColor: 'dodgerblue',
+                      position: 'absolute',
+                      right: 12,
+                      top: 12,
+                    }}
+                  />
+                )}
+
+                <Text style={{ marginTop: 5 }}>{item.body}</Text>
+
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: 'gray',
+                    marginTop: 8,
+                    textAlign: 'right',
+                  }}
+                >
+                  {item.updated_at.slice(0, 10)}
+                </Text>
+              </TouchableOpacity>
+            </Swipeable>
+          </Animated.View>
         )}
       />
     </SafeAreaView>

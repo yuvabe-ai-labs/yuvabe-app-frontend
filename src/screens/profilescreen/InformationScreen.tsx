@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native';
 import { fetchUserDetails } from '../../api/auth-api/authApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLORS } from '../../utils/theme';
 
 const InformationScreen = () => {
   const [loading, setLoading] = useState(true);
@@ -28,13 +30,19 @@ const InformationScreen = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#4A90E2" />
-      </View>
-    );
-  }
+  if (loading)
+      return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+          <View
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ marginTop: 10, color: 'gray' }}>
+              Loading ...
+            </Text>
+          </View>
+        </SafeAreaView>
+      );
 
   const user = info?.user;
   const home = info?.home_data;

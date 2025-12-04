@@ -1,7 +1,6 @@
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Image,
   ScrollView,
   Text,
@@ -15,96 +14,104 @@ import {
   getUserLeaveBalance,
   mentorDecision,
 } from '../../api/profile-api/profileApi';
+import { useLoadingStore } from '../../store/useLoadingStore';
 import { showToast } from '../../utils/ToastHelper';
 
 export default function MentorApprovalScreen({ route, navigation }: any) {
   const { leaveId } = route.params;
 
-  const [loading, setLoading] = useState(true);
   const [leave, setLeave] = useState<any>(null);
   const [sick, setSick] = useState(0);
   const [casual, setCasual] = useState(0);
   const [rejectComment, setRejectComment] = useState('');
-  const [submitLoading, setSubmitLoading] = useState(false);
+
+  const { showLoading, hideLoading } = useLoadingStore.getState();
 
   useEffect(() => {
+    const loadData = async () => {
+      showLoading('mentorApproval', 'Loading leave details...');
+      try {
+        const res = await getLeaveDetails(leaveId);
+        const data = res.data.data;
+        setLeave(data);
+
+        const bal = await getUserLeaveBalance(data.user_id);
+        setSick(bal.data.data.sick_remaining);
+        setCasual(bal.data.data.casual_remaining);
+      } catch (err) {
+        showToast('Error', 'Unable to load leave details', 'error');
+      } finally {
+        hideLoading();
+      }
+    };
+
     loadData();
   }, []);
 
-  const loadData = async () => {
+  const approveLeave = async () => {
+    showLoading('submit', 'Approving...');
     try {
-      const res = await getLeaveDetails(leaveId);
-      const data = res.data.data;
-      setLeave(data);
-
-      const bal = await getUserLeaveBalance(data.user_id);
-      setSick(bal.data.data.sick_remaining);
-      setCasual(bal.data.data.casual_remaining);
-    } catch (err) {
-      showToast('Error', 'Unable to load leave details');
-      console.log(err);
+      await mentorDecision(leaveId, { status: 'Approved' });
+      showToast('Success', 'Leave Approved', 'success');
+      navigation.goBack();
+    } catch (error: any) {
+      showToast('Error', error.message, 'error');
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   };
 
-  const approveLeave = async () => {
-    setSubmitLoading(true);
+  const rejectLeave = async () => {
+    if (!rejectComment.trim()) {
+      return showToast('Error', 'Comment required to reject', 'error');
+    }
+
+    showLoading('submit', 'Rejecting...');
     try {
-      await mentorDecision(leaveId, { status: 'Approved' });
-      showToast('Success', 'Leave Approved');
+      await mentorDecision(leaveId, {
+        status: 'Rejected',
+        comment: rejectComment,
+      });
+      showToast('Rejected', 'Leave request rejected', 'error');
       navigation.goBack();
     } catch (error: any) {
-      showToast('Error', error.message);
+      showToast('Error', error.message, 'error');
     } finally {
-      setSubmitLoading(false);
+      hideLoading();
     }
   };
 
   const toReadableDate = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate();
-    const month = date.toLocaleString('en-US', { month: 'short' }); // Jan, Feb, Mar
+    const month = date.toLocaleString('en-US', { month: 'short' });
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
   };
 
-  const rejectLeave = async () => {
-    if (!rejectComment.trim()) {
-      return showToast('Error', 'Comment required to reject');
-    }
-    setSubmitLoading(true);
-    try {
-      await mentorDecision(leaveId, {
-        status: 'Rejected',
-        comment: rejectComment,
-      });
-      showToast('Rejected', 'Leave request rejected');
-      navigation.goBack();
-    } catch (error: any) {
-      showToast('Error', error.message);
-    } finally {
-      setSubmitLoading(false);
-    }
-  };
-
-  // Loading State
-  if (loading || !leave) {
+  // ⚠ NO EARLY RETURN — RENDER EMPTY STATE INSTEAD
+  if (!leave) {
     return (
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
         <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
         >
-          <ActivityIndicator size="large" color="#4A90E2" />
+          <Text style={{ fontSize: 18, color: 'gray' }}>
+            Loading leave details...
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
+  // AFTER leave exists → render UI
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FBFF' }}>
-      {/* 🔵 CUSTOM HEADER */}
-      {/* 🔵 CUSTOM HEADER */}
+      {/* HEADER */}
       <View
         style={{
           flexDirection: 'row',
@@ -116,13 +123,12 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
           borderBottomColor: '#E6E6E6',
         }}
       >
-        {/* LEFT: Back + Title */}
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={{ padding: 5 }}
           >
-            <ChevronLeft size={28} color="#4A90E2" strokeWidth={2.5} />
+            <ChevronLeft size={28} color="#000" />
           </TouchableOpacity>
 
           <Text
@@ -137,7 +143,6 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
           </Text>
         </View>
 
-        {/* RIGHT: LOGO */}
         <Image
           source={require('../../assets/logo/yuvabe-logo.png')}
           style={{
@@ -148,13 +153,13 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
         />
       </View>
 
-      {/* CONTENT */}
+      {/* BODY */}
       <ScrollView style={{ padding: 18 }}>
-        {/* Employee Name */}
+        {/* Employee info */}
         <View>
           <Text style={{ fontSize: 15, color: '#777' }}>Employee</Text>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 2 }}>
-            {leave.user_name || 'Unknown User'}
+            {leave.user_name}
           </Text>
         </View>
 
@@ -238,19 +243,16 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
           multiline
         />
 
-        {/* Action Buttons */}
+        {/* Buttons */}
         <View style={{ flexDirection: 'row', marginTop: 35 }}>
-          {/* APPROVE BUTTON */}
           <TouchableOpacity
             style={{
               flex: 1,
-              backgroundColor: submitLoading ? '#7BC47F' : '#2E8B57',
+              backgroundColor: '#2E8B57',
               padding: 15,
               borderRadius: 12,
               marginRight: 12,
-              opacity: submitLoading ? 0.8 : 1,
             }}
-            disabled={submitLoading}
             onPress={approveLeave}
           >
             <Text
@@ -261,20 +263,17 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
                 fontWeight: '600',
               }}
             >
-              {submitLoading ? 'Approving...' : 'Approve'}
+              Approve
             </Text>
           </TouchableOpacity>
 
-          {/* REJECT BUTTON */}
           <TouchableOpacity
             style={{
               flex: 1,
-              backgroundColor: submitLoading ? '#F1948A' : '#D94343',
+              backgroundColor: '#D94343',
               padding: 15,
               borderRadius: 12,
-              opacity: submitLoading ? 0.8 : 1,
             }}
-            disabled={submitLoading}
             onPress={rejectLeave}
           >
             <Text
@@ -285,18 +284,10 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
                 fontWeight: '600',
               }}
             >
-              {submitLoading ? 'Rejecting...' : 'Reject'}
+              Reject
             </Text>
           </TouchableOpacity>
         </View>
-
-        {submitLoading && (
-          <ActivityIndicator
-            size="large"
-            style={{ marginTop: 20 }}
-            color="#4A90E2"
-          />
-        )}
       </ScrollView>
     </SafeAreaView>
   );

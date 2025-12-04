@@ -5,8 +5,8 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
+import BootSplash from 'react-native-bootsplash';
 import { fetchUserDetails } from '../api/auth-api/authApi';
-import SplashScreen from '../screens/auth/SplashScreen';
 import { getAccessToken, getItem, setItem } from '../store/storage';
 import { useUserStore } from '../store/useUserStore';
 import AppNavigator from './AppNavigator';
@@ -31,16 +31,15 @@ const RootNavigator = () => {
 
   useEffect(() => {
     const initAuth = async () => {
+      //   const DEV_BYPASS = true;
 
-    //   const DEV_BYPASS = true; 
-
-    // if (DEV_BYPASS) {
-    //   console.log('DEV MODE: Bypassing auth → Going straight to App');
-    //   setIsLoggedIn(true);
-    //   setIsVerified(true);
-    //   setIsAuthChecked(true);
-    //   return;
-    // }
+      // if (DEV_BYPASS) {
+      //   console.log('DEV MODE: Bypassing auth → Going straight to App');
+      //   setIsLoggedIn(true);
+      //   setIsVerified(true);
+      //   setIsAuthChecked(true);
+      //   return;
+      // }
       const token = getAccessToken();
       const storedVerified = await getItem('is_verified');
       const storedEmail = await getItem('pending_email');
@@ -80,8 +79,8 @@ const RootNavigator = () => {
         setIsLoggedIn(true);
         setIsVerified(verified);
 
-        await setItem('is_verified', verified ? 'true' : 'false');
-        await setItem('pending_email', email);
+        setItem('is_verified', verified ? 'true' : 'false');
+        setItem('pending_email', email);
       } catch (err) {
         console.error(' Could not verify user:', err);
         setIsLoggedIn(false);
@@ -95,7 +94,7 @@ const RootNavigator = () => {
   }, [setIsLoggedIn, setIsVerified, setUser]);
 
   if (!isAuthChecked) {
-    return <SplashScreen navigation={{ replace: () => {} }} />;
+    return null;
   }
 
   return (
@@ -103,6 +102,7 @@ const RootNavigator = () => {
       ref={navigationRef}
       onReady={() => {
         console.log('✅ Navigation is ready');
+        BootSplash.hide({ fade: true }); // 👈 smooth fade
       }}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>

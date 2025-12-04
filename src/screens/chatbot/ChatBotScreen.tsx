@@ -1,3 +1,4 @@
+import { ChevronLeft } from 'lucide-react-native';
 import { InferenceSession } from 'onnxruntime-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -34,7 +35,7 @@ type ChatTurn = {
   content: string;
 };
 
-const ChatScreen = () => {
+const ChatScreen = ({ navigation }: any) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [session, setSession] = useState<InferenceSession | null>(null);
@@ -270,8 +271,21 @@ const ChatScreen = () => {
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{
+          position: 'absolute',
+          top: 12,
+          left: 12,
+          zIndex: 20,
+          padding: 4,
+        }}
+      >
+        <ChevronLeft size={30} color="#000" strokeWidth={2.5} />
+      </TouchableOpacity>
+
       <KeyboardAvoidingView
-        style={styles.container}
+        style={[styles.container, { paddingTop: 70 }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
       >

@@ -17,6 +17,8 @@
 		A0512F02CB674F7A82E629F9 /* gilroy-bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5E3D939FC1CA4AA6873CC153 /* gilroy-bold.ttf */; };
 		EC7FC71949D947ADB3EA0190 /* gilroy-medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BB189F231F454D2EB4A4D319 /* gilroy-medium.ttf */; };
 		C5FCC0EE47FE4812AD27BC53 /* gilroy-regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ED75DFE839E74449A4DE3167 /* gilroy-regular.ttf */; };
+		975CEE3519D74B61B4D42ED5 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2AA82CCCFBA494DB580CD5D /* BootSplash.storyboard */; };
+		251B468976EC4F658D2E8046 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61EA54921FF14FD8B133C021 /* Colors.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		5E3D939FC1CA4AA6873CC153 /* gilroy-bold.ttf */ = {isa = PBXFileReference; name = "gilroy-bold.ttf"; path = "../src/assets/fonts/gilroy-bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		BB189F231F454D2EB4A4D319 /* gilroy-medium.ttf */ = {isa = PBXFileReference; name = "gilroy-medium.ttf"; path = "../src/assets/fonts/gilroy-medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		ED75DFE839E74449A4DE3167 /* gilroy-regular.ttf */ = {isa = PBXFileReference; name = "gilroy-regular.ttf"; path = "../src/assets/fonts/gilroy-regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C2AA82CCCFBA494DB580CD5D /* BootSplash.storyboard */ = {isa = PBXFileReference; name = "BootSplash.storyboard"; path = "YuvabeApp/BootSplash.storyboard"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		61EA54921FF14FD8B133C021 /* Colors.xcassets */ = {isa = PBXFileReference; name = "Colors.xcassets"; path = "YuvabeApp/Colors.xcassets"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = folder.assetcatalog; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +62,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				C2AA82CCCFBA494DB580CD5D /* BootSplash.storyboard */,
+				61EA54921FF14FD8B133C021 /* Colors.xcassets */,
 			);
 			name = YuvabeApp;
 			sourceTree = "<group>";
@@ -192,6 +198,8 @@
 				A0512F02CB674F7A82E629F9 /* gilroy-bold.ttf in Resources */,
 				EC7FC71949D947ADB3EA0190 /* gilroy-medium.ttf in Resources */,
 				C5FCC0EE47FE4812AD27BC53 /* gilroy-regular.ttf in Resources */,
+				975CEE3519D74B61B4D42ED5 /* BootSplash.storyboard in Resources */,
+				251B468976EC4F658D2E8046 /* Colors.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

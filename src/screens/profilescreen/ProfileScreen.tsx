@@ -1,4 +1,4 @@
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,106 +9,49 @@ import {
   Pencil,
 } from 'lucide-react-native';
 import React from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  fetchProfileDetails,
-  logoutDevice,
-} from '../../api/profile-api/profileApi';
-import { getItem, setItem } from '../../store/storage';
+import { fetchProfileDetails } from '../../api/profile-api/profileApi';
+import { getItem } from '../../store/storage';
+import { useLoadingStore } from '../../store/useLoadingStore';
 import { useUserStore } from '../../store/useUserStore';
+import { logoutUser } from '../../utils/LogoutHelper';
+import { COLORS } from '../../utils/theme';
 import { styles } from './ProfileStyles';
 
 const ProfileScreen = () => {
   const navigation = useNavigation<any>();
-  const { user, resetUser, setIsLoggedIn, setIsVerified } = useUserStore();
+  const { user } = useUserStore();
   const { setProfileDetails } = useUserStore();
   const { team_name, mentor_name } = useUserStore();
 
   // Saved image from storage
   const storedImage = getItem('profile_image');
   const profileSrc = storedImage || user?.profile_picture;
-  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   // Load profile details
   React.useEffect(() => {
-    fetchProfileDetails().then(res => {
-      if (res.code === 200) {
-        setProfileDetails(res.data);
+    const { showLoading, hideLoading } = useLoadingStore.getState();
+
+    const loadProfile = async () => {
+      showLoading('profile', 'Loading profile...');
+
+      try {
+        const res = await fetchProfileDetails();
+        if (res.code === 200) {
+          setProfileDetails(res.data);
+        }
+      } finally {
+        hideLoading();
       }
-    });
+    };
+
+    loadProfile();
   }, [setProfileDetails]);
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          setIsLoggingOut(true);
-          try {
-            await logoutDevice();
-          } catch (e) {
-            console.log('Error removing device:', e);
-          }
-          resetUser();
-          setIsLoggedIn(false);
-          setIsVerified(false);
-
-          await Promise.all([
-            setItem('is_verified', 'false'),
-            setItem('pending_email', ''),
-            setItem('access_token', ''),
-            setItem('refresh_token', ''),
-          ]);
-
-          setIsLoggingOut(false);
-
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: 'Auth' }],
-            }),
-          );
-        },
-      },
-    ]);
+    logoutUser(navigation);
   };
-
-  if (isLoggingOut) {
-    return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0,0,0,0.3)',
-        }}
-      >
-        <View
-          style={{
-            padding: 25,
-            backgroundColor: '#fff',
-            borderRadius: 10,
-            elevation: 4,
-          }}
-        >
-          <Text style={{ fontSize: 16, marginBottom: 15 }}>Logging out...</Text>
-          <ActivityIndicator size="large" color="#4A90E2" />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -118,10 +61,7 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* 🔵 Gradient Header */}
-        <LinearGradient
-          colors={['#4A90E2', '#5A6FF0']}
-          style={styles.headerBg}
-        />
+        <View style={[styles.headerBg, { backgroundColor: COLORS.primary }]} />
 
         {/* 🔙 Back Button */}
         <TouchableOpacity
@@ -174,7 +114,11 @@ const ProfileScreen = () => {
                 style={{ width: 65, height: 65, borderRadius: 32.5 }}
               />
             ) : (
-              <IconLucideUser size={34} color="#4A90E2" strokeWidth={2.5} />
+              <IconLucideUser
+                size={34}
+                color={COLORS.primary}
+                strokeWidth={2.5}
+              />
             )}
           </View>
           {/* Details */}

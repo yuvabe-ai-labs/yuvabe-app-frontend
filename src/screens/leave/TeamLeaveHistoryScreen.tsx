@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchTeamLeaveHistory } from '../../api/profile-api/profileApi';
+import { useLoadingStore } from '../../store/useLoadingStore';
 import { formatDate } from './LeaveDetailsScreen';
 
 export default function TeamLeaveHistoryScreen() {
@@ -15,8 +16,14 @@ export default function TeamLeaveHistoryScreen() {
   }, []);
 
   const load = async () => {
-    const res = await fetchTeamLeaveHistory();
-    setLeaves(res.data.data);
+    const { showLoading, hideLoading } = useLoadingStore.getState();
+    showLoading('teamHistory', 'Loading leave history ');
+    try {
+      const res = await fetchTeamLeaveHistory();
+      setLeaves(res.data.data);
+    } finally {
+      hideLoading();
+    }
   };
 
   const renderItem = ({ item }: any) => (

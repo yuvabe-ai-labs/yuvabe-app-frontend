@@ -9,18 +9,24 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchPendingLeaves } from '../../api/profile-api/profileApi';
+import { useLoadingStore } from '../../store/useLoadingStore';
 
 export default function MentorLeaveListScreen({ navigation }: any) {
   const [pendingLeaves, setPendingLeaves] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadPendingLeaves();
+    loadPendingLeaves(); // 👉 first load uses GLOBAL LOADING
   }, []);
 
-  const loadPendingLeaves = async () => {
+  const loadPendingLeaves = async (isRefresh = false) => {
+    const { showLoading, hideLoading } = useLoadingStore.getState();
+
+    if (!isRefresh) {
+      showLoading('pending', 'Loading pending leaves...');
+    }
+
     try {
-      setLoading(true);
       const res = await fetchPendingLeaves();
 
       const sorted = res.data.data.sort(
@@ -32,7 +38,8 @@ export default function MentorLeaveListScreen({ navigation }: any) {
     } catch (err: any) {
       console.log('🔥 mentor list error:', err?.response?.data || err);
     } finally {
-      setLoading(false);
+      if (!isRefresh) hideLoading();
+      if (isRefresh) setRefreshing(false);
     }
   };
 
@@ -42,7 +49,7 @@ export default function MentorLeaveListScreen({ navigation }: any) {
         navigation.navigate('MentorApproval', { leaveId: item.id })
       }
       style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: '#F4F6F9',
         padding: 18,
         borderRadius: 12,
         marginBottom: 14,
@@ -51,7 +58,6 @@ export default function MentorLeaveListScreen({ navigation }: any) {
         shadowRadius: 4,
       }}
     >
-      {/* Leave Type + User */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <Text style={{ fontWeight: '700', fontSize: 18, color: '#2C3E50' }}>
           {item.leave_type}
@@ -62,7 +68,6 @@ export default function MentorLeaveListScreen({ navigation }: any) {
         </Text>
       </View>
 
-      {/* Dates */}
       <View
         style={{ flexDirection: 'row', marginTop: 10, alignItems: 'center' }}
       >
@@ -73,7 +78,6 @@ export default function MentorLeaveListScreen({ navigation }: any) {
         </Text>
       </View>
 
-      {/* Updated At */}
       <View style={{ marginTop: 6 }}>
         <Text style={{ fontSize: 12, color: 'gray' }}>
           Updated: {item.updated_at?.slice(0, 10)}
@@ -83,9 +87,8 @@ export default function MentorLeaveListScreen({ navigation }: any) {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F4F6F9' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
       <View style={{ flex: 1, padding: 16 }}>
-        {/* Header */}
         {/* Header */}
         <View
           style={{
@@ -94,46 +97,19 @@ export default function MentorLeaveListScreen({ navigation }: any) {
             marginBottom: 20,
           }}
         >
-          {/* LEFT: Back + Title */}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flex: 1,
-            }}
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ padding: 6, marginRight: 10 }}
           >
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{
-                padding: 6,
-                marginRight: 10,
-              }}
-            >
-              <ChevronLeft size={28} color="#000" strokeWidth={2} />
-            </TouchableOpacity>
+            <ChevronLeft size={28} color="#000" strokeWidth={2} />
+          </TouchableOpacity>
 
-            <Text
-              style={{
-                fontWeight: '800',
-                fontSize: 18,
-                color: '#1C1C1E',
-              }}
-            >
-              Pending Leave Requests
-            </Text>
-          </View>
-
-          {/* RIGHT: Logo */}
-          {/* <Image
-            source={require('../../assets/logo/yuvabe-logo.png')}
-            style={{
-              width: 40,
-              height: 40,
-              resizeMode: 'contain',
-            }}
-          /> */}
+          <Text style={{ fontWeight: '800', fontSize: 18, color: '#1C1C1E' }}>
+            Pending Leave Requests
+          </Text>
         </View>
 
+        {/* LIST */}
         <FlatList
           data={pendingLeaves}
           keyExtractor={(item: any) => item.id}
@@ -141,15 +117,22 @@ export default function MentorLeaveListScreen({ navigation }: any) {
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
-              refreshing={loading}
-              onRefresh={loadPendingLeaves}
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                loadPendingLeaves(true); // 👉 refresh mode
+              }}
             />
           }
           ListEmptyComponent={
-            !loading ? (
-              <View style={{ marginTop: 80, alignItems: 'center' }}>
+            !refreshing && pendingLeaves.length === 0 ? (
+              <View
+                style={{
+                  marginTop: 80,
+                  alignItems: 'center',
+                }}
+              >
                 <CloudOff size={60} color="gray" strokeWidth={2} />
-
                 <Text
                   style={{
                     marginTop: 10,

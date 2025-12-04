@@ -51,7 +51,7 @@ export const useWeeklyWaterChart = () => {
           : 0;
 
         return Math.round(total);
-      });
+      }); 
 
       const formatted = {
         labels: labels,

@@ -97,7 +97,7 @@ const SignUpScreen = ({ navigation }: any) => {
         routes: [{ name: 'App' }],
       });
     } catch (error: any) {
-      showToast('Signup Failed', error.message || 'Something went wrong');
+      showToast('Signup Failed', error.message || 'Something went wrong',"error");
     } finally {
       setLoading(false);
     }
