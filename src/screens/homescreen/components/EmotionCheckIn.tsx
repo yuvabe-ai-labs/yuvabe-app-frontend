@@ -14,7 +14,16 @@ interface Props {
   onSelect: (emoji: string | null) => void;
 }
 
-const EMOJIS = ['😀', '🙂', '😐', '😕', '😢', '😡', '🤯'];
+const EMOJIS = ['😄', '😀', '🙂', '😐', '😢', '😡', '🤯'];
+const EMOJI_LABELS: Record<string, string> = {
+  '😄': 'Joyful',
+  '😀': 'Happy',
+  '🙂': 'Calm',
+  '😐': 'Neutral',
+  '😢': 'Anxious',
+  '😡': 'Sad',
+  '🤯': 'Frustrated',
+};
 
 const EmotionCheckIn: React.FC<Props> = ({
   visible,
@@ -36,22 +45,17 @@ const EmotionCheckIn: React.FC<Props> = ({
 
             <View style={styles.emojiRow}>
               {EMOJIS.map((emoji, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => onSelect(emoji)}
-                  style={styles.emojiButton}
-                >
-                  <Text style={styles.emojiText}>{emoji}</Text>
-                </TouchableOpacity>
+                <View key={index} style={styles.emojiWrapper}>
+                  <TouchableOpacity
+                    onPress={() => onSelect(emoji)}
+                    style={styles.emojiButton}
+                  >
+                    <Text style={styles.emojiText}>{emoji}</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.emojiLabel}>{EMOJI_LABELS[emoji]}</Text>
+                </View>
               ))}
             </View>
-
-            <TouchableOpacity
-              onPress={() => onSelect(null)}
-              style={styles.nullButton}
-            >
-              <Text style={styles.nullIcon}>🚫</Text>
-            </TouchableOpacity>
           </View>
         </TouchableWithoutFeedback>
       </View>
@@ -73,6 +77,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
+  emojiWrapper: {
+    alignItems: 'center',
+    margin: 5,
+  },
+  emojiLabel: {
+    fontSize: 12,
+    color: '#555',
+    marginTop: 3,
+  },
+
   container: {
     backgroundColor: 'white',
     padding: 20,

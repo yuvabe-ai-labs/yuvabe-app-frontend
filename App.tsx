@@ -21,6 +21,29 @@ import {
 } from './src/utils/pushNotifications';
 import { showToast } from './src/utils/ToastHelper';
 
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+  if (type === EventType.PRESS) {
+    const data = detail.notification?.data;
+    console.log('[v0] Notification pressed (background):', data);
+
+    if (!data) return;
+
+    if (data.type === 'home_alert') {
+      (globalThis as any).homeAlert = {
+        visible: true,
+        message: data.message || '',
+      };
+      return;
+    }
+
+    if (data.screen && data.leave_id) {
+      navigationRef.current?.navigate(String(data.screen), {
+        leaveId: String(data.leave_id),
+      });
+    }
+  }
+});
+
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('[v0] Background message received:', remoteMessage);
 
@@ -33,14 +56,13 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   await notifee.displayNotification({
     title: String(remoteMessage.data?.title),
     body: String(remoteMessage.data?.body),
-
     data: remoteMessage.data,
     android: {
       channelId,
       importance: AndroidImportance.HIGH,
       smallIcon: 'ic_stat_yuvabe',
       largeIcon: require('../yuvabe-app-frontend/src/assets/logo/yuvabe-logo.png'),
-      pressAction: { id: 'default', launchActivity: 'default' },
+      pressAction: { id: 'default' }, // FIXED
     },
   });
 });
@@ -52,40 +74,30 @@ function App(): React.JSX.Element {
     const initializeNotifee = async () => {
       try {
         await createDefaultChannel();
-        console.log('[v0] Notification channel created');
-
         await requestNotificationPermission();
-        console.log('[v0] Notification permissions requested');
       } catch (error) {
         console.error('[v0] Failed to initialize notifications:', error);
       }
     };
-
     initializeNotifee();
   }, []);
 
-  // Notification Permission Listener
   useEffect(() => {
     const updatePermission = async () => {
       const enabled = await checkNotificationPermission();
       useNotificationStore.getState().setNotificationEnabled(enabled);
-      console.log('[v0] Notification enabled:', enabled);
     };
     updatePermission();
     const subscription = AppState.addEventListener('change', state => {
-      if (state === 'active') {
-        updatePermission();
-      }
+      if (state === 'active') updatePermission();
     });
     return () => subscription.remove();
   }, []);
 
-  // Start Model Download
   useEffect(() => {
     startDownload();
   }, [startDownload]);
 
-  // Navigation Helper
   function safeNavigate(screen: string, leaveId: string) {
     const tryNav = () => {
       if (navigationRef.current?.isReady()) {
@@ -111,46 +123,30 @@ function App(): React.JSX.Element {
     tryNav();
   }
 
-  // FCM LISTENERS
   useEffect(() => {
-    // Get device token
+    // Device token
     getDeviceToken().then(token => {
       console.log('[v0] Device token:', token);
     });
 
-    notifee.onBackgroundEvent(async ({ type, detail }) => {
-      if (type === EventType.PRESS) {
-        const data = detail.notification?.data;
-        console.log('[v0] Notification pressed (background):', data);
-
-        if (data?.screen && data?.leave_id) {
-          navigationRef.current?.navigate(String(data.screen), {
-            leaveId: String(data.leave_id),
-          });
-        }
-      }
-    });
-
     const unsubscribeNotifeeEvent = notifee.onForegroundEvent(
       ({ type, detail }) => {
-        console.log('[v0] Notifee event:', type);
-
         if (type === EventType.PRESS) {
-          const { notification } = detail;
-          const customData = notification?.data;
+          const customData = detail.notification?.data;
+          if (!customData) return;
 
-          console.log('[v0] Notification pressed with data:', customData);
-
-          if (customData?.type === 'home_alert') {
+          // Home alert
+          if (customData.type === 'home_alert') {
             (globalThis as any).homeAlert = {
               visible: true,
-              message: customData?.message || 'Hello!',
+              message: customData.message || 'Hello!',
             };
             safeNavigateToHome();
             return;
           }
 
-          if (customData?.screen && customData?.leave_id) {
+          // Other navigation
+          if (customData.screen && customData.leave_id) {
             safeNavigate(
               String(customData.screen),
               String(customData.leave_id),
@@ -162,53 +158,44 @@ function App(): React.JSX.Element {
 
     const unsubscribeBackground = messaging().onNotificationOpenedApp(
       remoteMessage => {
-        console.log('[v0] Notification opened from background:', remoteMessage);
-
         if (!remoteMessage?.data) return;
         const { screen, leave_id } = remoteMessage.data;
+
         showToast(
           String(remoteMessage.data?.title),
           String(remoteMessage.data?.body),
           remoteMessage.data?.status === 'error' ? 'error' : 'success',
         );
 
-        if (screen && leave_id) {
-          safeNavigate(String(screen), String(leave_id));
-        }
+        if (screen && leave_id) safeNavigate(String(screen), String(leave_id));
       },
     );
 
     const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-      console.log('[v0] Foreground message received:', remoteMessage);
-
       try {
         await notifee.displayNotification({
           title: String(remoteMessage.data?.title),
           body: String(remoteMessage.data?.body),
-
           data: remoteMessage.data,
           android: {
             channelId: 'default',
             importance: AndroidImportance.HIGH,
             smallIcon: 'ic_stat_yuvabe',
             largeIcon: require('../yuvabe-app-frontend/src/assets/logo/yuvabe-logo.png'),
-            pressAction: { id: 'default' },
+            pressAction: { id: 'default' }, // FIXED
           },
         });
-        console.log('[v0] Notification displayed successfully');
       } catch (error) {
         console.error('[v0] Failed to display notification:', error);
       }
     });
 
-    // App Opened From Quit State
     messaging()
       .getInitialNotification()
       .then(remoteMessage => {
-        console.log('[v0] Initial notification:', remoteMessage);
-
         if (!remoteMessage?.data) return;
         const { type, screen, leave_id, message } = remoteMessage.data;
+
         setTimeout(() => {
           if (type === 'home_alert') {
             (globalThis as any).homeAlert = {

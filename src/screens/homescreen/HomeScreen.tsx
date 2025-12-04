@@ -58,15 +58,15 @@ const HomeScreen = ({ navigation }: any) => {
 
   const [user, setUser] = useState<any>(null);
 
-  const EMOJI_MAP: { [key: string]: number } = {
-    '😀': 1,
-    '🙂': 2,
-    '😐': 3,
-    '😕': 4,
-    '😢': 5,
-    '😡': 6,
-    '🤯': 7,
-  };
+  const EMOJI_TO_EMOTION: Record<string, string> = {
+  '😄': 'joyful',
+  '😀': 'happy',
+  '🙂': 'calm',
+  '😐': 'neutral',
+  '😢': 'anxious',
+  '😡': 'sad',
+  '🤯': 'frustrated',
+};
 
   //
   useEffect(() => {
@@ -89,7 +89,7 @@ const HomeScreen = ({ navigation }: any) => {
     };
 
     loadUser();
-  }, []);
+  }, [profileImage]);
 
   useEffect(() => {
     registerDevice();
@@ -145,7 +145,7 @@ const HomeScreen = ({ navigation }: any) => {
     };
 
     fetchQuote();
-  }, []);
+  }, [author,quote]);
 
   useEffect(() => {
     const savedImage = getItem('profile_image');
@@ -252,12 +252,12 @@ const HomeScreen = ({ navigation }: any) => {
               onClose={() => setShowNotificationModal(false)}
               onSelect={async emoji => {
                 setShowNotificationModal(false);
-                const emojiNumber = emoji ? EMOJI_MAP[emoji] : null;
+                const emotion = emoji ? EMOJI_TO_EMOTION[emoji] : null;
                 try {
                   const timeOfDay = homeAlertMessage.includes('morning')
                     ? 'morning'
                     : 'evening';
-                  await submitEmotion(user?.user.id, emojiNumber, timeOfDay);
+                  await submitEmotion(user?.user.id, emotion, timeOfDay);
                 } catch (err) {
                   console.error('Emotion submit failed', err);
                 }
