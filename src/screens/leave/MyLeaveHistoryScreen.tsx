@@ -2,8 +2,6 @@ import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   FlatList,
   RefreshControl,
   Text,
@@ -15,6 +13,8 @@ import {
   cancelLeave,
   fetchMyLeaveHistory,
 } from '../../api/profile-api/profileApi';
+import CustomAlert from '../../components/CustomAlert';
+import { useLoadingStore } from '../../store/useLoadingStore';
 import { showToast } from '../../utils/ToastHelper';
 import { formatDate } from './LeaveDetailsScreen';
 
@@ -24,17 +24,21 @@ export default function MyLeaveHistoryScreen() {
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedLeave, setSelectedLeave] = useState<any>(null);
+  const [showCancelLeave, setShowCancelLeave] = useState(false);
 
   useEffect(() => {
     load();
   }, []);
 
   const load = async () => {
+    const { showLoading, hideLoading } = useLoadingStore.getState();
+    showLoading('history', 'Loading leave history');
     try {
       const res = await fetchMyLeaveHistory();
       setLeaves(res.data.data);
     } finally {
-      setLoading(false);
+      hideLoading();
       setRefreshing(false);
     }
   };
@@ -44,24 +48,9 @@ export default function MyLeaveHistoryScreen() {
     load();
   };
 
-  // Cancel leave handler
-  const handleCancel = (leave: any) => {
-    Alert.alert('Cancel Leave', 'Are you sure?', [
-      { text: 'No' },
-      {
-        text: 'Yes',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await cancelLeave(leave.id);
-            showToast('Success', 'Leave cancelled');
-            load();
-          } catch (err: any) {
-            showToast('Error', err.response?.data?.detail || 'Failed');
-          }
-        },
-      },
-    ]);
+  const handleCancel = (item: any) => {
+    setSelectedLeave(item);
+    setShowCancelLeave(true);
   };
 
   // Render Leave Card
@@ -141,18 +130,6 @@ export default function MyLeaveHistoryScreen() {
     );
   };
 
-  // FIRST LOAD LOADING UI
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#4A90E2" />
-        <Text style={{ marginTop: 10, color: 'gray' }}>
-          Loading your leave history...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -200,6 +177,39 @@ export default function MyLeaveHistoryScreen() {
             }}
           /> */}
         </View>
+        <CustomAlert
+          visible={showCancelLeave}
+          title="Cancel Leave"
+          message="Are you sure?"
+          confirmText="Yes"
+          cancelText="No"
+          destructive
+          onCancel={() => {
+            setShowCancelLeave(false);
+            setSelectedLeave(null);
+          }}
+          onConfirm={async () => {
+            setShowCancelLeave(false);
+
+            if (!selectedLeave) return;
+            const { showLoading, hideLoading } = useLoadingStore.getState();
+            showLoading('cancelLeave', 'Cancelling leave...');
+
+            try {
+              await cancelLeave(selectedLeave.id);
+              showToast('Success', 'Leave cancelled', 'success');
+              load();
+            } catch (err: any) {
+              showToast(
+                'Error',
+                err.response?.data?.detail || 'Failed',
+                'error',
+              );
+            } finally {
+              hideLoading();
+            }
+          }}
+        />
 
         {/* LIST */}
         <View style={{ flex: 1, paddingHorizontal: 15 }}>

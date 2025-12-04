@@ -11,6 +11,7 @@ import {
   Animated,
   Dimensions,
   Modal,
+  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -45,6 +46,7 @@ const WaterTrackerScreen = ({ navigation }: any) => {
 
   const fillAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
+  let saveTimeout: any = null;
 
   useEffect(() => {
     const loadData = async () => {
@@ -82,7 +84,7 @@ const WaterTrackerScreen = ({ navigation }: any) => {
       duration: 800,
       useNativeDriver: false,
     }).start();
-  }, [todayTotal]);
+  }, [fillAnim, todayTotal]);
 
   const pulseAnimation = () => {
     Animated.sequence([
@@ -99,13 +101,36 @@ const WaterTrackerScreen = ({ navigation }: any) => {
     ]).start();
   };
 
+  const autoSaveToDB = (value: number) => {
+    clearTimeout(saveTimeout);
+
+    saveTimeout = setTimeout(async () => {
+      try {
+        if (lastLogId) {
+          const saved = await updateWaterLog(lastLogId, value);
+          console.log(saved);
+        } else {
+          const saved = await logWater(value);
+          setLastLogId(saved.id);
+        }
+
+        storage.set(WATER_TODAY, value);
+        storage.set(WATER_LAST_UPDATE, Date.now());
+        console.log('Auto synced to DB');
+      } catch (err) {
+        console.log('Auto-sync failed:', err);
+        showToast('Error', 'Failed to update. Will retry.', 'error');
+      }
+    }, 800);
+  };
+
   const addWater = (ml: number) => {
     pulseAnimation();
     const newTotal = Math.min(todayTotal + ml, DAILY_GOAL);
     setTodayTotal(newTotal);
     storage.set(WATER_TODAY, newTotal);
-    setShowSave(true);
     setModalVisible(false);
+    autoSaveToDB(newTotal);
   };
 
   const removeWater = (ml = 250) => {
@@ -113,8 +138,8 @@ const WaterTrackerScreen = ({ navigation }: any) => {
     const newTotal = Math.max(todayTotal - ml, 0);
     setTodayTotal(newTotal);
     storage.set(WATER_TODAY, newTotal);
-    setShowSave(true);
     setModalVisible(false);
+    autoSaveToDB(newTotal);
   };
 
   const handleSaveToDB = async () => {
@@ -133,10 +158,10 @@ const WaterTrackerScreen = ({ navigation }: any) => {
       storage.set(WATER_TODAY, todayTotal);
 
       setShowSave(false);
-      showToast('Success', 'Water intake saved!');
+      showToast('Success', 'Water intake saved!', 'success');
     } catch (err) {
       console.log('Failed to save:', err);
-      showToast('Error', 'Failed to update DB');
+      showToast('Error', 'Failed to update DB', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -170,15 +195,6 @@ const WaterTrackerScreen = ({ navigation }: any) => {
               Water Intake
             </Text>
           </View>
-
-          {/* <Image
-            source={require('../../../assets/logo/yuvabe-logo.png')}
-            style={{
-              width: 40,
-              height: 40,
-              resizeMode: 'contain',
-            }}
-          /> */}
         </View>
 
         <View style={styles.statsContainer}>
@@ -318,52 +334,77 @@ const WaterTrackerScreen = ({ navigation }: any) => {
               <Text style={{ fontSize: 14, color: '#ef4444' }}>{error}</Text>
             </View>
           ) : chartData ? (
-            <View style={{ marginVertical: 10 }}>
-              <BarChart
-                data={chartData}
-                width={screenWidth - 30}
-                height={280}
-                yAxisLabel=""
-                yAxisSuffix="ml"
-                yAxisInterval={500}
-                fromZero={true}
-                segments={5}
-                chartConfig={{
-                  backgroundColor: '#ffffff',
-                  backgroundGradientFrom: '#ffffff',
-                  backgroundGradientTo: '#f8fafc',
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-                  labelColor: (opacity = 1) =>
-                    `rgba(100, 116, 139, ${opacity})`,
-                  style: {
-                    marginVertical: 8,
-                    borderRadius: 12,
-                    paddingRight: 30,
-                    marginHorizontal: 30,
+            // START CHART UI WRAPPER
+            <View
+              style={{
+                marginHorizontal: 15,
+                overflow: 'hidden',
+                borderRadius: 12, // **UI FIX: Rounded corners**
+                backgroundColor: '#f8fafc', // **UI FIX: Light gray background**
+                // **UI FIX: Shadow for depth**
+                ...Platform.select({
+                  ios: {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
                   },
-                  propsForDots: {
-                    r: '4',
-                    strokeWidth: '2',
-                    stroke: '#3b82f6',
+                  android: {
+                    elevation: 4,
                   },
-                  propsForLabels: {
-                    fontSize: 12,
-                    fontWeight: '600',
-                  },
-                  propsForBackgroundLines: {
-                    strokeDasharray: '5,5',
-                    stroke: '#e2e8f0',
-                  },
-                }}
-                withVerticalLabels={true}
-                withHorizontalLabels={true}
-                withInnerLines={false}
-                showValuesOnTopOfBars={true}
-                flatColor={true}
-              />
+                }),
+              }}
+            >
+              <View style={{ marginVertical: 10 }}>
+                <BarChart
+                  data={chartData}
+                  // **LAYOUT FIX 1: Set chart width slightly wider than the screen**
+                  width={screenWidth - 36}
+                  height={280}
+                  yAxisLabel=""
+                  yAxisSuffix="ml"
+                  yAxisInterval={500}
+                  fromZero={true}
+                  segments={5}
+                  chartConfig={{
+                    backgroundColor: '#ffffff',
+                    backgroundGradientFrom: '#ffffff',
+                    backgroundGradientTo: '#f8fafc',
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+                    labelColor: (opacity = 1) =>
+                      `rgba(100, 116, 139, ${opacity})`,
+                    style: {
+                      marginVertical: 0,
+                      borderRadius: 0,
+                      // **LAYOUT FIX 2: Aggressive padding (110) to push content left**
+                      paddingRight: 10,
+                      paddingLeft: 20,
+                    },
+                    propsForDots: {
+                      r: '4',
+                      strokeWidth: '2',
+                      stroke: '#3b82f6',
+                    },
+                    propsForLabels: {
+                      fontSize: 12,
+                      fontWeight: '600',
+                    },
+                    propsForBackgroundLines: {
+                      strokeDasharray: '5,5',
+                      stroke: '#e2e8f0',
+                    },
+                  }}
+                  withVerticalLabels={true}
+                  withHorizontalLabels={true}
+                  withInnerLines={false}
+                  showValuesOnTopOfBars={true}
+                  flatColor={true}
+                />
+              </View>
             </View>
           ) : (
+            // END CHART UI WRAPPER
             <View
               style={{
                 height: 280,

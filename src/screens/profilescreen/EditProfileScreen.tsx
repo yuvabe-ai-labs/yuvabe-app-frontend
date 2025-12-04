@@ -185,11 +185,11 @@ const EditProfileScreen = ({ navigation }: any) => {
 
       const updatedUser = await updateProfile(payload);
       setUser(updatedUser);
-      showToast('Success', 'Profile updated successfully!');
+      showToast('Success', 'Profile updated successfully!',"success");
 
       navigation.goBack();
     } catch (err: any) {
-      showToast('Update failed', err.message || 'Something went wrong');
+      showToast('Update failed', err.message || 'Something went wrong',"error");
     } finally {
       setLoading(false);
     }

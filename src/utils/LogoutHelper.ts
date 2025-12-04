@@ -1,51 +1,57 @@
 import { CommonActions } from '@react-navigation/native';
-import { Alert } from 'react-native';
 import { logoutDevice } from '../api/profile-api/profileApi';
 import { setItem } from '../store/storage';
+import { useAlertStore } from '../store/useAlertStore';
+import { useLoadingStore } from '../store/useLoadingStore';
 import { useUserStore } from '../store/useUserStore';
 
 export const logoutUser = (navigation: any) => {
-  const { resetUser, setIsLoggedIn, setIsVerified, setLogoutLoading } =
-    useUserStore.getState();
+  const { resetUser, setIsLoggedIn, setIsVerified } = useUserStore.getState();
 
-  Alert.alert('Logout', 'Are you sure?', [
-    { text: 'Cancel', style: 'cancel' },
-    {
-      text: 'Logout',
-      style: 'destructive',
-      onPress: () => {
-        // 🔥 Force UI update before async code runs
-        setTimeout(async () => {
-          setLogoutLoading(true);
+  const { showAlert, hideAlert } = useAlertStore.getState();
+  const { showLoading, hideLoading } = useLoadingStore.getState();
 
-          try {
-            await logoutDevice();
-          } catch (e) {
-            console.log('Device logout error:', e);
-          }
+  showAlert({
+    title: 'Logout',
+    message: 'Are you sure?',
+    confirmText: 'Logout',
+    cancelText: 'Cancel',
+    destructive: true,
 
-          resetUser();
-          setIsLoggedIn(false);
-          setIsVerified(false);
+    onCancel: () => hideAlert(),
 
-          await Promise.all([
-            setItem('is_verified', 'false'),
-            setItem('pending_email', ''),
-            setItem('access_token', ''),
-            setItem('refresh_token', ''),
-          ]);
+    onConfirm: async () => {
+      hideAlert();
 
-          // Stop loading
-          setLogoutLoading(false);
+      // ⭐ GLOBAL LOADING STARTS
+      showLoading('logout', 'Logging out...');
 
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: 'Auth' }],
-            }),
-          );
-        }, 0);
-      },
+      try {
+        await logoutDevice();
+      } catch (e) {
+        console.log('Device logout error:', e);
+      }
+
+      resetUser();
+      setIsLoggedIn(false);
+      setIsVerified(false);
+
+      await Promise.all([
+        setItem('is_verified', 'false'),
+        setItem('pending_email', ''),
+        setItem('access_token', ''),
+        setItem('refresh_token', ''),
+      ]);
+
+      // ⭐ GLOBAL LOADING ENDS
+      hideLoading();
+
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Auth' }],
+        }),
+      );
     },
-  ]);
+  });
 };

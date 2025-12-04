@@ -7,6 +7,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -88,7 +89,7 @@ const SignInScreen = ({ navigation }: any) => {
         setItem('pending_email', data.email);
         navigation.navigate('VerifyEmail', { email: data.email });
       } else {
-        showToast('Error', error.message || 'Something went wrong');
+        showToast('Error', error.message || 'Something went wrong',"error");
       }
     } finally {
       setLoading(false);

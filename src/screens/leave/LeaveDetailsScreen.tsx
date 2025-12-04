@@ -1,15 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLeaveDetails } from '../../api/profile-api/profileApi';
+import { useLoadingStore } from '../../store/useLoadingStore';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -33,31 +28,17 @@ export default function LeaveDetailsScreen({ route }: any) {
   }, []);
 
   const loadLeave = async () => {
+    const { showLoading, hideLoading } = useLoadingStore.getState();
+    showLoading('details', 'Loading leave details...');
     try {
       const res = await getLeaveDetails(leaveId);
       setLeave(res.data.data);
     } catch (e) {
       console.log('leave error:', e);
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   };
-
-  // Loading Screen
-  if (loading) {
-    return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={{ marginTop: 10, color: 'gray' }}>
-            Loading leave details...
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   // Error Screen
   if (!leave) {

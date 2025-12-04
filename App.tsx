@@ -8,8 +8,9 @@ import { AppState, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { toastConfig } from './src/components/customToast';
+import { toastConfig } from './src/components/CustomToast';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
+import AppProviders from './src/providers/AppProviders';
 import { useModelDownloadStore } from './src/store/modelDownloadStore';
 import { useNotificationStore } from './src/store/notificationStore';
 import { createDefaultChannel } from './src/utils/noificationChannel';
@@ -37,7 +38,9 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
     android: {
       channelId,
       importance: AndroidImportance.HIGH,
-      pressAction: { id: 'default' },
+      smallIcon: 'ic_stat_yuvabe',
+      largeIcon: require('../yuvabe-app-frontend/src/assets/logo/yuvabe-logo.png'),
+      pressAction: { id: 'default', launchActivity: 'default' },
     },
   });
 });
@@ -166,6 +169,7 @@ function App(): React.JSX.Element {
         showToast(
           String(remoteMessage.data?.title),
           String(remoteMessage.data?.body),
+          remoteMessage.data?.status === 'error' ? 'error' : 'success',
         );
 
         if (screen && leave_id) {
@@ -186,6 +190,8 @@ function App(): React.JSX.Element {
           android: {
             channelId: 'default',
             importance: AndroidImportance.HIGH,
+            smallIcon: 'ic_stat_yuvabe',
+            largeIcon: require('../yuvabe-app-frontend/src/assets/logo/yuvabe-logo.png'),
             pressAction: { id: 'default' },
           },
         });
@@ -227,8 +233,10 @@ function App(): React.JSX.Element {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
       <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootNavigator />
-        <Toast config={toastConfig} />
+        <AppProviders>
+          <RootNavigator />
+          <Toast config={toastConfig} />
+        </AppProviders>
       </GestureHandlerRootView>
     </SafeAreaView>
   );

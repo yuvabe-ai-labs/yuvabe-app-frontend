@@ -4,7 +4,7 @@ export async function createDefaultChannel() {
   await notifee.createChannel({
     id: 'default',
     name: 'Default Notifications',
-    importance: AndroidImportance.HIGH, 
+    importance: AndroidImportance.HIGH,
     sound: 'default',
   });
 }
