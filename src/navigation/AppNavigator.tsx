@@ -9,6 +9,7 @@ import TeamLeaveHistoryScreen from '../screens/leave/TeamLeaveHistoryScreen';
 import MentorApprovalScreen from '../screens/mentor/MentorApproveScreen';
 import MentorLeaveListScreen from '../screens/mentor/MentorLeaveListScreen';
 import NotificationScreen from '../screens/notification/NotificationScreen';
+import PayslipScreen from '../screens/payslip/PaySlipScreen';
 import AssetSection from '../screens/profilescreen/AssetSection';
 import EditProfileScreen from '../screens/profilescreen/EditProfileScreen';
 import InformationScreen from '../screens/profilescreen/InformationScreen';
@@ -148,6 +149,11 @@ const AppNavigator = () => {
         <AppStack.Screen
           name="WaterTracker"
           component={WaterTrackerScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="PaySlip"
+          component={PayslipScreen}
           options={{ headerShown: false }}
         />
       </AppStack.Navigator>
