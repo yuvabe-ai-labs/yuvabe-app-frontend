@@ -20,6 +20,7 @@ import {
   requestNotificationPermission,
 } from './src/utils/pushNotifications';
 import { showToast } from './src/utils/ToastHelper';
+import './global.css';
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   if (type === EventType.PRESS) {

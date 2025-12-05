@@ -6,8 +6,9 @@ import {
   FilePlus,
   History,
   LogOut,
+  NotebookPen,
   User,
-  Users,
+  Users
 } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
@@ -99,6 +100,15 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           onPress={() => {
             closeDrawer();
             navigation.navigate('Chat');
+          }}
+        />
+
+        <DrawerItem
+          label="Journaling"
+          icon={<NotebookPen size={20} color="#444" strokeWidth={1.8} />}
+          onPress={() => {
+            closeDrawer();
+            navigation.navigate('Journaling');
           }}
         />
 
