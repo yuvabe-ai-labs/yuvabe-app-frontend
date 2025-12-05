@@ -3,6 +3,8 @@ import React from 'react';
 import NotificationIndicator from '../components/NotificationIndicator';
 import ChatScreen from '../screens/chatbot/ChatBotScreen';
 import HomeScreen from '../screens/homescreen/HomeScreen';
+import CreateJournalScreen from '../screens/journaling/CreateJournalScreen';
+import JournalingScreen from '../screens/journaling/JournalingScreen';
 import LeaveDetailsScreen from '../screens/leave/LeaveDetailsScreen';
 import MyLeaveHistoryScreen from '../screens/leave/MyLeaveHistoryScreen';
 import TeamLeaveHistoryScreen from '../screens/leave/TeamLeaveHistoryScreen';
@@ -18,59 +20,6 @@ import RequestLeaveScreen from '../screens/requestLeave/RequestLeave';
 import WaterTrackerScreen from '../screens/wellbeing/water/WaterTrackingScreen';
 
 const AppStack = createNativeStackNavigator();
-
-// const AppNavigator = () => {
-//   return (
-//     <AppStack.Navigator initialRouteName="Root">
-//       {/* <AppStack.Screen
-//         name="VerifyEmail"
-//         component={VerifyEmailScreen}
-//         options={{ headerShown: false }}
-//       /> */}
-//       <AppStack.Screen
-//         name="Root"
-//         component={TabNavigator}
-//         options={{ headerShown: false }}
-//       />
-//       <AppStack.Screen name="EditProfile" component={EditProfileScreen} />
-//       <AppStack.Screen name="AssetsScreen" component={AssetSection} />
-//       <AppStack.Screen
-//         name="InformationScreen"
-//         component={InformationScreen}
-//         options={{ headerTitle: 'Information' }}
-//       />
-//       <AppStack.Screen
-//         name="LeaveScreen"
-//         component={LeaveRequestScreen}
-//         options={{ headerTitle: 'Leave Request' }}
-//       />
-//       <AppStack.Screen name="LeaveDetails" component={LeaveDetailsScreen} />
-//       <AppStack.Screen
-//         name="Notifications"
-//         component={NotificationScreen}
-//         options={{
-//           headerShown: true,
-//         }}
-//       />
-
-//       <AppStack.Screen
-//         name="MentorApproval"
-//         component={MentorApprovalScreen}
-//         options={{ headerTitle: 'Leave Approval' }}
-//       />
-//       <AppStack.Screen
-//         name="TeamLeaveHistory"
-//         component={TeamLeaveHistoryScreen}
-//         options={{ headerTitle: 'Leave Approval' }}
-//       />
-//       <AppStack.Screen
-//         name="MyLeaveHistory"
-//         component={MyLeaveHistoryScreen}
-//         options={{ headerTitle: 'Leave Approval' }}
-//       />
-//     </AppStack.Navigator>
-//   );
-// };
 
 const AppNavigator = () => {
   return (
@@ -154,6 +103,13 @@ const AppNavigator = () => {
         <AppStack.Screen
           name="PaySlip"
           component={PayslipScreen}
+          name="Journaling"
+          component={JournalingScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="CreateJournal"
+          component={CreateJournalScreen}
           options={{ headerShown: false }}
         />
       </AppStack.Navigator>

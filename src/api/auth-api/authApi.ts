@@ -153,7 +153,7 @@ export const semanticSearch = async (
 
 export const submitEmotion = async (
   userId: string,
-  emojiNumber: number | null,
+  emotion: string | null,
   timeOfDay: "morning" | "evening"
 ) => {
   try {
@@ -163,9 +163,9 @@ export const submitEmotion = async (
     };
 
     if (timeOfDay === "morning") {
-      payload.morning_emotion = emojiNumber;
+      payload.morning_emotion = emotion;
     } else {
-      payload.evening_emotion = emojiNumber;
+      payload.evening_emotion = emotion;
     }
 
     const response = await api.post("/home/emotion", payload);

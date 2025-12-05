@@ -4,6 +4,15 @@
     "skipLibCheck": true,
     "allowJs": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "src", "types"],
-  "exclude": ["node_modules", "Pods"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "src",
+    "types",
+    "nativewind-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "Pods"
+  ]
 }
