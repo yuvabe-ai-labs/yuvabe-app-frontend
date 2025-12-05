@@ -231,7 +231,6 @@ const HomeScreen = ({ navigation }: any) => {
                 Welcome, {user?.user.name || 'Loading...'}
               </Text>
 
-              {/* Thought */}
               <View style={styles.thoughtContainer}>
                 <Text style={styles.thoughtTitle}>Thought of the Day</Text>
                 <Text style={styles.thoughtText}>"{quote}"</Text>
@@ -269,7 +268,6 @@ const HomeScreen = ({ navigation }: any) => {
                   console.error('Emotion submit failed', err);
                 }
 
-                // Open grounding modal AFTER emotion selection
                 setShowGroundingModal(true);
               }}
             />
@@ -278,7 +276,7 @@ const HomeScreen = ({ navigation }: any) => {
             visible={showGroundingModal}
             onDone={() => {
               setShowGroundingModal(false);
-              setShowBreathingModal(true); // open breathing modal
+              setShowBreathingModal(true);
             }}
             onClose={() => setShowGroundingModal(false)}
           />
