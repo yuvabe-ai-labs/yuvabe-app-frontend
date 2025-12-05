@@ -1,54 +1,106 @@
-import { Plus } from 'lucide-react-native'; // optional icon package
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-
-const prompts = ['Your own thoughts.', 'What’s on your mind right now?'];
+import { useIsFocused } from '@react-navigation/native';
+import { ChevronLeft, Plus } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { getAllJournals } from '../../api/journal-api/journalApi';
 
 const JournalingScreen = ({ navigation }: any) => {
-  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+  const [entries, setEntries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Placeholder list data for UI (replace with DB results)
-  const entries = [
-    // Example:
-    { id: '1', title: 'My Day', date: 'Dec 5, 2025' },
-  ];
+  const isFocused = useIsFocused();
+
+  const fetchJournals = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllJournals();
+      setEntries(data);
+    } catch (err) {
+      console.log('Error fetching journals:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchJournals();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    if (isFocused) fetchJournals();
+  }, [isFocused]);
+
+  const hasEntries = entries.length > 0;
 
   return (
-    <View className="flex-1 bg-white px-4 pt-6">
-      {/* Header */}
-      <Text className="text-3xl font-semibold text-gray-900 mb-4">Journal</Text>
+    <View className="flex-1 bg-[#FFFFFF] pt-4 px-4">
+      {/* HEADER */}
+      <View className="flex-row items-center mb-6">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ paddingRight: 8 }}
+        >
+          <ChevronLeft size={28} color="#000" />
+        </TouchableOpacity>
 
-      {/* Prompt */}
-      <View className="bg-blue-50 rounded-2xl p-4 mb-5">
-        <Text className="text-lg text-gray-800">{prompt}</Text>
+        <Text className="text-xl font-bold text-[#111827]">Journal</Text>
       </View>
 
-      {/* List of entries */}
-      <FlatList
-        data={entries}
-        keyExtractor={item => item.id}
-        ListEmptyComponent={
-          <Text className="text-gray-500 mt-10 text-center">
-            No entries yet. Tap + to start writing.
+      {/* LOADING */}
+      {loading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" />
+        </View>
+      ) : hasEntries ? (
+        <FlatList
+          data={entries}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{ paddingBottom: 50 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              className="p-4 mb-3 border border-[#D1D5DB] rounded-xl"
+              onPress={() =>
+                navigation.navigate('CreateJournal', { id: item.id })
+              }
+            >
+              <Text className="text-xl font-medium text-[#111827]">
+                {item.title}
+              </Text>
+              <Text className="text-[#6B7280] mt-1">
+                {new Date(item.journal_date).toDateString()}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      ) : (
+        /* EMPTY-STATE */
+        <View className="flex-1 items-center justify-center px-4">
+          <Text className="text-xl font-semibold text-[#374151] text-center mb-2 opacity-90">
+            Today is yours. What do you want to say about it?
           </Text>
-        }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            className="p-4 mb-3 border border-gray-200 rounded-xl"
-            onPress={() =>
-              navigation.navigate('CreateJournal', { id: item.id })
-            }
-          >
-            <Text className="text-xl font-medium text-gray-900">
-              {item.title}
-            </Text>
-            <Text className="text-gray-600 mt-1">{item.date}</Text>
-          </TouchableOpacity>
-        )}
-      />
 
-      {/* Floating Add Button */}
+          <Text className="text-[15px] text-[#6B7280] text-center opacity-80 leading-6">
+            Start by writing your first journal entry.
+          </Text>
+        </View>
+      )}
+
+      {/* FLOATING ADD BUTTON */}
       <TouchableOpacity
-        className="absolute bottom-6 right-6 bg-blue-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+        className="absolute bottom-6 right-6 bg-[#5829c7] w-16 h-16 rounded-full items-center justify-center shadow-lg"
         onPress={() => navigation.navigate('CreateJournal')}
       >
         <Plus size={30} color="white" />
