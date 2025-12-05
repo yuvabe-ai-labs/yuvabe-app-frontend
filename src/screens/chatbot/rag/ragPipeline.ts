@@ -1,5 +1,5 @@
 import type { InferenceSession } from 'onnxruntime-react-native';
-import { semanticSearch } from '../../../api/auth-api/authApi';
+import { semanticSearch } from '../../../api/chatbot-api/chatbotApi';
 import { generateEmbedding } from '../models/embed';
 
 type SearchResult = {
@@ -10,32 +10,6 @@ type SearchResult = {
   score: number;
 };
 
-// export const retrieveContextForQuery = async (
-//   session: InferenceSession,
-//   text: string,
-// ): Promise<string | null> => {
-//   const embedding = await generateEmbedding(session, text);
-
-//   const results = await semanticSearch(embedding);
-
-//    if (!results || results.length === 0) {
-//     return null;
-//   }
-
-//   const combinedContext = results
-//     .filter((r: SearchResult) => r.text)
-//     .map((r: SearchResult) => r.text)
-//     .join("\n\n");
-
-//   return combinedContext;
-// const best = results?.[0];
-
-// if (!best || !best.text) {
-//   return null;
-// }
-
-// return best.text as string;
-// };
 export const retrieveContextForQuery = async (
   session: InferenceSession,
   text: string,

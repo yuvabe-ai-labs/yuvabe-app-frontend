@@ -227,7 +227,6 @@ const CreateJournalScreen = ({ navigation, route }: any) => {
               : 'Journal Entry'}
         </Text>
 
-        {/* icons */}
         <View className="flex-row items-center">
           {!isEditing && journalId && (
             <TouchableOpacity onPress={handleDelete} className="p-2 mr-2">

@@ -1,5 +1,5 @@
 import * as ort from 'onnxruntime-react-native';
-import { tokenizeQuery } from '../../../api/auth-api/authApi';
+import { tokenizeQuery } from '../../../api/chatbot-api/chatbotApi';
 
 export const generateEmbedding = async (
   session: ort.InferenceSession,

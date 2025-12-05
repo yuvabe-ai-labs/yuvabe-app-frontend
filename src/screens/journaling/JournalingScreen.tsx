@@ -44,7 +44,6 @@ const JournalingScreen = ({ navigation }: any) => {
 
   return (
     <View className="flex-1 bg-[#FFFFFF] pt-4 px-4">
-      {/* HEADER */}
       <View className="flex-row items-center mb-6">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -56,7 +55,6 @@ const JournalingScreen = ({ navigation }: any) => {
         <Text className="text-xl font-bold text-[#111827]">Journal</Text>
       </View>
 
-      {/* LOADING */}
       {loading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" />
@@ -86,7 +84,6 @@ const JournalingScreen = ({ navigation }: any) => {
           )}
         />
       ) : (
-        /* EMPTY-STATE */
         <View className="flex-1 items-center justify-center px-4">
           <Text className="text-xl font-semibold text-[#374151] text-center mb-2 opacity-90">
             Today is yours. What do you want to say about it?
@@ -98,7 +95,6 @@ const JournalingScreen = ({ navigation }: any) => {
         </View>
       )}
 
-      {/* FLOATING ADD BUTTON */}
       <TouchableOpacity
         className="absolute bottom-6 right-6 bg-[#5829c7] w-16 h-16 rounded-full items-center justify-center shadow-lg"
         onPress={() => navigation.navigate('CreateJournal')}
