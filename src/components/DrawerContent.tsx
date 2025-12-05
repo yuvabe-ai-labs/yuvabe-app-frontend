@@ -122,6 +122,15 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           }}
         />
 
+        <DrawerItem
+          label="Payslip"
+          icon={<Bot size={20} color="#444" strokeWidth={1.8} />}
+          onPress={() => {
+            closeDrawer();
+            navigation.navigate('PaySlip');
+          }}
+        />
+
         {/* Mentor / User sections */}
         {isMentor ? (
           <>
