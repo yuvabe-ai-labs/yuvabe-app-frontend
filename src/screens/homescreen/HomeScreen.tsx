@@ -24,8 +24,10 @@ import { getItem, removeItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './HomeStyles';
+import BreathingModal from './components/BreathingModal';
 import CalmingAudio from './components/CalmingAudio';
 import EmotionCheckIn from './components/EmotionCheckIn';
+import GroundingExerciseModal from './components/GroundingExerciseModal';
 import VisionBoard from './components/VisionBoard';
 
 export async function requestNotificationPermission() {
@@ -48,6 +50,9 @@ export async function requestNotificationPermission() {
 
 const HomeScreen = ({ navigation }: any) => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showGroundingModal, setShowGroundingModal] = useState(false);
+  const [showBreathingModal, setShowBreathingModal] = useState(false);
+
   const [homeAlertMessage, setHomeAlertMessage] = useState('');
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -58,14 +63,14 @@ const HomeScreen = ({ navigation }: any) => {
 
   const [user, setUser] = useState<any>(null);
 
-  const EMOJI_MAP: { [key: string]: number } = {
-    '😀': 1,
-    '🙂': 2,
-    '😐': 3,
-    '😕': 4,
-    '😢': 5,
-    '😡': 6,
-    '🤯': 7,
+  const EMOJI_TO_EMOTION: Record<string, string> = {
+    '😄': 'joyful',
+    '😀': 'happy',
+    '🙂': 'calm',
+    '😐': 'neutral',
+    '😢': 'anxious',
+    '😡': 'sad',
+    '🤯': 'frustrated',
   };
 
   //
@@ -89,7 +94,7 @@ const HomeScreen = ({ navigation }: any) => {
     };
 
     loadUser();
-  }, []);
+  }, [profileImage]);
 
   useEffect(() => {
     registerDevice();
@@ -145,7 +150,7 @@ const HomeScreen = ({ navigation }: any) => {
     };
 
     fetchQuote();
-  }, []);
+  }, [author, quote]);
 
   useEffect(() => {
     const savedImage = getItem('profile_image');
@@ -226,7 +231,6 @@ const HomeScreen = ({ navigation }: any) => {
                 Welcome, {user?.user.name || 'Loading...'}
               </Text>
 
-              {/* Thought */}
               <View style={styles.thoughtContainer}>
                 <Text style={styles.thoughtTitle}>Thought of the Day</Text>
                 <Text style={styles.thoughtText}>"{quote}"</Text>
@@ -252,18 +256,36 @@ const HomeScreen = ({ navigation }: any) => {
               onClose={() => setShowNotificationModal(false)}
               onSelect={async emoji => {
                 setShowNotificationModal(false);
-                const emojiNumber = emoji ? EMOJI_MAP[emoji] : null;
+                const emotion = emoji ? EMOJI_TO_EMOTION[emoji] : null;
+
                 try {
                   const timeOfDay = homeAlertMessage.includes('morning')
                     ? 'morning'
                     : 'evening';
-                  await submitEmotion(user?.user.id, emojiNumber, timeOfDay);
+
+                  await submitEmotion(user?.user.id, emotion, timeOfDay);
                 } catch (err) {
                   console.error('Emotion submit failed', err);
                 }
+
+                setShowGroundingModal(true);
               }}
             />
           )}
+          <GroundingExerciseModal
+            visible={showGroundingModal}
+            onDone={() => {
+              setShowGroundingModal(false);
+              setShowBreathingModal(true);
+            }}
+            onClose={() => setShowGroundingModal(false)}
+          />
+          <BreathingModal
+            visible={showBreathingModal}
+            onClose={() => setShowBreathingModal(false)}
+            onFinish={() => setShowBreathingModal(false)}
+          />
+
           {isLogoutLoading && (
             <View
               style={{
