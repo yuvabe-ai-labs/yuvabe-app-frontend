@@ -41,16 +41,11 @@ const RootNavigator = () => {
       //   return;
       // }
       const token = getAccessToken();
-      const storedVerified = await getItem('is_verified');
-      const storedEmail = await getItem('pending_email');
-
-      console.log(' Token:', token);
-      console.log(' Stored is_verified:', storedVerified);
-      console.log(' Stored email:', storedEmail);
+      const storedVerified = getItem('is_verified');
+      const storedEmail = getItem('pending_email');
 
       // If user is unverified, go to Verify first (even without token)
       if (storedVerified === 'false' && storedEmail) {
-        console.log('User unverified → Go to Verify screen');
         setIsLoggedIn(true);
         setIsVerified(false);
         setIsAuthChecked(true);
@@ -59,7 +54,6 @@ const RootNavigator = () => {
 
       //  If no token, show Sign-In
       if (!token) {
-        console.log(' No token → Show Sign-In');
         setIsLoggedIn(false);
         setIsVerified(false);
         setIsAuthChecked(true);
@@ -68,8 +62,12 @@ const RootNavigator = () => {
 
       //  If token exists, verify via API
       try {
-        const userData = await fetchUserDetails();
-        console.log('User from backend:', userData);
+        let userData = null;
+        try {
+          userData = await fetchUserDetails();
+        } catch (e) {
+          console.log('User fetch failed, using cached user', e);
+        }
 
         const verified = userData.user?.is_verified ?? false;
         const email = userData.user?.email || '';
@@ -101,8 +99,7 @@ const RootNavigator = () => {
     <NavigationContainer
       ref={navigationRef}
       onReady={() => {
-        console.log('✅ Navigation is ready');
-        BootSplash.hide({ fade: true }); // 👈 smooth fade
+        BootSplash.hide({ fade: true });
       }}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>

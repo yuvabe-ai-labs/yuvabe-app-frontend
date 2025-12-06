@@ -359,7 +359,7 @@ const WaterTrackerScreen = ({ navigation }: any) => {
                 <BarChart
                   data={chartData}
                   // **LAYOUT FIX 1: Set chart width slightly wider than the screen**
-                  width={screenWidth - 36}
+                  width={screenWidth - 28}
                   height={280}
                   yAxisLabel=""
                   yAxisSuffix="ml"

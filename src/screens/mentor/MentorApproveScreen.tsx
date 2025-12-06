@@ -2,7 +2,11 @@ import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -27,6 +31,22 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
 
   const { showLoading, hideLoading } = useLoadingStore.getState();
 
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () =>
+      setKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener('keyboardDidHide', () =>
+      setKeyboardVisible(false),
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       showLoading('mentorApproval', 'Loading leave details...');
@@ -39,6 +59,7 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
         setSick(bal.data.data.sick_remaining);
         setCasual(bal.data.data.casual_remaining);
       } catch (err) {
+        console.log(err)
         showToast('Error', 'Unable to load leave details', 'error');
       } finally {
         hideLoading();
@@ -154,141 +175,157 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
       </View>
 
       {/* BODY */}
-      <ScrollView style={{ padding: 18 }}>
-        {/* Employee info */}
-        <View>
-          <Text style={{ fontSize: 15, color: '#777' }}>Employee</Text>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 2 }}>
-            {leave.user_name}
-          </Text>
-        </View>
-
-        {/* Leave Balance */}
-        <View style={{ flexDirection: 'row', marginTop: 25 }}>
-          <View
-            style={{
-              flex: 1,
-              padding: 18,
-              backgroundColor: '#E9F3FF',
-              borderRadius: 14,
-            }}
-          >
-            <Text style={{ fontSize: 15 }}>Sick Remaining</Text>
-            <Text
-              style={{ fontSize: 22, fontWeight: 'bold', color: '#1A73E8' }}
-            >
-              {sick}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={
+          keyboardVisible ? (StatusBar.currentHeight ?? 80) : 0
+        }
+      >
+        <ScrollView
+          style={{ padding: 18 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Employee info */}
+          <View>
+            <Text style={{ fontSize: 15, color: '#777' }}>Employee</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 2 }}>
+              {leave.user_name}
             </Text>
           </View>
 
-          <View style={{ width: 15 }} />
-
-          <View
-            style={{
-              flex: 1,
-              padding: 18,
-              backgroundColor: '#FFF3E9',
-              borderRadius: 14,
-            }}
-          >
-            <Text style={{ fontSize: 15 }}>Casual Remaining</Text>
-            <Text
-              style={{ fontSize: 22, fontWeight: 'bold', color: '#E67E22' }}
+          {/* Leave Balance */}
+          <View style={{ flexDirection: 'row', marginTop: 25 }}>
+            <View
+              style={{
+                flex: 1,
+                padding: 18,
+                backgroundColor: '#E9F3FF',
+                borderRadius: 14,
+              }}
             >
-              {casual}
-            </Text>
+              <Text style={{ fontSize: 15 }}>Sick Remaining</Text>
+              <Text
+                style={{ fontSize: 22, fontWeight: 'bold', color: '#1A73E8' }}
+              >
+                {sick}
+              </Text>
+            </View>
+
+            <View style={{ width: 15 }} />
+
+            <View
+              style={{
+                flex: 1,
+                padding: 18,
+                backgroundColor: '#FFF3E9',
+                borderRadius: 14,
+              }}
+            >
+              <Text style={{ fontSize: 15 }}>Casual Remaining</Text>
+              <Text
+                style={{ fontSize: 22, fontWeight: 'bold', color: '#E67E22' }}
+              >
+                {casual}
+              </Text>
+            </View>
           </View>
-        </View>
 
-        {/* Leave Info */}
-        <View style={{ marginTop: 30 }}>
-          <Text style={{ fontSize: 16, color: '#777' }}>Leave Type</Text>
-          <Text style={{ fontSize: 19, fontWeight: 'bold', marginTop: 3 }}>
-            {leave.leave_type}
-          </Text>
-
-          <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>
-            From
-          </Text>
-          <Text style={{ fontSize: 18 }}>
-            {toReadableDate(leave.from_date)}
-          </Text>
-
-          <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>To</Text>
-          <Text style={{ fontSize: 18 }}>{toReadableDate(leave.to_date)}</Text>
-
-          <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>
-            Reason
-          </Text>
-          <Text style={{ fontSize: 18 }}>{leave.reason}</Text>
-        </View>
-
-        {/* Reject Comment */}
-        <Text style={{ marginTop: 30, fontSize: 16, fontWeight: '600' }}>
-          Reject Comment
-        </Text>
-        <TextInput
-          placeholder="Enter reason if rejecting"
-          style={{
-            borderWidth: 1,
-            borderColor: '#CFCFCF',
-            padding: 14,
-            borderRadius: 12,
-            marginTop: 10,
-            fontSize: 16,
-            backgroundColor: '#fff',
-          }}
-          value={rejectComment}
-          onChangeText={setRejectComment}
-          multiline
-        />
-
-        {/* Buttons */}
-        <View style={{ flexDirection: 'row', marginTop: 35 }}>
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              backgroundColor: '#2E8B57',
-              padding: 15,
-              borderRadius: 12,
-              marginRight: 12,
-            }}
-            onPress={approveLeave}
-          >
-            <Text
-              style={{
-                color: '#fff',
-                textAlign: 'center',
-                fontSize: 18,
-                fontWeight: '600',
-              }}
-            >
-              Approve
+          {/* Leave Info */}
+          <View style={{ marginTop: 30 }}>
+            <Text style={{ fontSize: 16, color: '#777' }}>Leave Type</Text>
+            <Text style={{ fontSize: 19, fontWeight: 'bold', marginTop: 3 }}>
+              {leave.leave_type}
             </Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              backgroundColor: '#D94343',
-              padding: 15,
-              borderRadius: 12,
-            }}
-            onPress={rejectLeave}
-          >
-            <Text
-              style={{
-                color: '#fff',
-                textAlign: 'center',
-                fontSize: 18,
-                fontWeight: '600',
-              }}
-            >
-              Reject
+            <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>
+              From
             </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            <Text style={{ fontSize: 18 }}>
+              {toReadableDate(leave.from_date)}
+            </Text>
+
+            <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>
+              To
+            </Text>
+            <Text style={{ fontSize: 18 }}>
+              {toReadableDate(leave.to_date)}
+            </Text>
+
+            <Text style={{ fontSize: 16, color: '#777', marginTop: 15 }}>
+              Reason
+            </Text>
+            <Text style={{ fontSize: 18 }}>{leave.reason}</Text>
+          </View>
+
+          {/* Reject Comment */}
+          <Text style={{ marginTop: 30, fontSize: 16, fontWeight: '600' }}>
+            Reject Comment
+          </Text>
+          <TextInput
+            placeholder="Enter reason if rejecting"
+            style={{
+              borderWidth: 1,
+              borderColor: '#CFCFCF',
+              padding: 14,
+              borderRadius: 12,
+              marginTop: 10,
+              fontSize: 16,
+              backgroundColor: '#fff',
+            }}
+            value={rejectComment}
+            onChangeText={setRejectComment}
+            multiline
+          />
+
+          {/* Buttons */}
+          <View style={{ flexDirection: 'row', marginTop: 35 }}>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                backgroundColor: '#2E8B57',
+                padding: 15,
+                borderRadius: 12,
+                marginRight: 12,
+              }}
+              onPress={approveLeave}
+            >
+              <Text
+                style={{
+                  color: '#fff',
+                  textAlign: 'center',
+                  fontSize: 18,
+                  fontWeight: '600',
+                }}
+              >
+                Approve
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                backgroundColor: '#D94343',
+                padding: 15,
+                borderRadius: 12,
+              }}
+              onPress={rejectLeave}
+            >
+              <Text
+                style={{
+                  color: '#fff',
+                  textAlign: 'center',
+                  fontSize: 18,
+                  fontWeight: '600',
+                }}
+              >
+                Reject
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

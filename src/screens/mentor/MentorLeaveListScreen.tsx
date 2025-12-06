@@ -36,7 +36,7 @@ export default function MentorLeaveListScreen({ navigation }: any) {
 
       setPendingLeaves(sorted);
     } catch (err: any) {
-      console.log('🔥 mentor list error:', err?.response?.data || err);
+      console.log('🔥 mentor list error:', err);
     } finally {
       if (!isRefresh) hideLoading();
       if (isRefresh) setRefreshing(false);

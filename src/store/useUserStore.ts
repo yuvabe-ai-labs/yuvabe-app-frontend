@@ -5,6 +5,7 @@ type User = {
   id: string;
   name?: string;
   email?: string;
+  join_date?: string | null;
   is_verified?: boolean;
   team_name?: string;
   role?: string;
@@ -20,6 +21,7 @@ type ProfileDetails = {
   team_name: string;
   mentor_name: string;
   mentor_email: string;
+  join_date: string | null;
 };
 
 type UserStore = {
@@ -63,11 +65,13 @@ export const useUserStore = create<UserStore>(set => ({
             ...state.user,
             name: details.name,
             email: details.email,
+            join_date: details.join_date,
           }
         : {
             id: '',
             name: details.name,
             email: details.email,
+            join_date: details.join_date,
           },
 
       team_name: details.team_name,
