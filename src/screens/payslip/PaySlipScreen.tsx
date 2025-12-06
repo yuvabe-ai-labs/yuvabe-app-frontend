@@ -1,13 +1,15 @@
 'use client';
 
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { ChevronLeft } from 'lucide-react-native';
-import { useState } from 'react';
+import { Linking } from 'react-native';
+
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -35,6 +37,57 @@ export default function PayslipScreen({ navigation }: any) {
   // NOT the source of truth for whether Gmail is connected.
   const [gmailConnected, setGmailConnected] = useState(false);
   const [showGmailModal, setShowGmailModal] = useState(false);
+
+  // DATE PICKER STATES
+  const [showFromPicker, setShowFromPicker] = useState(false);
+  const [showToPicker, setShowToPicker] = useState(false);
+
+  // JOIN DATE LOGIC COMES FROM USER STORE
+  const rawJoinDate = user?.join_date;
+
+  const joinDate = rawJoinDate
+    ? new Date(rawJoinDate) // use actual date
+    : new Date(2020, 3, 1); // fallback: 2020 April 1
+
+  useEffect(() => {
+    const processUrl = (url: string) => {
+      if (!url || !url.includes('gmail/callback')) return;
+
+      // 💡 Add delay so screen is fully mounted
+      setTimeout(() => {
+        const isSuccess = url.includes('success=true');
+
+        if (isSuccess) {
+          showToast('Success', 'Gmail connected successfully!', 'success');
+          setGmailConnected(true);
+        } else {
+          if (url.includes('email_mismatch')) {
+            showToast(
+              'Error',
+              'Oops! That Google email isn’t linked with your current Yuvabe account.',
+              'error',
+            );
+          } else {
+            showToast('Error', 'Gmail connection failed', 'error');
+          }
+        }
+
+        setShowGmailModal(false);
+      }, 300); // ⏳ Delay ensures toast ALWAYS appears
+    };
+
+    // 1️⃣ When app already open
+    const subscription = Linking.addEventListener('url', event => {
+      processUrl(event.url);
+    });
+
+    // 2️⃣ Cold start or background open
+    Linking.getInitialURL().then(url => {
+      if (url) processUrl(url);
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   // 1️⃣ SAFETY CHECK — user must exist or app will crash
   if (!user) {
@@ -97,13 +150,9 @@ export default function PayslipScreen({ navigation }: any) {
           toolbarColor: '#5B21B6',
           showInRecents: true,
         });
-        // After successful OAuth flow (user comes back to app)
-        setGmailConnected(true);
-        setShowGmailModal(false);
-        showToast('Success', 'Gmail connected!', 'success');
       }
     } catch (error: any) {
-      console.log('Gmail Error:', error.response?.data);
+      console.log('Gmail Error:', error);
       showToast('Error', 'Failed to connect Gmail. Please try again.', 'error');
     } finally {
       setLoading(false);
@@ -188,7 +237,30 @@ export default function PayslipScreen({ navigation }: any) {
     }
   };
 
-  // 🔻 UI BELOW IS EXACTLY YOURS (unchanged JSX)
+  const getFromDateForMin = () => {
+    if (!fromMonth) return joinDate;
+
+    const [mm, yyyy] = fromMonth.split('/').map(Number);
+    return new Date(yyyy, mm - 1, 1);
+  };
+
+  const handleFromDate = (event: any, selectedDate?: Date) => {
+    setShowFromPicker(false);
+    if (selectedDate) {
+      const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const yyyy = selectedDate.getFullYear();
+      setFromMonth(`${mm}/${yyyy}`);
+    }
+  };
+
+  const handleToDate = (event: any, selectedDate?: Date) => {
+    setShowToPicker(false);
+    if (selectedDate) {
+      const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const yyyy = selectedDate.getFullYear();
+      setToMonth(`${mm}/${yyyy}`);
+    }
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
@@ -389,23 +461,26 @@ export default function PayslipScreen({ navigation }: any) {
             >
               From
             </Text>
-            <TextInput
-              placeholder="01/2024"
-              placeholderTextColor="#D1D5DB"
-              value={fromMonth}
-              onChangeText={setFromMonth}
+            <TouchableOpacity
+              onPress={() => setShowFromPicker(true)}
               style={{
                 borderWidth: 1.5,
                 borderColor: '#E5E7EB',
                 borderRadius: 8,
                 paddingHorizontal: 12,
                 paddingVertical: 10,
-                fontSize: 14,
-                color: '#1F2937',
                 marginBottom: 16,
               }}
-              maxLength={7}
-            />
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: fromMonth ? '#1F2937' : '#9CA3AF',
+                }}
+              >
+                {fromMonth || 'Select From Month'}
+              </Text>
+            </TouchableOpacity>
 
             {/* To Month */}
             <Text
@@ -418,22 +493,22 @@ export default function PayslipScreen({ navigation }: any) {
             >
               To
             </Text>
-            <TextInput
-              placeholder="12/2024"
-              placeholderTextColor="#D1D5DB"
-              value={toMonth}
-              onChangeText={setToMonth}
+            <TouchableOpacity
+              onPress={() => setShowToPicker(true)}
               style={{
                 borderWidth: 1.5,
                 borderColor: '#E5E7EB',
                 borderRadius: 8,
                 paddingHorizontal: 12,
                 paddingVertical: 10,
-                fontSize: 14,
-                color: '#1F2937',
               }}
-              maxLength={7}
-            />
+            >
+              <Text
+                style={{ fontSize: 14, color: toMonth ? '#1F2937' : '#9CA3AF' }}
+              >
+                {toMonth || 'Select To Month'}
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
@@ -468,6 +543,27 @@ export default function PayslipScreen({ navigation }: any) {
             </Text>
           )}
         </TouchableOpacity>
+        {showFromPicker && (
+          <DateTimePicker
+            value={new Date()}
+            mode="date"
+            display="calendar"
+            minimumDate={joinDate}
+            maximumDate={new Date()}
+            onChange={handleFromDate}
+          />
+        )}
+
+        {showToPicker && (
+          <DateTimePicker
+            value={new Date()}
+            mode="date"
+            display="calendar"
+            minimumDate={getFromDateForMin()}
+            maximumDate={new Date()}
+            onChange={handleToDate}
+          />
+        )}
       </View>
 
       {/* GMAIL CONNECTION MODAL */}

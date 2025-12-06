@@ -1,4 +1,5 @@
 import {
+  BookText,
   Bot,
   Box,
   Clock,
@@ -8,7 +9,7 @@ import {
   LogOut,
   NotebookPen,
   User,
-  Users
+  Users,
 } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
@@ -33,10 +34,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
 
   const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
 
-  useEffect(() => {
-    console.log('User role:', role);
-    console.log('Is mentor:', isMentor);
-  }, [isMentor, role]);
+  useEffect(() => {}, [isMentor, role]);
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 20 }}>
@@ -124,7 +122,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
 
         <DrawerItem
           label="Payslip"
-          icon={<Bot size={20} color="#444" strokeWidth={1.8} />}
+          icon={<BookText size={20} color="#444" strokeWidth={1.8} />}
           onPress={() => {
             closeDrawer();
             navigation.navigate('PaySlip');

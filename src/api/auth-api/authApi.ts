@@ -15,9 +15,7 @@ export const signUp = async (name: string, email: string, password: string) => {
 
 export const sendVerificationEmail = async (email: string) => {
   try {
-    console.log('📧 Sending verification email for:', email);
     const response = await api.post('/auth/send-verification', { email });
-    console.log('✅ Verification email response:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('Verification email error:', error.response?.data || error);
@@ -51,23 +49,16 @@ export const verifyOtp = async (email: string, otp: string) => {
 
 export const signIn = async (email: string, password: string) => {
   try {
-    console.log(`inside sign in function before api call`);
+
     const response = await api.post('/auth/login', { email, password });
 
-    console.log(`inside sign in function after api call`);
-    console.log(' Raw Axios response:', response);
-
     const data = response.data.data;
-    console.log(' Parsed data:', data);
 
     setTokens(data.access_token, data.refresh_token);
     return data;
   } catch (error: any) {
-    console.log('Full login error:', error);
 
     if (error.response) {
-      console.log('Response data:', error.response.data);
-      console.log('Status:', error.response.status);
       const message =
         error.response.data.detail ||
         error.response.data.message ||
@@ -86,14 +77,12 @@ export const signIn = async (email: string, password: string) => {
 
 export const getHome = async () => {
   const response = await api.get('/auth/home');
-  console.log(`The fetched user details is ${response}`);
   return response.data;
 };
 
 export const fetchUserDetails = async () => {
   try {
     const response = await api.get('/auth/home');
-    console.log('Fetched:', response.data.data);
     return response.data.data;
   } catch (error: any) {
     console.error('Failed to fetch user details:', error);
@@ -102,9 +91,9 @@ export const fetchUserDetails = async () => {
 };
 
 export const submitEmotion = async (
-  userId: string,
+  userId: string ,
   emotion: string | null,
-  timeOfDay: 'morning' | 'evening'
+  timeOfDay: 'morning' | 'evening',
 ) => {
   try {
     const payload: any = {
@@ -121,7 +110,6 @@ export const submitEmotion = async (
     const response = await api.post('/home/emotion', payload);
     return response.data;
   } catch (error: any) {
-    console.log('Emotion API error:', error.response?.data || error);
     throw new Error(error.response?.data?.detail || 'Failed to submit emotion');
   }
 };

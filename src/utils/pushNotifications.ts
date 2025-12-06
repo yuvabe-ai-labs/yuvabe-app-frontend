@@ -9,17 +9,16 @@ export async function requestNotificationPermission() {
   const currentStatus = await messaging().hasPermission();
 
   if (currentStatus === messaging.AuthorizationStatus.AUTHORIZED) {
-    console.log('[v0] Notifications already authorized');
     return true;
   }
 
   if (currentStatus === messaging.AuthorizationStatus.NOT_DETERMINED) {
     const requestStatus = await messaging().requestPermission();
-    console.log('[v0] Permission request status:', requestStatus);
+    console.log(' Permission request status:', requestStatus);
     return requestStatus === messaging.AuthorizationStatus.AUTHORIZED;
   }
 
-  console.log('[v0] Notifications denied by user');
+  console.log(' Notifications denied by user');
   return false;
 }
 
@@ -29,7 +28,6 @@ export async function getDeviceToken() {
   // 1) Allowed
   if (currentStatus === messaging.AuthorizationStatus.AUTHORIZED) {
     const token = await messaging().getToken();
-    console.log('[v0] Device token retrieved:', token);
     return token;
   }
 
@@ -39,7 +37,6 @@ export async function getDeviceToken() {
 
     if (requestStatus === messaging.AuthorizationStatus.AUTHORIZED) {
       const token = await messaging().getToken();
-      console.log('[v0] Device token retrieved after permission:', token);
       return token;
     }
 
@@ -47,6 +44,6 @@ export async function getDeviceToken() {
   }
 
   // 3) Denied → don't ask again
-  console.log('[v0] Cannot get token - notifications denied');
+  console.log('Cannot get token - notifications denied');
   return null;
 }

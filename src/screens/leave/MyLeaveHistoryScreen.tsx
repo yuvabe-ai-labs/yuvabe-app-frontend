@@ -33,7 +33,7 @@ export default function MyLeaveHistoryScreen() {
 
   const load = async () => {
     const { showLoading, hideLoading } = useLoadingStore.getState();
-    showLoading('history', 'Loading leave history');
+    showLoading('history', 'Loading history');
     try {
       const res = await fetchMyLeaveHistory();
       setLeaves(res.data.data);
