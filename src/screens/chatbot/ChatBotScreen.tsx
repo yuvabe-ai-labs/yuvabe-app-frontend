@@ -109,6 +109,8 @@ const ChatScreen = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
+    Keyboard.dismiss();
+
     setSuggestionsUsed(true);
 
     if (!session) return;
@@ -282,6 +284,7 @@ const ChatScreen = () => {
             <DefaultSuggestions
               onSelect={text => {
                 setInput(text);
+                Keyboard.dismiss();
               }}
             />
           </View>
