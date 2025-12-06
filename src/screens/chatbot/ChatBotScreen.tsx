@@ -109,6 +109,8 @@ const ChatScreen = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
+    Keyboard.dismiss();
+
     setSuggestionsUsed(true);
 
     if (!session) return;
@@ -139,7 +141,7 @@ const ChatScreen = () => {
       const { contextText } = await retrieveContextForQuery(session, text);
 
       const modelUserMessage = contextText
-        ? `Context:\n${contextText}\n\nUser Question: ${text} Respond concisely on what user asked for and use image whenever relevant to the user question and less elaboration`
+        ? `Context:\n${contextText}\n\nUser Question: ${text} Respond concisely on what user asked for and use image only when relevant to the user question and less elaboration`
         : text;
 
       const finalText = await qwenChat(
@@ -278,16 +280,31 @@ const ChatScreen = () => {
         }
       >
         {!suggestionsUsed && messages.length === 0 && (
-          <View style={{ flex: 1 }}>
+          <View
+            pointerEvents="box-none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: 10,
+              zIndex: 20,
+              elevation: 20,
+            }}
+          >
             <DefaultSuggestions
               onSelect={text => {
                 setInput(text);
+                Keyboard.dismiss();
               }}
             />
           </View>
         )}
-
         <FlatList
+          pointerEvents="auto"
           ref={flatListRef}
           data={messages}
           renderItem={renderItem}
