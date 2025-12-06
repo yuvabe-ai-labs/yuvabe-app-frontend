@@ -47,40 +47,9 @@ const SignUpScreen = ({ navigation }: any) => {
     try {
       const res = await signUp(data.name, data.email, data.password);
       
-
-      // const accessToken = res.data?.access_token;
-      // const refreshToken = res.data?.refresh_token;
-
-      // if (accessToken && refreshToken) {
-      //   console.log('✅ Tokens received at signup');
-      //   setTokens(accessToken, refreshToken);
-      // } else {
-      //   console.warn('⚠️ No tokens returned at signup');
-      // }
-
-      
-
-      // const email = data.email;
-
-      // await setItem('is_verified', 'false');
-      // await setItem('pending_email', data.email);
-      // Alert.alert(
-      //   'Verify Your Email',
-      //   'We’ve sent you a verification link. Please check your inbox.',
-      //   [
-      //     {
-      //       text: 'Go to Verification',
-      //       onPress: () =>
-      //         navigation.navigate('VerifyEmail', { email: data.email }),
-      //     },
-      //   ],
-      // );
-
-      // Navigate to verification screen
       setItem('is_verified', 'true');
       setItem('pending_email', data.email);
 
-      // If your API returns token
       if (res?.data?.access_token) {
          setItem('access_token', res.data.access_token);
       }
@@ -105,10 +74,8 @@ const SignUpScreen = ({ navigation }: any) => {
 
   return (
     <>
-      {/* Only top safe area to avoid bottom spacing bug */}
       <SafeAreaView style={{ flex: 0 }} />
 
-      {/* Main screen wrapper */}
       <View style={{ flex: 1 }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -132,7 +99,6 @@ const SignUpScreen = ({ navigation }: any) => {
                 <Text style={styles.title}>Create Account</Text>
                 <Text style={styles.subtitle}>Join Yuvabe today</Text>
 
-                {/* Name Field */}
                 <Controller
                   control={control}
                   name="name"
@@ -153,7 +119,6 @@ const SignUpScreen = ({ navigation }: any) => {
                   <Text style={styles.errorText}>{errors.name.message}</Text>
                 )}
 
-                {/* Email Field */}
                 <Controller
                   control={control}
                   name="email"

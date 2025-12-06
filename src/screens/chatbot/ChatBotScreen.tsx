@@ -1,6 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
 import { Bot, ChevronLeft, User } from 'lucide-react-native';
-import { InferenceSession } from 'onnxruntime-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
@@ -16,6 +15,7 @@ import {
 } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useModelSessionStore } from '../../store/useModelSessionStore';
 import ChatDownloadIndicator from './models/modelDownloadIndicator';
 
 import { Message, useChatStore } from '../../store/chatStore';
@@ -41,14 +41,16 @@ const ChatScreen = () => {
   } = useChatStore();
 
   const [input, setInput] = useState('');
-  const [session, setSession] = useState<InferenceSession | null>(null);
-  const [modelsLoaded, setModelsLoaded] = useState(false);
+  const session = useModelSessionStore(s => s.session);
+  const modelsLoaded = useModelSessionStore(s => s.modelsLoaded);
+  const setSession = useModelSessionStore(s => s.setSession);
+  const setModelsLoaded = useModelSessionStore(s => s.setModelsLoaded);
 
   const downloadState = useModelDownloadStore(state => state.downloadState);
 
   const streamedTextRef = useRef('');
   const currentBotMsgIdRef = useRef<string | null>(null);
-  const isDisabled = downloadState !== 'completed' || !session;
+  const isDisabled = downloadState !== 'completed' || !session || !modelsLoaded;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const navigation = useNavigation();
 
@@ -80,6 +82,8 @@ const ChatScreen = () => {
 
   useEffect(() => {
     const loadModels = async () => {
+      if (session && modelsLoaded) return;
+
       try {
         const s = await loadOnnxModel();
         setSession(s);
@@ -91,10 +95,16 @@ const ChatScreen = () => {
       }
     };
 
-    if (downloadState === 'completed' && !modelsLoaded) {
+    if (downloadState === 'completed') {
       loadModels();
     }
-  }, [downloadState, modelsLoaded]);
+  }, [downloadState]);
+
+  useEffect(() => {
+    if (messages.length === 0) {
+      setSuggestionsUsed(false);
+    }
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -129,7 +139,7 @@ const ChatScreen = () => {
       const { contextText } = await retrieveContextForQuery(session, text);
 
       const modelUserMessage = contextText
-        ? `Context:\n${contextText}\n\nUser Question: ${text}`
+        ? `Context:\n${contextText}\n\nUser Question: ${text} Respond concisely on what user asked for and use image whenever relevant to the user question and less elaboration`
         : text;
 
       const finalText = await qwenChat(
@@ -210,7 +220,6 @@ const ChatScreen = () => {
           )}
         </View>
 
-        {/* USER ICON */}
         {isUser && (
           <User
             size={30}
@@ -265,16 +274,14 @@ const ChatScreen = () => {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
-          keyboardVisible ? StatusBar.currentHeight ?? 10 : 0
+          keyboardVisible ? (StatusBar.currentHeight ?? 10) : 0
         }
       >
-        {modelsLoaded && !suggestionsUsed && messages.length === 0 && (
+        {!suggestionsUsed && messages.length === 0 && (
           <View style={{ flex: 1 }}>
             <DefaultSuggestions
               onSelect={text => {
-                setSuggestionsUsed(true);
                 setInput(text);
-                sendMessage();
               }}
             />
           </View>

@@ -26,8 +26,6 @@ export const semanticSearch = async (
       top_k,
     });
 
-    console.log('RAW semantic response:', response.data);
-
     if (response.data?.data) {
       return response.data.data;
     }

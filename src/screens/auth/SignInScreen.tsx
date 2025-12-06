@@ -46,12 +46,10 @@ const SignInScreen = ({ navigation }: any) => {
       const res = await signIn(data.email, data.password);
       const userData = await fetchUserDetails();
 
-      // ✅ Save user globally
       setUser(userData.user);
       setIsLoggedIn(true);
       setIsVerified(res.user.is_verified);
 
-      // ✅ Store tokens locally
       setTokens(res.access_token, res.refresh_token);
       setItem('is_verified', res.user.is_verified ? 'true' : 'false');
       setItem('pending_email', data.email);
@@ -60,14 +58,6 @@ const SignInScreen = ({ navigation }: any) => {
         navigation.navigate('VerifyEmail', { email: data.email });
         return;
       }
-      // Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
-      //   {
-      //     text: 'Continue',
-      //     onPress: () => {
-      //       console.log('✅ RootNavigator will switch automatically');
-      //     },
-      //   },
-      // ]);
     } catch (error: any) {
       console.error(' Login error:', error);
 
@@ -114,7 +104,6 @@ const SignInScreen = ({ navigation }: any) => {
                   Sign in to continue to Yuvabe
                 </Text>
 
-                {/* Email */}
                 <Controller
                   control={control}
                   name="email"
@@ -137,7 +126,6 @@ const SignInScreen = ({ navigation }: any) => {
                   <Text style={styles.errorText}>{errors.email.message}</Text>
                 )}
 
-                {/* Password */}
                 <View style={styles.passwordContainer}>
                   <Controller
                     control={control}
@@ -179,7 +167,6 @@ const SignInScreen = ({ navigation }: any) => {
                   </Text>
                 )}
 
-                {/* Login Button */}
                 <TouchableOpacity
                   style={[styles.button, loading && { opacity: 0.6 }]}
                   onPress={handleSubmit(onSubmit)}
