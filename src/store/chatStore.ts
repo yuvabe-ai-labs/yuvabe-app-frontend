@@ -32,7 +32,6 @@ interface ChatState {
 export const useChatStore = create<ChatState>((set) => ({
   messages: [],
 
-  // ✔ IMPORTANT
   chatHistory: [
     { role: "system", content: SYSTEM_PROMPT }
   ],
@@ -58,7 +57,7 @@ export const useChatStore = create<ChatState>((set) => ({
   resetChat: () =>
     set({
       messages: [],
-      chatHistory: [{ role: "system", content: SYSTEM_PROMPT }], // keep system prompt
+      chatHistory: [{ role: "system", content: SYSTEM_PROMPT }],
       suggestionsUsed: false,
     }),
 }));

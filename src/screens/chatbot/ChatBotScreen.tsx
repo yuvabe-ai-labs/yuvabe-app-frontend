@@ -220,7 +220,6 @@ const ChatScreen = () => {
           )}
         </View>
 
-        {/* USER ICON */}
         {isUser && (
           <User
             size={30}

@@ -50,8 +50,6 @@ const TileModal: React.FC<TileModalProps> = ({
   const fetchImageFromPexels = async (keyword: string) => {
     if (!keyword) return null;
     try {
-      console.log('inside fetch image');
-      console.log(`'api key: ${API_KEY}`);
       const response = await fetch(
         `https://api.pexels.com/v1/search?query=${encodeURIComponent(
           keyword,
@@ -63,7 +61,6 @@ const TileModal: React.FC<TileModalProps> = ({
         },
       );
 
-      console.log('after api call');
       const data = await response.json();
       if (data.photos?.length > 0) return data.photos[0].src.medium;
       return null;
@@ -140,7 +137,7 @@ const TileModal: React.FC<TileModalProps> = ({
             </View>
           </View>
         </View>
-      </TouchableWithoutFeedback> 
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

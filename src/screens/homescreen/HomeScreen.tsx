@@ -35,15 +35,12 @@ export async function requestNotificationPermission() {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
     );
-    console.log('Android Permission:', granted);
   }
 
   const authStatus = await messaging().requestPermission();
   const enabled =
     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-  console.log('Firebase permission:', enabled);
 
   return enabled;
 }
@@ -84,8 +81,6 @@ const HomeScreen = ({ navigation }: any) => {
         const userData = await fetchUserDetails();
         removeItem('profile_image');
         setProfileImage(null);
-
-        console.log('PROFILE IMAGE = ', profileImage);
 
         setUser(userData);
       } catch (error) {

@@ -31,6 +31,5 @@ export const retrieveContextForQuery = async (
     })
     .join('\n\n');
 
-  console.log(`The context of the sematic search is : ${merged}`);
   return { contextText: merged };
 };

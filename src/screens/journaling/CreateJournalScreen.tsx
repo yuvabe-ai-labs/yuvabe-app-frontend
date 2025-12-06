@@ -1,5 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { ChevronLeft, Save, Pencil, Trash } from 'lucide-react-native';
+import { ChevronLeft, Pencil, Save, Trash } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -114,18 +114,19 @@ const CreateJournalScreen = ({ navigation, route }: any) => {
     }
 
     showLoading('journalSave', 'Saving your journal...');
-
+    const cleanTitle = title.trim();
+    const cleanContent = content.replace(/^\n+/, '').replace(/\n+$/, '').trim();
     try {
       if (journalId) {
         await updateJournal(journalId, {
-          title,
-          content,
+          title: cleanTitle,
+          content: cleanContent,
           journal_date: journalDateISO,
         });
       } else {
         await createOrUpdateJournal({
-          title,
-          content,
+          title: cleanTitle,
+          content: cleanContent,
           journal_date: journalDateISO,
         });
       }
@@ -183,23 +184,23 @@ const CreateJournalScreen = ({ navigation, route }: any) => {
     }
   };
 
-  const applyFormat = (type: 'bold' | 'italic' | 'heading' | 'bullet') => {
-    setContent(prev => {
-      const prefix = prev.endsWith('\n') || prev.length === 0 ? '' : '\n';
-      switch (type) {
-        case 'bold':
-          return prev + `${prefix}**bold text**`;
-        case 'italic':
-          return prev + `${prefix}_italic text_`;
-        case 'heading':
-          return prev + `${prefix}# Heading`;
-        case 'bullet':
-          return prev + `${prefix}- item`;
-        default:
-          return prev;
-      }
-    });
-  };
+  // const applyFormat = (type: 'bold' | 'italic' | 'heading' | 'bullet') => {
+  //   setContent(prev => {
+  //     const prefix = prev.endsWith('\n') || prev.length === 0 ? '' : '\n';
+  //     switch (type) {
+  //       case 'bold':
+  //         return prev + `${prefix}**bold text**`;
+  //       case 'italic':
+  //         return prev + `${prefix}_italic text_`;
+  //       case 'heading':
+  //         return prev + `${prefix}# Heading`;
+  //       case 'bullet':
+  //         return prev + `${prefix}- item`;
+  //       default:
+  //         return prev;
+  //     }
+  //   });
+  // };
 
   if (loading) {
     return (

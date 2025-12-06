@@ -31,36 +31,21 @@ const RootNavigator = () => {
 
   useEffect(() => {
     const initAuth = async () => {
-      //   const DEV_BYPASS = true;
-
-      // if (DEV_BYPASS) {
-      //   console.log('DEV MODE: Bypassing auth → Going straight to App');
-      //   setIsLoggedIn(true);
-      //   setIsVerified(true);
-      //   setIsAuthChecked(true);
-      //   return;
-      // }
       const token = getAccessToken();
       const storedVerified = getItem('is_verified');
       const storedEmail = getItem('pending_email');
-
-      // If user is unverified, go to Verify first (even without token)
       if (storedVerified === 'false' && storedEmail) {
         setIsLoggedIn(true);
         setIsVerified(false);
         setIsAuthChecked(true);
         return;
       }
-
-      //  If no token, show Sign-In
       if (!token) {
         setIsLoggedIn(false);
         setIsVerified(false);
         setIsAuthChecked(true);
         return;
       }
-
-      //  If token exists, verify via API
       try {
         let userData = null;
         try {
@@ -73,7 +58,6 @@ const RootNavigator = () => {
         const email = userData.user?.email || '';
 
         setUser(userData.user);
-        // console.log(' User is verified:', user);
         setIsLoggedIn(true);
         setIsVerified(verified);
 
