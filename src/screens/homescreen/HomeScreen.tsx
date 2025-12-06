@@ -116,7 +116,9 @@ const HomeScreen = ({ navigation }: any) => {
           }
         }
 
-        const response = await fetch('https://quotes.domiadi.com/api');
+        const response = await fetch(
+          'https://motivational-spark-api.vercel.app/api/quotes/random', // if not try https://quotes.domiadi.com/api
+        );
         if (!response.ok) {
           throw new Error(`HTTP error ${response.status}`);
         }
@@ -124,7 +126,7 @@ const HomeScreen = ({ navigation }: any) => {
         const data = await response.json();
         const quoteData = {
           quote: data.quote,
-          author: data.from,
+          author: data.author,
           date: today,
           success: true,
         };

@@ -8,7 +8,9 @@ import { AppState, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import './global.css';
 import { toastConfig } from './src/components/CustomToast';
+import { VersionGate } from './src/components/VersionGate';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
 import AppProviders from './src/providers/AppProviders';
 import { useModelDownloadStore } from './src/store/modelDownloadStore';
@@ -20,7 +22,6 @@ import {
   requestNotificationPermission,
 } from './src/utils/pushNotifications';
 import { showToast } from './src/utils/ToastHelper';
-import './global.css';
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   if (type === EventType.PRESS) {
@@ -222,7 +223,9 @@ function App(): React.JSX.Element {
       <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AppProviders>
-          <RootNavigator />
+          <VersionGate>
+            <RootNavigator />
+          </VersionGate>
           <Toast config={toastConfig} />
         </AppProviders>
       </GestureHandlerRootView>
