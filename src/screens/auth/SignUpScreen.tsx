@@ -46,7 +46,7 @@ const SignUpScreen = ({ navigation }: any) => {
 
     try {
       const res = await signUp(data.name, data.email, data.password);
-      console.log('Signup successful:', res);
+      
 
       // const accessToken = res.data?.access_token;
       // const refreshToken = res.data?.refresh_token;
@@ -58,7 +58,7 @@ const SignUpScreen = ({ navigation }: any) => {
       //   console.warn('⚠️ No tokens returned at signup');
       // }
 
-      console.log('Signup successful:', res.data);
+      
 
       // const email = data.email;
 
@@ -86,7 +86,7 @@ const SignUpScreen = ({ navigation }: any) => {
       }
 
       const userData = await fetchUserDetails();
-      console.log('User fetched after signup:', userData);
+     
 
       setUser(userData.user);
       setIsLoggedIn(true);

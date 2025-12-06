@@ -14,9 +14,12 @@ import {
   Animated,
   Easing,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   LayoutChangeEvent,
   Platform,
   ScrollView,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -36,6 +39,7 @@ import { styles } from './EditProfileStyles';
 // ---------- Password input ----------
 const PasswordInput = ({ field, error, placeholder }: any) => {
   const [show, setShow] = useState(false);
+
   return (
     <View style={{ position: 'relative' }}>
       <TextInput
@@ -72,6 +76,21 @@ const PasswordInput = ({ field, error, placeholder }: any) => {
 const EditProfileScreen = ({ navigation }: any) => {
   const { user, setUser } = useUserStore();
   const [loading, setLoading] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () =>
+      setKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener('keyboardDidHide', () =>
+      setKeyboardVisible(false),
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   // image preview
   const [profileImage, setProfileImage] = useState<string | undefined>(
@@ -91,11 +110,11 @@ const EditProfileScreen = ({ navigation }: any) => {
     return `${day}-${month}-${year}`;
   };
 
-  const toDDMMYYYY = (dob: string | null) => {
-    if (!dob) return null;
-    const [day, month, year] = dob.split('-');
-    return `${day}.${month}.${year}`;
-  };
+  // const toDDMMYYYY = (dob: string | null) => {
+  //   if (!dob) return null;
+  //   const [day, month, year] = dob.split('-');
+  //   return `${day}.${month}.${year}`;
+  // };
 
   const {
     control,
@@ -173,7 +192,7 @@ const EditProfileScreen = ({ navigation }: any) => {
   const onSubmit = async (data: EditProfileForm) => {
     setLoading(true);
     try {
-      const dobForBackend = data.dob ? toDDMMYYYY(data.dob) : null;
+      const dobForBackend = data.dob ? ddmmyyyyToISO(data.dob) : null;
 
       const payload: any = {
         name: data.name,
@@ -185,11 +204,15 @@ const EditProfileScreen = ({ navigation }: any) => {
 
       const updatedUser = await updateProfile(payload);
       setUser(updatedUser);
-      showToast('Success', 'Profile updated successfully!',"success");
+      showToast('Success', 'Profile updated successfully!', 'success');
 
       navigation.goBack();
     } catch (err: any) {
-      showToast('Update failed', err.message || 'Something went wrong',"error");
+      showToast(
+        'Update failed',
+        err.message || 'Something went wrong',
+        'error',
+      );
     } finally {
       setLoading(false);
     }
@@ -230,178 +253,190 @@ const EditProfileScreen = ({ navigation }: any) => {
         /> */}
       </View>
 
-      <ScrollView
-        style={{ paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={
+          keyboardVisible ? (StatusBar.currentHeight ?? 10) : 0
+        }
       >
-        {/* Profile Image */}
-        <View style={styles.header}>
-          <Image
-            source={
-              profileImage
-                ? { uri: profileImage }
-                : require('../../assets/logo/yuvabe-logo.png')
-            }
-            style={styles.profileImage}
-          />
+        <ScrollView
+          style={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Profile Image */}
+          <View style={styles.header}>
+            <Image
+              source={
+                profileImage
+                  ? { uri: profileImage }
+                  : require('../../assets/logo/yuvabe-logo.png')
+              }
+              style={styles.profileImage}
+            />
 
-          <TouchableOpacity style={styles.changePhotoBtn} onPress={pickImage}>
-            <Text style={styles.changePhotoText}>Change Photo</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity style={styles.changePhotoBtn} onPress={pickImage}>
+              <Text style={styles.changePhotoText}>Change Photo</Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* Form */}
-        <View style={styles.formContainer}>
-          {/* Name */}
-          <Text style={styles.label}>Full Name</Text>
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <TextInput
-                value={field.value}
-                onChangeText={field.onChange}
-                style={[styles.input, errors.name && styles.inputError]}
-              />
-            )}
-          />
-          {errors.name && (
-            <Text style={styles.errorText}>{errors.name.message}</Text>
-          )}
-
-          {/* Email */}
-          <Text style={styles.label}>Email</Text>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field }) => (
-              <TextInput
-                value={field.value}
-                onChangeText={field.onChange}
-                editable={false}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={[styles.input, errors.email && styles.inputError]}
-              />
-            )}
-          />
-          {errors.email && (
-            <Text style={styles.errorText}>{errors.email.message}</Text>
-          )}
-
-          {/* DOB */}
-          <Text style={styles.label}>Date of Birth</Text>
-          <Controller
-            control={control}
-            name="dob"
-            render={({ field }) => (
-              <>
-                <TouchableOpacity onPress={() => setShowDobPicker(true)}>
-                  <TextInput
-                    value={field.value}
-                    editable={false}
-                    placeholder="YYYY-MM-DD"
-                    style={[styles.input, errors.dob && styles.inputError]}
-                  />
-                </TouchableOpacity>
-
-                {showDobPicker && (
-                  <DateTimePicker
-                    value={
-                      field.value
-                        ? new Date(ddmmyyyyToISO(field.value))
-                        : new Date(2000, 0, 1)
-                    }
-                    mode="date"
-                    display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
-                    onChange={onDobChange(field.onChange)}
-                    maximumDate={new Date()}
-                  />
-                )}
-              </>
-            )}
-          />
-          {errors.dob && (
-            <Text style={styles.errorText}>{errors.dob.message}</Text>
-          )}
-
-          {/* Password Dropdown */}
-          <TouchableOpacity
-            style={styles.dropdownHeader}
-            onPress={togglePasswordSection}
-          >
-            <Text style={styles.dropdownHeaderText}>Change Password</Text>
-            {showPasswordSection ? (
-              <ChevronUp size={22} color="#444" />
-            ) : (
-              <ChevronDown size={22} color="#444" />
-            )}
-          </TouchableOpacity>
-
-          {/* Animated Password Content */}
-          <Animated.View style={{ height: animatedHeight, overflow: 'hidden' }}>
-            <View onLayout={onPasswordLayout} style={{ paddingTop: 8 }}>
-              <Text style={styles.label}>Current Password</Text>
-              <Controller
-                control={control}
-                name="currentPassword"
-                render={({ field }) => (
-                  <PasswordInput
-                    field={field}
-                    error={errors.currentPassword}
-                    placeholder="Current password"
-                  />
-                )}
-              />
-
-              <Text style={styles.label}>New Password</Text>
-              <Controller
-                control={control}
-                name="newPassword"
-                render={({ field }) => (
-                  <PasswordInput
-                    field={field}
-                    error={errors.newPassword}
-                    placeholder="New password"
-                  />
-                )}
-              />
-
-              <Text style={styles.label}>Confirm New Password</Text>
-              <Controller
-                control={control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <PasswordInput
-                    field={field}
-                    error={errors.confirmPassword}
-                    placeholder="Confirm new password"
-                  />
-                )}
-              />
-              {errors.confirmPassword && (
-                <Text style={styles.errorText}>
-                  {errors.confirmPassword.message}
-                </Text>
+          {/* Form */}
+          <View style={styles.formContainer}>
+            {/* Name */}
+            <Text style={styles.label}>Full Name</Text>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <TextInput
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  style={[styles.input, errors.name && styles.inputError]}
+                />
               )}
-            </View>
-          </Animated.View>
-
-          {/* Save Button */}
-          <TouchableOpacity
-            disabled={loading}
-            onPress={handleSubmit(onSubmit)}
-            style={styles.saveBtn}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.saveBtnText}>Save Changes</Text>
+            />
+            {errors.name && (
+              <Text style={styles.errorText}>{errors.name.message}</Text>
             )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+
+            {/* Email */}
+            <Text style={styles.label}>Email</Text>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <TextInput
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  editable={false}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  style={[styles.input, errors.email && styles.inputError]}
+                />
+              )}
+            />
+            {errors.email && (
+              <Text style={styles.errorText}>{errors.email.message}</Text>
+            )}
+
+            {/* DOB */}
+            <Text style={styles.label}>Date of Birth</Text>
+            <Controller
+              control={control}
+              name="dob"
+              render={({ field }) => (
+                <>
+                  <TouchableOpacity onPress={() => setShowDobPicker(true)}>
+                    <TextInput
+                      value={field.value}
+                      editable={false}
+                      placeholder="YYYY-MM-DD"
+                      style={[styles.input, errors.dob && styles.inputError]}
+                    />
+                  </TouchableOpacity>
+
+                  {showDobPicker && (
+                    <DateTimePicker
+                      value={
+                        field.value
+                          ? new Date(ddmmyyyyToISO(field.value))
+                          : new Date(2000, 0, 1)
+                      }
+                      mode="date"
+                      display={
+                        Platform.OS === 'android' ? 'calendar' : 'spinner'
+                      }
+                      onChange={onDobChange(field.onChange)}
+                      maximumDate={new Date()}
+                    />
+                  )}
+                </>
+              )}
+            />
+            {errors.dob && (
+              <Text style={styles.errorText}>{errors.dob.message}</Text>
+            )}
+
+            {/* Password Dropdown */}
+            <TouchableOpacity
+              style={styles.dropdownHeader}
+              onPress={togglePasswordSection}
+            >
+              <Text style={styles.dropdownHeaderText}>Change Password</Text>
+              {showPasswordSection ? (
+                <ChevronUp size={22} color="#444" />
+              ) : (
+                <ChevronDown size={22} color="#444" />
+              )}
+            </TouchableOpacity>
+
+            {/* Animated Password Content */}
+            <Animated.View
+              style={{ height: animatedHeight, overflow: 'hidden' }}
+            >
+              <View onLayout={onPasswordLayout} style={{ paddingTop: 8 }}>
+                <Text style={styles.label}>Current Password</Text>
+                <Controller
+                  control={control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <PasswordInput
+                      field={field}
+                      error={errors.currentPassword}
+                      placeholder="Current password"
+                    />
+                  )}
+                />
+
+                <Text style={styles.label}>New Password</Text>
+                <Controller
+                  control={control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <PasswordInput
+                      field={field}
+                      error={errors.newPassword}
+                      placeholder="New password"
+                    />
+                  )}
+                />
+
+                <Text style={styles.label}>Confirm New Password</Text>
+                <Controller
+                  control={control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <PasswordInput
+                      field={field}
+                      error={errors.confirmPassword}
+                      placeholder="Confirm new password"
+                    />
+                  )}
+                />
+                {errors.confirmPassword && (
+                  <Text style={styles.errorText}>
+                    {errors.confirmPassword.message}
+                  </Text>
+                )}
+              </View>
+            </Animated.View>
+
+            {/* Save Button */}
+            <TouchableOpacity
+              disabled={loading}
+              onPress={handleSubmit(onSubmit)}
+              style={styles.saveBtn}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.saveBtnText}>Save Changes</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

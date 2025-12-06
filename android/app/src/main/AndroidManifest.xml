@@ -33,8 +33,7 @@
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data
-          android:scheme="yuvabe"
-          android:host="verified" />
+          android:scheme="yuvabe" />
       </intent-filter>
     </activity>
   </application>

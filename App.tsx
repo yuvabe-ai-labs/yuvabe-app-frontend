@@ -8,6 +8,7 @@ import { AppState, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import './global.css';
 import { toastConfig } from './src/components/CustomToast';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
 import AppProviders from './src/providers/AppProviders';
@@ -20,12 +21,10 @@ import {
   requestNotificationPermission,
 } from './src/utils/pushNotifications';
 import { showToast } from './src/utils/ToastHelper';
-import './global.css';
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   if (type === EventType.PRESS) {
     const data = detail.notification?.data;
-    console.log('[v0] Notification pressed (background):', data);
 
     if (!data) return;
 
@@ -46,8 +45,6 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
 });
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('[v0] Background message received:', remoteMessage);
-
   const channelId = await notifee.createChannel({
     id: 'default',
     name: 'Default Notifications',
@@ -77,7 +74,7 @@ function App(): React.JSX.Element {
         await createDefaultChannel();
         await requestNotificationPermission();
       } catch (error) {
-        console.error('[v0] Failed to initialize notifications:', error);
+        console.error(' Failed to initialize notifications:', error);
       }
     };
     initializeNotifee();
@@ -126,9 +123,7 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     // Device token
-    getDeviceToken().then(token => {
-      console.log('[v0] Device token:', token);
-    });
+    getDeviceToken().then(_token => {});
 
     const unsubscribeNotifeeEvent = notifee.onForegroundEvent(
       ({ type, detail }) => {
@@ -187,7 +182,7 @@ function App(): React.JSX.Element {
           },
         });
       } catch (error) {
-        console.error('[v0] Failed to display notification:', error);
+        console.error('Failed to display notification:', error);
       }
     });
 

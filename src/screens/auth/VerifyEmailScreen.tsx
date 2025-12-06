@@ -31,7 +31,6 @@ const VerifyEmailScreen = ({ route }: any) => {
   const handleSendVerification = async () => {
     setLoading(true);
     try {
-      console.log('📨 Trying to send verification link to:', email);
       if (!email) {
         Alert.alert('Error', 'Email address is missing.');
         return;

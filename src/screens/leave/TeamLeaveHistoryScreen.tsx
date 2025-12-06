@@ -17,7 +17,7 @@ export default function TeamLeaveHistoryScreen() {
 
   const load = async () => {
     const { showLoading, hideLoading } = useLoadingStore.getState();
-    showLoading('teamHistory', 'Loading leave history ');
+    showLoading('teamHistory', 'Loading  leave history ');
     try {
       const res = await fetchTeamLeaveHistory();
       setLeaves(res.data.data);

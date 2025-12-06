@@ -43,12 +43,7 @@ const SignInScreen = ({ navigation }: any) => {
     Keyboard.dismiss();
 
     try {
-      console.log(' Sending login request...');
-      console.log(
-        `data that is being sent is : ${data.email} : ${data.password}`,
-      );
       const res = await signIn(data.email, data.password);
-      console.log(' Login success:', res);
       const userData = await fetchUserDetails();
 
       // ✅ Save user globally
@@ -60,15 +55,11 @@ const SignInScreen = ({ navigation }: any) => {
       setTokens(res.access_token, res.refresh_token);
       setItem('is_verified', res.user.is_verified ? 'true' : 'false');
       setItem('pending_email', data.email);
-      console.log('💾 Saved is_verified:', res.user.is_verified);
-      console.log('💾 Saved pending_email:', data.email);
 
       if (!res.user.is_verified) {
-        console.log('⚠️ User not verified, navigating to VerifyEmail...');
         navigation.navigate('VerifyEmail', { email: data.email });
         return;
       }
-      console.log('✅ RootNavigator will switch automatically');
       // Alert.alert('Welcome', `Hi ${res.user?.name}!`, [
       //   {
       //     text: 'Continue',
