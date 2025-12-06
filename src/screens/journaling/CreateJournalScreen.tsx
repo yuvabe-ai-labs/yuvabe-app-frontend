@@ -302,7 +302,7 @@ const CreateJournalScreen = ({ navigation, route }: any) => {
                   />
                 )}
 
-                <View className="flex-row mb-2">
+                {/* <View className="flex-row mb-2">
                   <TouchableOpacity
                     className="border border-[#D1D5DB] rounded-lg px-3 py-1 mr-2"
                     onPress={() => applyFormat('bold')}
@@ -330,7 +330,7 @@ const CreateJournalScreen = ({ navigation, route }: any) => {
                   >
                     <Text>• List</Text>
                   </TouchableOpacity>
-                </View>
+                </View> */}
 
                 <Text className="text-[#374151] mb-2">Your Thoughts</Text>
                 <TextInput
