@@ -11,9 +11,7 @@ import {
 import React from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchProfileDetails } from '../../api/profile-api/profileApi';
 import { getItem } from '../../store/storage';
-import { useLoadingStore } from '../../store/useLoadingStore';
 import { useUserStore } from '../../store/useUserStore';
 import { logoutUser } from '../../utils/LogoutHelper';
 import { COLORS } from '../../utils/theme';
@@ -22,32 +20,11 @@ import { styles } from './ProfileStyles';
 const ProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { user } = useUserStore();
-  const { setProfileDetails } = useUserStore();
   const { team_name, mentor_name } = useUserStore();
 
   // Saved image from storage
   const storedImage = getItem('profile_image');
   const profileSrc = storedImage || user?.profile_picture;
-
-  // Load profile details
-  React.useEffect(() => {
-    const { showLoading, hideLoading } = useLoadingStore.getState();
-
-    const loadProfile = async () => {
-      showLoading('profile', 'Loading profile...');
-
-      try {
-        const res = await fetchProfileDetails();
-        if (res.code === 200) {
-          setProfileDetails(res.data);
-        }
-      } finally {
-        hideLoading();
-      }
-    };
-
-    loadProfile();
-  }, [setProfileDetails]);
 
   const handleLogout = () => {
     logoutUser(navigation);
