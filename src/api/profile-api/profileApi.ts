@@ -1,6 +1,4 @@
 import messaging from '@react-native-firebase/messaging';
-import { Platform } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
 import api from '../client/axiosClient';
 
 export async function registerDevice() {
@@ -8,18 +6,14 @@ export async function registerDevice() {
 
   await api.post('/notifications/register-device', {
     device_token,
-    platform: Platform.OS,
-    device_model: DeviceInfo.getModel(),
   });
 }
-  
+
 export async function logoutDevice() {
   const device_token = await messaging().getToken();
 
   await api.post('/notifications/logout', {
     device_token,
-    platform: Platform.OS,
-    device_model: DeviceInfo.getModel(),
   });
 }
 
