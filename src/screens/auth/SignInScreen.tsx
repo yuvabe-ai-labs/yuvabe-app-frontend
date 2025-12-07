@@ -70,7 +70,7 @@ const SignInScreen = ({ navigation }: any) => {
         setItem('pending_email', data.email);
         navigation.navigate('VerifyEmail', { email: data.email });
       } else {
-        showToast('Error', error.message || 'Something went wrong',"error");
+        showToast('Error', error.message || 'Something went wrong', 'error');
       }
     } finally {
       setLoading(false);
@@ -180,7 +180,7 @@ const SignInScreen = ({ navigation }: any) => {
                   )}
                 </TouchableOpacity>
 
-                <Text style={styles.footerText}>
+                {/* <Text style={styles.footerText}>
                   Don’t have an account?{' '}
                   <Text
                     style={styles.link}
@@ -188,7 +188,7 @@ const SignInScreen = ({ navigation }: any) => {
                   >
                     Sign Up
                   </Text>
-                </Text>
+                </Text> */}
               </View>
             </ScrollView>
           </TouchableWithoutFeedback>

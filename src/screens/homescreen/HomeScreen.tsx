@@ -1,6 +1,8 @@
+'use client';
+
 import messaging from '@react-native-firebase/messaging';
 import { Bell, Menu } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -13,14 +15,14 @@ import {
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchUserDetails, submitEmotion } from '../../api/auth-api/authApi';
+import { submitEmotion } from '../../api/auth-api/authApi';
 import {
   fetchProfileDetails,
   registerDevice,
 } from '../../api/profile-api/profileApi';
 import AppDrawer from '../../components/AppDrawer';
 import DrawerContent from '../../components/DrawerContent';
-import { getItem, removeItem, setItem } from '../../store/storage';
+import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
 import styles from './HomeStyles';
@@ -49,16 +51,15 @@ const HomeScreen = ({ navigation }: any) => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showGroundingModal, setShowGroundingModal] = useState(false);
   const [showBreathingModal, setShowBreathingModal] = useState(false);
-
   const [homeAlertMessage, setHomeAlertMessage] = useState('');
-
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [, setProfileImage] = useState<string | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [quote, setQuote] = useState<string>('');
   const [author, setAuthor] = useState<string>('');
-  const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
 
-  const [user, setUser] = useState<any>(null);
+  const user = useUserStore(state => state.user);
+  const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
+  const { setProfileDetails } = useUserStore();
 
   const EMOJI_TO_EMOTION: Record<string, string> = {
     '😄': 'joyful',
@@ -70,29 +71,15 @@ const HomeScreen = ({ navigation }: any) => {
     '🤯': 'frustrated',
   };
 
-  //
   useEffect(() => {
     requestNotificationPermission();
   }, []);
 
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const userData = await fetchUserDetails();
-        removeItem('profile_image');
-        setProfileImage(null);
-
-        setUser(userData);
-      } catch (error) {
-        console.error('Error loading user details:', error);
-      }
-    };
-
-    loadUser();
-  }, [profileImage]);
-
-  useEffect(() => {
-    registerDevice();
+    const savedImage = getItem('profile_image');
+    if (savedImage) {
+      setProfileImage(savedImage);
+    }
   }, []);
 
   useEffect(() => {
@@ -127,7 +114,6 @@ const HomeScreen = ({ navigation }: any) => {
         };
 
         setItem('daily_quote', JSON.stringify(quoteData));
-
         setQuote(quoteData.quote);
         setAuthor(quoteData.author);
       } catch (error) {
@@ -150,20 +136,11 @@ const HomeScreen = ({ navigation }: any) => {
   }, [author, quote]);
 
   useEffect(() => {
-    const savedImage = getItem('profile_image');
-    if (savedImage) {
-      setProfileImage(savedImage);
-    } else {
-      setProfileImage(null);
-    }
-  }, []);
-
-  useEffect(() => {
     const loadProfileDetails = async () => {
       try {
         const res = await fetchProfileDetails();
         if (res.code === 200) {
-          useUserStore.getState().setProfileDetails(res.data);
+          setProfileDetails(res.data);
         }
       } catch (err) {
         console.log('Profile fetch failed in HomeScreen:', err);
@@ -171,6 +148,16 @@ const HomeScreen = ({ navigation }: any) => {
     };
 
     loadProfileDetails();
+  }, [setProfileDetails]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      registerDevice().catch(err =>
+        console.log('Device registration failed:', err),
+      );
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -178,7 +165,6 @@ const HomeScreen = ({ navigation }: any) => {
       if ((globalThis as any).homeAlert?.visible) {
         setHomeAlertMessage((globalThis as any).homeAlert.message);
         setShowNotificationModal(true);
-
         (globalThis as any).homeAlert.visible = false;
       }
     }, 400);
@@ -225,7 +211,7 @@ const HomeScreen = ({ navigation }: any) => {
               </View>
 
               <Text style={[styles.welcomeText]}>
-                Welcome, {user?.user.name || 'Loading...'}
+                Welcome, {user?.name || 'Loading...'}
               </Text>
 
               <View style={styles.thoughtContainer}>
@@ -256,11 +242,15 @@ const HomeScreen = ({ navigation }: any) => {
                 const emotion = emoji ? EMOJI_TO_EMOTION[emoji] : null;
 
                 try {
+                  if (!user?.id) {
+                    console.error('User ID not available');
+                    return;
+                  }
+
                   const timeOfDay = homeAlertMessage.includes('morning')
                     ? 'morning'
                     : 'evening';
-
-                  await submitEmotion(user?.user.id, emotion, timeOfDay);
+                  await submitEmotion(user.id, emotion, timeOfDay);
                 } catch (err) {
                   console.error('Emotion submit failed', err);
                 }

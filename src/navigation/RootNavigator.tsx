@@ -1,10 +1,12 @@
+'use client';
+
 import {
   createNavigationContainerRef,
   NavigationContainer,
-  NavigationContainerRefWithCurrent,
+  type NavigationContainerRefWithCurrent,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import BootSplash from 'react-native-bootsplash';
 import { fetchUserDetails } from '../api/auth-api/authApi';
 import { getAccessToken, getItem, setItem } from '../store/storage';
@@ -46,30 +48,27 @@ const RootNavigator = () => {
         setIsAuthChecked(true);
         return;
       }
-      try {
-        let userData = null;
-        try {
-          userData = await fetchUserDetails();
-        } catch (e) {
-          console.log('User fetch failed, using cached user', e);
-        }
 
-        const verified = userData.user?.is_verified ?? false;
-        const email = userData.user?.email || '';
+      //  If token exists, verify via API
+      setIsLoggedIn(true);
+      setIsVerified(storedVerified === 'true');
+      setIsAuthChecked(true);
 
-        setUser(userData.user);
-        setIsLoggedIn(true);
-        setIsVerified(verified);
-
-        setItem('is_verified', verified ? 'true' : 'false');
-        setItem('pending_email', email);
-      } catch (err) {
-        console.error(' Could not verify user:', err);
-        setIsLoggedIn(false);
-        setIsVerified(false);
-      } finally {
-        setIsAuthChecked(true);
-      }
+      // Fetch user details in background without blocking UI
+      fetchUserDetails()
+        .then(userData => {
+          if (userData?.user) {
+            setUser(userData.user);
+            const verified = userData.user?.is_verified ?? false;
+            const email = userData.user?.email || '';
+            setIsVerified(verified);
+            setItem('is_verified', verified ? 'true' : 'false');
+            setItem('pending_email', email);
+          }
+        })
+        .catch(err => {
+          console.error('Background user fetch failed:', err);
+        });
     };
 
     initAuth();

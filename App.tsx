@@ -70,31 +70,52 @@ function App(): React.JSX.Element {
   const startDownload = useModelDownloadStore(state => state.startDownload);
 
   useEffect(() => {
-    const initializeNotifee = async () => {
-      try {
-        await createDefaultChannel();
-        await requestNotificationPermission();
-      } catch (error) {
-        console.error(' Failed to initialize notifications:', error);
-      }
-    };
-    initializeNotifee();
+    const timer = setTimeout(() => {
+      const initializeNotifee = async () => {
+        try {
+          await createDefaultChannel();
+          await requestNotificationPermission();
+        } catch (error) {
+          console.error(' Failed to initialize notifications:', error);
+        }
+      };
+      initializeNotifee();
+    }, 500); // Delay initialization by 500ms to not block startup
+
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    const updatePermission = async () => {
-      const enabled = await checkNotificationPermission();
-      useNotificationStore.getState().setNotificationEnabled(enabled);
-    };
-    updatePermission();
+    const timer = setTimeout(() => {
+      const updatePermission = async () => {
+        const enabled = await checkNotificationPermission();
+        useNotificationStore.getState().setNotificationEnabled(enabled);
+      };
+      updatePermission();
+    }, 1000);
+
     const subscription = AppState.addEventListener('change', state => {
-      if (state === 'active') updatePermission();
+      if (state === 'active') {
+        const updatePermission = async () => {
+          const enabled = await checkNotificationPermission();
+          useNotificationStore.getState().setNotificationEnabled(enabled);
+        };
+        updatePermission();
+      }
     });
-    return () => subscription.remove();
+
+    return () => {
+      clearTimeout(timer);
+      subscription.remove();
+    };
   }, []);
 
   useEffect(() => {
-    startDownload();
+    const timer = setTimeout(() => {
+      startDownload();
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [startDownload]);
 
   function safeNavigate(screen: string, leaveId: string) {
