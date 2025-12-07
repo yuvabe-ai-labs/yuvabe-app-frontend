@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import './global.css';
 import { toastConfig } from './src/components/CustomToast';
+import { VersionGate } from './src/components/VersionGate';
 import RootNavigator, { navigationRef } from './src/navigation/RootNavigator';
 import AppProviders from './src/providers/AppProviders';
 import { useModelDownloadStore } from './src/store/modelDownloadStore';
@@ -238,7 +239,9 @@ function App(): React.JSX.Element {
       <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AppProviders>
-          <RootNavigator />
+          <VersionGate>
+            <RootNavigator />
+          </VersionGate>
           <Toast config={toastConfig} />
         </AppProviders>
       </GestureHandlerRootView>

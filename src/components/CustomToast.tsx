@@ -14,8 +14,8 @@ export const CustomToast = ({ text1, text2, status }: CustomToastProps) => {
     <View
       style={[
         styles.container,
-        { backgroundColor: isSuccess ? '#1B5E20' : '#B71C1C' }, // GREEN or RED
-        { borderLeftColor: isSuccess ? '#00E676' : '#FF1744' }, // neon green / red
+        { backgroundColor: isSuccess ? '#1B5E20' : '#B71C1C' },
+        { borderLeftColor: isSuccess ? '#00E676' : '#FF1744' },
       ]}
     >
       <Text style={styles.title}>{text1}</Text>

@@ -39,7 +39,6 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
   return (
     <SafeAreaView style={{ flex: 1, padding: 20 }}>
       <View style={{ flex: 1 }}>
-        {/* PROFILE */}
         <TouchableOpacity
           onPress={() => {
             closeDrawer();
@@ -81,7 +80,6 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           </View>
         </TouchableOpacity>
 
-        {/* Assets */}
         <DrawerItem
           label="Assets"
           icon={<Box size={20} color="#444" strokeWidth={1.8} />}
@@ -91,7 +89,6 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           }}
         />
 
-        {/* Chatbot */}
         <DrawerItem
           label="Chatbot"
           icon={<Bot size={20} color="#444" strokeWidth={1.8} />}
@@ -110,7 +107,6 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           }}
         />
 
-        {/* Water Tracker */}
         <DrawerItem
           label="Water Track"
           icon={<Droplet size={20} color="#444" strokeWidth={1.8} />}
@@ -129,7 +125,6 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           }}
         />
 
-        {/* Mentor / User sections */}
         {isMentor ? (
           <>
             <DrawerItem
@@ -173,7 +168,6 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
         )}
       </View>
 
-      {/* LOGOUT BUTTON AT BOTTOM */}
       <TouchableOpacity
         style={{
           flexDirection: 'row',

@@ -105,7 +105,6 @@ const AppNavigator = () => {
           component={PayslipScreen}
           options={{ headerShown: false }}
         />
-
         <AppStack.Screen
           name="Journaling"
           component={JournalingScreen}

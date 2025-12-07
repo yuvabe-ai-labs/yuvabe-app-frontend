@@ -15,7 +15,7 @@ interface CustomAlertProps {
   cancelText?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  destructive?: boolean; // makes confirm button red
+  destructive?: boolean;
 }
 
 const CustomAlert: React.FC<CustomAlertProps> = ({
@@ -48,7 +48,6 @@ const CustomAlert: React.FC<CustomAlertProps> = ({
               elevation: 10,
             }}
           >
-            {/* Title */}
             <Text
               style={{
                 fontSize: 20,
@@ -61,7 +60,6 @@ const CustomAlert: React.FC<CustomAlertProps> = ({
               {title}
             </Text>
 
-            {/* Message */}
             <Text
               style={{
                 fontSize: 16,
@@ -73,7 +71,6 @@ const CustomAlert: React.FC<CustomAlertProps> = ({
               {message}
             </Text>
 
-            {/* Buttons */}
             <View
               style={{
                 flexDirection: 'row',
@@ -81,7 +78,6 @@ const CustomAlert: React.FC<CustomAlertProps> = ({
                 gap: 10,
               }}
             >
-              {/* Cancel */}
               <TouchableOpacity
                 onPress={onCancel}
                 style={{
@@ -98,7 +94,6 @@ const CustomAlert: React.FC<CustomAlertProps> = ({
                 </Text>
               </TouchableOpacity>
 
-              {/* Confirm */}
               <TouchableOpacity
                 onPress={onConfirm}
                 style={{

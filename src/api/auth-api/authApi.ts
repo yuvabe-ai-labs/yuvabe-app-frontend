@@ -18,7 +18,7 @@ export const sendVerificationEmail = async (email: string) => {
     const response = await api.post('/auth/send-verification', { email });
     return response.data;
   } catch (error: any) {
-    console.error(' Verification email error:', error.response?.data || error);
+    console.error('Verification email error:', error.response?.data || error);
 
     if (error.response) {
       const detail = error.response.data?.detail;
@@ -26,9 +26,8 @@ export const sendVerificationEmail = async (email: string) => {
         typeof detail === 'string'
           ? detail
           : typeof detail === 'object'
-            ? JSON.stringify(detail)
-            : 'Failed to send verification link';
-
+          ? JSON.stringify(detail)
+          : 'Failed to send verification link';
       throw new Error(message);
     }
 
@@ -55,7 +54,6 @@ export const signIn = async (email: string, password: string) => {
 
     const data = response.data.data;
 
-    // If backend wraps tokens inside "data"
     setTokens(data.access_token, data.refresh_token);
     return data;
   } catch (error: any) {
@@ -78,64 +76,17 @@ export const signIn = async (email: string, password: string) => {
 };
 
 export const getHome = async () => {
-  // api is your axios instance that automatically adds Authorization header
   const response = await api.get('/auth/home');
-  return response.data; // returns { code: 200, data: { ... } }
+  return response.data;
 };
 
 export const fetchUserDetails = async () => {
   try {
     const response = await api.get('/auth/home');
-
-    // root navigator expects this EXACT structure:
-    // return { message, user, home_data }
-
     return response.data.data;
   } catch (error: any) {
     console.error('Failed to fetch user details:', error);
     throw error;
-  }
-};
-
-export const tokenizeQuery = async (text: string) => {
-  try {
-    const response = await api.post('/chatbot/tokenize', { text });
-    return response.data;
-  } catch (error: any) {
-
-
-    if (error.response) {
-      throw new Error(error.response.data.detail || 'Tokenization failed');
-    }
-    throw new Error('Network error');
-  }
-};
-export const semanticSearch = async (
-  embedding: number[],
-  top_k: number = 3,
-) => {
-  try {
-    const cleanEmbedding = Array.from(embedding).map(Number);
-
-    const response = await api.post('/chatbot/semantic-search', {
-      embedding: cleanEmbedding,
-      top_k,
-    });
-
-    
-
-    if (response.data?.data) {
-      return response.data.data;
-    }
-
-    if (Array.isArray(response.data)) {
-      return response.data;
-    }
-
-    throw new Error('Unexpected semantic search response format');
-  } catch (error: any) {
-    
-    throw new Error(error.response?.data?.detail || 'Semantic search failed');
   }
 };
 
@@ -159,7 +110,6 @@ export const submitEmotion = async (
     const response = await api.post('/home/emotion', payload);
     return response.data;
   } catch (error: any) {
-    
     throw new Error(error.response?.data?.detail || 'Failed to submit emotion');
   }
 };

@@ -60,7 +60,7 @@ export const useWeeklyWaterChart = () => {
 
       setChartData(formatted);
     } catch (err) {
-      console.log('📉 Chart load failed:', err);
+      console.log('Chart load failed:', err);
       setError('Failed to load chart data');
       setChartData(null);
     } finally {

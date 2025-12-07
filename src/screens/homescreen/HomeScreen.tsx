@@ -37,15 +37,12 @@ export async function requestNotificationPermission() {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
     );
-    console.log('Android Permission:', granted);
   }
 
   const authStatus = await messaging().requestPermission();
   const enabled =
     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-  console.log('Firebase permission:', enabled);
 
   return enabled;
 }
@@ -101,7 +98,9 @@ const HomeScreen = ({ navigation }: any) => {
           }
         }
 
-        const response = await fetch('https://quotes.domiadi.com/api');
+        const response = await fetch(
+          'https://motivational-spark-api.vercel.app/api/quotes/random', // if not try https://quotes.domiadi.com/api
+        );
         if (!response.ok) {
           throw new Error(`HTTP error ${response.status}`);
         }
@@ -109,7 +108,7 @@ const HomeScreen = ({ navigation }: any) => {
         const data = await response.json();
         const quoteData = {
           quote: data.quote,
-          author: data.from,
+          author: data.author,
           date: today,
           success: true,
         };

@@ -21,9 +21,9 @@ export default function AppDrawer({ drawerContent, children }: AppDrawerProps) {
   return (
     <Drawer
       ref={drawerRef}
-      type="displace" // pushes screen to right
+      type="displace"
       tapToClose={true}
-      openDrawerOffset={0.3} // 70% main visible
+      openDrawerOffset={0.3}
       panCloseMask={0.3}
       panOpenMask={0.1}
       tweenDuration={250}

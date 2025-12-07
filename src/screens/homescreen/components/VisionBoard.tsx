@@ -1,11 +1,12 @@
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { Download, LockOpen, Pencil, Plus } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Share from 'react-native-share';
 import ViewShot from 'react-native-view-shot';
 import { getVisionBoard, setVisionBoard } from '../../../store/storage';
+import { useAlertStore } from '../../../store/useAlertStore';
 import Tile from './Tile';
 import styles, { COLUMN_COUNT, GAP } from './VisionBoardStyles';
 
@@ -35,6 +36,7 @@ const VisionBoard: React.FC<{
 
   const [tiles, setTiles] = useState<VisionItem[]>(initialTiles);
   const [editMode, setEditMode] = useState(false);
+  const { showAlert, hideAlert } = useAlertStore.getState();
 
   useEffect(() => {
     setVisionBoard(tiles);
@@ -61,27 +63,25 @@ const VisionBoard: React.FC<{
       ref.current.capture().then(async uri => {
         await CameraRoll.saveAsset(uri, { type: 'photo' });
 
-        Alert.alert(
-          'VisionBoard',
-          'Vision Board Screenshot has been captured and saved to gallery! \n Would you like to share your VisionBoard?',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Share',
-              style: 'default',
-              onPress: () => {
-                {
-                  const data = {
-                    url: uri,
-                    title: 'Share VisionBoard',
-                    message: 'Checkout my Vision Board',
-                  };
-                  Share.open(data).catch(() => {});
-                }
-              },
-            },
-          ],
-        );
+        showAlert({
+          title: 'Vision Board',
+          message:
+            'Your vision board screenshot has been saved to your gallery.\nWould you like to share it?',
+          confirmText: 'Share',
+          cancelText: 'Cancel',
+
+          onConfirm: () => {
+            hideAlert();
+            const data = {
+              url: uri,
+              title: 'Share VisionBoard',
+              message: 'Checkout my Vision Board',
+            };
+            Share.open(data).catch(() => {});
+          },
+
+          onCancel: () => hideAlert(),
+        });
       });
     } else {
       console.log('Ref reference is Empty!');

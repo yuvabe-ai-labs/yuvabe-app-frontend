@@ -8,11 +8,11 @@ const suggestions = [
   'How many hours should I work on weekends?',
 ];
 
-export default function DefaultSuggestions({
-  onSelect,
-}: {
+type Props = {
   onSelect: (text: string) => void;
-}) {
+};
+
+export default function DefaultSuggestions({ onSelect }: Props) {
   return (
     <View
       style={{
@@ -22,25 +22,24 @@ export default function DefaultSuggestions({
         paddingHorizontal: 16,
       }}
     >
-      <View style={{ marginTop: 300 }}>
-        <Text
-          style={{
-            fontSize: 18,
-            color: '#222',
-            marginBottom: 20,
-            textAlign: 'center',
-          }}
-        >
-          Hey, I’m your Yuvabe Assistant!{'\n'}What would you like to know?
-        </Text>
-      </View>
+      <Text
+        style={{
+          fontSize: 18,
+          color: '#222',
+          textAlign: 'center',
+          marginBottom: 24,
+        }}
+      >
+        Hey, I’m your Yuvabe Assistant!
+        {'\n'}
+        What would you like to know?
+      </Text>
 
       <View
         style={{
           flexDirection: 'row',
           flexWrap: 'wrap',
           justifyContent: 'center',
-          gap: 10,
         }}
       >
         {suggestions.map((s, i) => (
@@ -51,7 +50,7 @@ export default function DefaultSuggestions({
               paddingVertical: 10,
               paddingHorizontal: 14,
               borderRadius: 20,
-              margin: 5,
+              margin: 6,
             }}
             onPress={() => onSelect(s)}
           >

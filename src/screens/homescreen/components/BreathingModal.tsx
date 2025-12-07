@@ -4,7 +4,7 @@ import LottieView from "lottie-react-native";
 
 interface Props {
   visible: boolean;
-  duration?: number; // default 30 seconds
+  duration?: number;
   onFinish: () => void;
   onClose: () => void;
 }
@@ -26,7 +26,7 @@ const BreathingModal: React.FC<Props> = ({
       setSeconds(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-          onFinish(); // auto-close or handle end
+          onFinish();
           return 0;
         }
         return prev - 1;
@@ -48,7 +48,7 @@ const BreathingModal: React.FC<Props> = ({
           <Text style={styles.title}>Take a moment and pause</Text>
 
           <LottieView
-            source={require("../../../assets/animations/Breathe.json")} // /home/shri/Desktop/Wellness App/yuvabe-app-frontend/assets
+            source={require("../../../assets/animations/Breathe.json")}
             autoPlay
             loop
             style={styles.lottie}

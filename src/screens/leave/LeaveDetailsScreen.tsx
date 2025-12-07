@@ -34,7 +34,7 @@ export default function LeaveDetailsScreen({ route }: any) {
       const res = await getLeaveDetails(leaveId);
       setLeave(res.data.data);
     } catch (e) {
-      console.log('leave error:', e);
+      console.log('Leave Error:', e);
     } finally {
       hideLoading();
     }

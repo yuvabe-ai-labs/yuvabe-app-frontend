@@ -37,7 +37,7 @@ const VerifyEmailScreen = ({ route }: any) => {
       }
 
       const response = await sendVerificationEmail(email);
-      console.log('Verification response:', response);
+      
       Alert.alert(
         'Email Sent',
         'A verification link has been sent to your email.',
@@ -45,7 +45,7 @@ const VerifyEmailScreen = ({ route }: any) => {
       setShowButton(false);
       setTimer(60);
     } catch (error: any) {
-      console.error('Verification error:', error);
+      
       Alert.alert('Error', error.message || 'Failed to send verification link');
     } finally {
       setLoading(false);
@@ -56,7 +56,6 @@ const VerifyEmailScreen = ({ route }: any) => {
     const loadEmail = async () => {
       if (!email) {
         const storedEmail = await getItem('pending_email');
-        console.log('📩 Restored email from storage:', storedEmail);
         if (storedEmail) setEmail(storedEmail);
       }
     };
@@ -65,7 +64,6 @@ const VerifyEmailScreen = ({ route }: any) => {
 
   // ✅ Logout handler
   const handleLogout = async () => {
-    console.log('🚪 Logging out...');
     try {
       setIsLoggedIn(false);
       setIsVerified(false);
@@ -74,15 +72,14 @@ const VerifyEmailScreen = ({ route }: any) => {
       setItem('access_token', '');
       setItem('refresh_token', '');
 
-      console.log('🚪 Logged out successfully');
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{ name: 'Auth' }], // 👈 RootNavigator will show SignIn
+          routes: [{ name: 'Auth' }],
         }),
       );
     } catch (err) {
-      console.error('❌ Logout error:', err);
+      console.error('Logout error:', err);
     }
   };
 
@@ -108,11 +105,9 @@ const VerifyEmailScreen = ({ route }: any) => {
     return () => backHandler.remove();
   }, []);
 
-  // ✅ Listen for deep link (yuvabe://verified?token=XYZ)
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
       const parseQueryParams = (url: string) => {
-        console.log('Deep link triggered:', event.url);
         const queryString = url.split('?')[1];
         const queryParams: Record<string, string> = {};
 
@@ -132,7 +127,6 @@ const VerifyEmailScreen = ({ route }: any) => {
       const token = queryParams.token;
 
       if (token) {
-        console.log('✅ JWT token received:', token);
         setTokens(token, '');
         setItem('is_verified', 'true');
         removeItem('pending_email');
@@ -144,7 +138,6 @@ const VerifyEmailScreen = ({ route }: any) => {
 
     const subscription = Linking.addEventListener('url', handleDeepLink);
 
-    // Handle cold start (app opened directly from link)
     Linking.getInitialURL().then(url => {
       if (url) handleDeepLink({ url });
     });
@@ -152,7 +145,6 @@ const VerifyEmailScreen = ({ route }: any) => {
     return () => subscription.remove();
   }, [setIsLoggedIn, setIsVerified]);
 
-  // ⏱ Timer
   useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => setTimer(prev => prev - 1), 1000);

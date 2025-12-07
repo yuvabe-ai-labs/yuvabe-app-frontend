@@ -50,25 +50,15 @@ export async function llamaChat(
       tokenCount++;
       if (firstTokenLatency === null) {
         firstTokenLatency = Date.now() - startTime;
-        console.log('First token latency:', firstTokenLatency, 'ms');
       }
 
       onToken(data.token);
     },
   );
-  const totalTime = Date.now() - startTime;
-  const tps = tokenCount / (totalTime / 1000);
-
-  console.log('LLaMA Benchmark:');
-  console.log('Total Time:', totalTime, 'ms');
-  console.log('Tokens Per Second:', tps.toFixed(2));
-  console.log('Tokens Generated:', tokenCount);
-  console.log('First Token Latency:', firstTokenLatency, 'ms');
 
   return result.text ?? '';
 }
 
-// for qwen 
 function buildQwenPrompt(
   messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>
 ): string {
@@ -78,7 +68,6 @@ function buildQwenPrompt(
     prompt += `<|im_start|>${m.role}\n${m.content}<|im_end|>\n`;
   }
 
-  // Qwen ALWAYS expects assistant tag open before generation
   prompt += `<|im_start|>assistant\n`;
 
   return prompt;
@@ -94,10 +83,8 @@ export async function qwenChat(
   let tokenCount = 0;
   const startTime = Date.now();
 
-  // Build Qwen-formatted prompt
   const prompt = buildQwenPrompt(messages);
 
-  // Qwen stop token
   const stopWords = ['<|im_end|>'];
 
   const result = await llamaContext.completion(
@@ -112,22 +99,12 @@ export async function qwenChat(
 
         if (firstTokenLatency === null) {
           firstTokenLatency = Date.now() - startTime;
-          console.log("Qwen first token latency:", firstTokenLatency, "ms");
         }
 
         onToken(data.token);
       }
     }
   );
-
-  const totalTime = Date.now() - startTime;
-  const tps = tokenCount / (totalTime / 1000);
-
-  console.log("Qwen Benchmark:");
-  console.log("Total Time:", totalTime, "ms");
-  console.log("Tokens Per Second:", tps.toFixed(2));
-  console.log("Tokens Generated:", tokenCount);
-  console.log("First Token Latency:", firstTokenLatency, "ms");
 
   return result.text ?? "";
 }

@@ -36,16 +36,12 @@ const RootNavigator = () => {
       const token = getAccessToken();
       const storedVerified = getItem('is_verified');
       const storedEmail = getItem('pending_email');
-
-      // If user is unverified, go to Verify first (even without token)
       if (storedVerified === 'false' && storedEmail) {
         setIsLoggedIn(true);
         setIsVerified(false);
         setIsAuthChecked(true);
         return;
       }
-
-      //  If no token, show Sign-In
       if (!token) {
         setIsLoggedIn(false);
         setIsVerified(false);
