@@ -169,10 +169,13 @@ export default function NotificationScreen({ navigation }: any) {
                   await markNotificationRead(item.id);
                   setNotifications(prev => prev.filter(n => n.id !== item.id));
 
-                  navigation.navigate(
-                    user?.role === 'mentor' ? 'MentorApproval' : 'LeaveDetails',
-                    { leaveId: item.id },
-                  );
+                  console.log('User Role:', user?.role);
+
+                  if (user?.role === 'mentor') {
+                    navigation.navigate('MentorApproval', { leaveId: item.id });
+                  } else {
+                    navigation.navigate('LeaveDetails', { leaveId: item.id });
+                  }
                 }}
                 style={{
                   backgroundColor: '#F5F5F5',

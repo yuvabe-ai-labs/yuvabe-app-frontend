@@ -10,10 +10,7 @@ export const editProfileSchema = z
         message: 'Name cannot be empty or spaces only',
       }),
 
-    email: z
-      .string()
-      .email('Enter a valid email')
-      .refine(v => v.endsWith('@yuvabe.com'), 'Email must be @yuvabe.com'),
+    email: z.string().email('Enter a valid email'),
 
     dob: z.string().min(1, 'Date of Birth is required'),
 
