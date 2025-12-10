@@ -44,7 +44,7 @@ export default function PayslipScreen({ navigation }: any) {
 
   // JOIN DATE LOGIC COMES FROM USER STORE
   const rawJoinDate = user?.join_date;
-
+  const now = new Date();
   const joinDate = rawJoinDate
     ? new Date(rawJoinDate) // use actual date
     : new Date(2020, 3, 1); // fallback: 2020 April 1
@@ -214,28 +214,27 @@ export default function PayslipScreen({ navigation }: any) {
   };
 
   // 5️⃣ GET READABLE DATE RANGE
-  const getPresetDateRange = () => {
-    const now = new Date();
-    if (presetMode === '3_months') {
-      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-      return `${threeMonthsAgo.toLocaleDateString('en-US', {
-        month: 'short',
-        year: 'numeric',
-      })} - ${now.toLocaleDateString('en-US', {
-        month: 'short',
-        year: 'numeric',
-      })}`;
-    } else {
-      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
-      return `${sixMonthsAgo.toLocaleDateString('en-US', {
-        month: 'short',
-        year: 'numeric',
-      })} - ${now.toLocaleDateString('en-US', {
-        month: 'short',
-        year: 'numeric',
-      })}`;
-    }
-  };
+  const getPresetDateRange = (mode: '3_months' | '6_months') => {
+  const today = new Date();
+
+  const end = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+  let start;
+  if (mode === '3_months') {
+    start = new Date(end.getFullYear(), end.getMonth() - 2, 1);
+  } else {
+    start = new Date(end.getFullYear(), end.getMonth() - 5, 1);
+  }
+
+  return `${start.toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  })} - ${end.toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  })}`;
+};
+
 
   const getFromDateForMin = () => {
     if (!fromMonth) return joinDate;
@@ -377,12 +376,12 @@ export default function PayslipScreen({ navigation }: any) {
                 {
                   value: '3_months',
                   label: 'Last 3 Months',
-                  desc: getPresetDateRange(),
+                  desc: getPresetDateRange('3_months'),
                 },
                 {
                   value: '6_months',
                   label: 'Last 6 Months',
-                  desc: getPresetDateRange(),
+                  desc: getPresetDateRange('6_months'),
                 },
               ].map(option => (
                 <TouchableOpacity
