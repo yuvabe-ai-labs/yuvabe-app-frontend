@@ -2,7 +2,7 @@
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ChevronLeft } from 'lucide-react-native';
-import { Linking } from 'react-native';
+import { Linking, TouchableWithoutFeedback } from 'react-native';
 
 import { useEffect, useState } from 'react';
 import {
@@ -215,26 +215,25 @@ export default function PayslipScreen({ navigation }: any) {
 
   // 5️⃣ GET READABLE DATE RANGE
   const getPresetDateRange = (mode: '3_months' | '6_months') => {
-  const today = new Date();
+    const today = new Date();
 
-  const end = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const end = new Date(today.getFullYear(), today.getMonth() - 1, 1);
 
-  let start;
-  if (mode === '3_months') {
-    start = new Date(end.getFullYear(), end.getMonth() - 2, 1);
-  } else {
-    start = new Date(end.getFullYear(), end.getMonth() - 5, 1);
-  }
+    let start;
+    if (mode === '3_months') {
+      start = new Date(end.getFullYear(), end.getMonth() - 2, 1);
+    } else {
+      start = new Date(end.getFullYear(), end.getMonth() - 5, 1);
+    }
 
-  return `${start.toLocaleDateString('en-US', {
-    month: 'short',
-    year: 'numeric',
-  })} - ${end.toLocaleDateString('en-US', {
-    month: 'short',
-    year: 'numeric',
-  })}`;
-};
-
+    return `${start.toLocaleDateString('en-US', {
+      month: 'short',
+      year: 'numeric',
+    })} - ${end.toLocaleDateString('en-US', {
+      month: 'short',
+      year: 'numeric',
+    })}`;
+  };
 
   const getFromDateForMin = () => {
     if (!fromMonth) return joinDate;
@@ -260,6 +259,15 @@ export default function PayslipScreen({ navigation }: any) {
       setToMonth(`${mm}/${yyyy}`);
     }
   };
+  const isRequestDisabled = () => {
+  if (loading) return true;
+
+  if (mode === 'manual') {
+    return !fromMonth || !toMonth;
+  }
+
+  return false;
+};
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
@@ -523,12 +531,12 @@ export default function PayslipScreen({ navigation }: any) {
         }}
       >
         <TouchableOpacity
-          disabled={loading}
+          disabled={isRequestDisabled()}
           onPress={handleRequestPayslip}
           style={{
             paddingVertical: 14,
             borderRadius: 10,
-            backgroundColor: loading ? '#D1D5DB' : '#5B21B6',
+            backgroundColor: isRequestDisabled() ? '#D1D5DB' : '#5B21B6',
             flexDirection: 'row',
             justifyContent: 'center',
             alignItems: 'center',
@@ -572,89 +580,100 @@ export default function PayslipScreen({ navigation }: any) {
         animationType="fade"
         onRequestClose={() => !loading && setShowGmailModal(false)}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            justifyContent: 'flex-end',
+        {' '}
+        <TouchableWithoutFeedback
+          onPress={() => {
+            if (!loading) setShowGmailModal(false);
           }}
         >
           <View
             style={{
-              backgroundColor: '#FFFFFF',
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              padding: 24,
-              paddingBottom: 32,
+              flex: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              justifyContent: 'flex-end',
             }}
           >
-            <Text
+            <View
               style={{
-                fontSize: 18,
-                fontWeight: '700',
-                color: '#1F2937',
-                marginBottom: 8,
-              }}
-            >
-              Connect Gmail Account
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: '#6B7280',
-                lineHeight: 20,
-                marginBottom: 24,
-              }}
-            >
-              To request payslips, we need to connect your Gmail account.
-            </Text>
-
-            <TouchableOpacity
-              disabled={loading}
-              onPress={handleConnectGmail}
-              style={{
-                paddingVertical: 14,
-                borderRadius: 10,
-                backgroundColor: loading ? '#D1D5DB' : '#5B21B6',
-                marginBottom: 10,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <Text
-                  style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '600' }}
-                >
-                  Connect Gmail
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              disabled={loading}
-              onPress={() => setShowGmailModal(false)}
-              style={{
-                paddingVertical: 14,
-                borderRadius: 10,
-                backgroundColor: '#F3F4F6',
+                backgroundColor: '#FFFFFF',
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                padding: 24,
+                paddingBottom: 32,
               }}
             >
               <Text
                 style={{
-                  color: '#4B5563',
-                  fontSize: 15,
-                  fontWeight: '600',
-                  textAlign: 'center',
+                  fontSize: 18,
+                  fontWeight: '700',
+                  color: '#1F2937',
+                  marginBottom: 8,
                 }}
               >
-                Cancel
+                Connect Gmail Account
               </Text>
-            </TouchableOpacity>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: '#6B7280',
+                  lineHeight: 20,
+                  marginBottom: 24,
+                }}
+              >
+                To request payslips, we need to connect your Gmail account.
+              </Text>
+
+              <TouchableOpacity
+                disabled={loading}
+                onPress={handleConnectGmail}
+                style={{
+                  paddingVertical: 14,
+                  borderRadius: 10,
+                  backgroundColor: loading ? '#D1D5DB' : '#5B21B6',
+                  marginBottom: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: 15,
+                      fontWeight: '600',
+                    }}
+                  >
+                    Connect Gmail
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                disabled={loading}
+                onPress={() => setShowGmailModal(false)}
+                style={{
+                  paddingVertical: 14,
+                  borderRadius: 10,
+                  backgroundColor: '#F3F4F6',
+                }}
+              >
+                <Text
+                  style={{
+                    color: '#4B5563',
+                    fontSize: 15,
+                    fontWeight: '600',
+                    textAlign: 'center',
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
