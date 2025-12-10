@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { fetchWaterLogsForChart } from '../../../api/wellbeing/wellBeingApi';
 
-export const useWeeklyWaterChart = () => {
+export const useWeeklyWaterChart = (todayAmount: number) => {
   const [weekOffset, setWeekOffset] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const [chartData, setChartData] = useState<any>({
     labels: [],
     datasets: [{ data: [] }],
@@ -29,9 +31,33 @@ export const useWeeklyWaterChart = () => {
     });
   };
 
+  const getWeekRange = (offset: number) => {
+    const now = new Date();
+
+    // Get Monday of current week (change to Sunday if needed)
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday
+    const diff = now.getDate() - day + 1; // Monday-based week
+
+    const start = new Date(now);
+    start.setDate(diff + offset * 7);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    return { start, end };
+  };
+
+  const { start: weekStart, end: weekEnd } = getWeekRange(weekOffset);
+
+  const format = (d: Date) =>
+    d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  const weekLabel = `${format(weekStart)} ➜ ${format(weekEnd)}`;
+
   const loadChart = async () => {
     setIsLoading(true);
     setError(null);
+
     try {
       const logs = await fetchWaterLogsForChart();
       const weekDays = getWeekDays(weekOffset);
@@ -41,24 +67,23 @@ export const useWeeklyWaterChart = () => {
       );
 
       const datasets = weekDays.map(day => {
+        // ALWAYS override today with current UI amount
+        if (day.toDateString() === new Date().toDateString()) {
+          return todayAmount;
+        }
+
         const dailyLogs = logs.filter(log => {
           const d = new Date(log.logged_at);
           return d.toDateString() === day.toDateString();
         });
 
-        const total = dailyLogs.length
-          ? dailyLogs[dailyLogs.length - 1].amount_ml
-          : 0;
+        return dailyLogs.length ? dailyLogs[dailyLogs.length - 1].amount_ml : 0;
+      });
 
-        return Math.round(total);
-      }); 
-
-      const formatted = {
-        labels: labels,
+      setChartData({
+        labels,
         datasets: [{ data: datasets }],
-      };
-
-      setChartData(formatted);
+      });
     } catch (err) {
       console.log('Chart load failed:', err);
       setError('Failed to load chart data');
@@ -68,15 +93,22 @@ export const useWeeklyWaterChart = () => {
     }
   };
 
+  // 🔥 Force chart to reload EVERY time todayAmount changes
+  useEffect(() => {
+    setRefreshKey(prev => prev + 1);
+  }, [todayAmount]);
+
   useEffect(() => {
     loadChart();
-  }, [weekOffset]);
+  }, [weekOffset, refreshKey]); // now refreshKey ensures updated state is used
 
   return {
     weekOffset,
     setWeekOffset,
     chartData,
     isLoading,
+    weekLabel,
     error,
+    refresh: () => setRefreshKey(prev => prev + 1),
   };
 };
