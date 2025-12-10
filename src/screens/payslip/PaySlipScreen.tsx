@@ -126,7 +126,7 @@ export default function PayslipScreen({ navigation }: any) {
     const toDate = new Date(toY, toM - 1);
 
     if (fromDate >= toDate) {
-      showToast('Error', '"From" date must be before "To" date', 'error');
+      showToast('Invalid Range', 'Start month must be earlier than end month.', 'error');
       return false;
     }
 
