@@ -4,6 +4,7 @@ import { z } from 'zod';
 const yuvabeEmail = z
   .string()
   .email({ message: 'Enter a valid email address' })
+  .transform((email) => email.toLowerCase())
   .refine(
     (email) => email.toLowerCase().endsWith('@yuvabe.com'),
     { message: 'Please use your Yuvabe email (example@yuvabe.com)' }
