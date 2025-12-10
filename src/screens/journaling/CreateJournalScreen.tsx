@@ -1,4 +1,3 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { ChevronLeft, Pencil, Save, Trash } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -47,7 +46,6 @@ const CreateJournalScreen = ({ navigation, route }: any) => {
   const [journalDateISO, setJournalDateISO] = useState(
     new Date().toISOString().split('T')[0],
   );
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const displayDate = new Date(journalDateISO).toDateString();
@@ -177,12 +175,6 @@ const CreateJournalScreen = ({ navigation, route }: any) => {
       onCancel: () => hideAlert(),
     });
   };
-  const onDateChange = (_event: any, selected?: Date) => {
-    setShowDatePicker(false);
-    if (selected) {
-      setJournalDateISO(selected.toISOString().split('T')[0]);
-    }
-  };
 
   // const applyFormat = (type: 'bold' | 'italic' | 'heading' | 'bullet') => {
   //   setContent(prev => {
@@ -286,22 +278,9 @@ const CreateJournalScreen = ({ navigation, route }: any) => {
                 />
 
                 <Text className="text-[#374151] mb-2">Date</Text>
-                <TouchableOpacity
-                  onPress={() => setShowDatePicker(true)}
-                  className="border border-[#D1D5DB] rounded-xl px-4 py-3 mb-4"
-                >
+                <View className="border border-[#D1D5DB] rounded-xl px-4 py-3 mb-4 bg-gray-100">
                   <Text className="text-[#1F2937]">{displayDate}</Text>
-                </TouchableOpacity>
-
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={new Date(journalDateISO)}
-                    mode="date"
-                    display="default"
-                    maximumDate={new Date()}
-                    onChange={onDateChange}
-                  />
-                )}
+                </View>
 
                 {/* <View className="flex-row mb-2">
                   <TouchableOpacity
