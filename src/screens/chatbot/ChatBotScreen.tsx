@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Bot, ChevronLeft, User } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Dimensions,
   FlatList,
   Image,
   Keyboard,
@@ -54,6 +55,7 @@ const ChatScreen = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigation = useNavigation();
+  const MAX_WIDTH = Dimensions.get('window').width * 0.7;
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () =>
@@ -106,6 +108,24 @@ const ChatScreen = () => {
       setSuggestionsUsed(false);
     }
   }, []);
+
+  const markdownImageRenderer = (node: any) => {
+  const uri = node.attributes.src;
+
+  return (
+    <Image
+      source={{ uri }}
+      style={{
+        width: MAX_WIDTH,
+        height: undefined,
+        aspectRatio: 1,
+        resizeMode: 'contain',
+        borderRadius: 12,
+        marginTop: 8,
+      }}
+    />
+  );
+};
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -211,12 +231,9 @@ const ChatScreen = () => {
                   fontSize: 14,
                   fontFamily: 'gilroy-regular',
                 },
-                image: {
-                  width: 240,
-                  height: 240,
-                  borderRadius: 12,
-                  marginTop: 8,
-                },
+              }}
+              rules={{
+                image: markdownImageRenderer,
               }}
             >
               {item.text}
