@@ -7,8 +7,20 @@ import { fetchTeamLeaveHistory } from '../../api/profile-api/profileApi';
 import { useLoadingStore } from '../../store/useLoadingStore';
 import { formatDate } from './LeaveDetailsScreen';
 
+type LeaveHistory = {
+  user_name: string;
+  leave_type: string;
+  status: string;
+  from_date: string;
+  to_date: string;
+  days: number;
+  reason: string;
+  updated_at?: string;
+  created_at?: string;
+};
+
 export default function TeamLeaveHistoryScreen() {
-  const [leaves, setLeaves] = useState([]);
+  const [leaves, setLeaves] = useState<LeaveHistory[]>([]);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -20,7 +32,8 @@ export default function TeamLeaveHistoryScreen() {
     showLoading('teamHistory', 'Loading  leave history ');
     try {
       const res = await fetchTeamLeaveHistory();
-      setLeaves(res.data.data);
+      const sorted = [...res.data.data].reverse();
+      setLeaves(sorted);
     } finally {
       hideLoading();
     }

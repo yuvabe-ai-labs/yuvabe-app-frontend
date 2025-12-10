@@ -19,8 +19,9 @@ type ProfileDetails = {
   name: string;
   email: string;
   team_name: string;
-  mentor_name: string;
-  mentor_email: string;
+  lead_label: string;
+  lead_name: string;
+  lead_email: string;
   join_date: string | null;
 };
 
@@ -31,7 +32,9 @@ type UserStore = {
   isVerified: boolean;
   isLogoutLoading: boolean;
   team_name?: string;
-  mentor_name?: string;
+  lead_label?: string;
+  lead_name?: string;
+  lead_email?: string;
   setUser: (userData: User) => void;
   setProfileDetails: (details: ProfileDetails) => void;
   setIsLoggedIn: (status: boolean) => void;
@@ -47,7 +50,9 @@ export const useUserStore = create<UserStore>(set => ({
   isVerified: false,
   isLogoutLoading: false,
   team_name: '',
-  mentor_name: '',
+  lead_label: '',
+  lead_name: '',
+  lead_email: '',
 
   setUser: userData =>
     set(state => ({
@@ -75,8 +80,10 @@ export const useUserStore = create<UserStore>(set => ({
           },
 
       team_name: details.team_name,
-      mentor_name: details.mentor_name,
-      mentor_email: details.mentor_email,
+      lead_label: details.lead_label,
+      lead_name: details.lead_name,
+      lead_email: details.lead_email,
+
       userDetails: details,
     })),
 
