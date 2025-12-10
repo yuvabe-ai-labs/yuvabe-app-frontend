@@ -59,7 +59,7 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
         setSick(bal.data.data.sick_remaining);
         setCasual(bal.data.data.casual_remaining);
       } catch (err) {
-        console.log(err)
+        console.log(err);
         showToast('Error', 'Unable to load leave details', 'error');
       } finally {
         hideLoading();
@@ -75,8 +75,26 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
       await mentorDecision(leaveId, { status: 'Approved' });
       showToast('Success', 'Leave Approved', 'success');
       navigation.goBack();
-    } catch (error: any) {
-      showToast('Error', error.message, 'error');
+    } catch (err: any) {
+      const isNetworkError =
+        err.message?.toLowerCase().includes('network') ||
+        err.code === 'ERR_NETWORK' ||
+        (err.response === undefined && err.request); // <-- best RN check
+
+      if (isNetworkError) {
+        showToast(
+          'No Internet',
+          'Please check your internet connection.',
+          'error',
+        );
+        return;
+      }
+
+      showToast(
+        'Update failed',
+        err.response?.data?.detail || err.message || 'Something went wrong',
+        'error',
+      );
     } finally {
       hideLoading();
     }
@@ -95,8 +113,26 @@ export default function MentorApprovalScreen({ route, navigation }: any) {
       });
       showToast('Rejected', 'Leave request rejected', 'error');
       navigation.goBack();
-    } catch (error: any) {
-      showToast('Error', error.message, 'error');
+    } catch (err: any) {
+      const isNetworkError =
+        err.message?.toLowerCase().includes('network') ||
+        err.code === 'ERR_NETWORK' ||
+        (err.response === undefined && err.request); // <-- best RN check
+
+      if (isNetworkError) {
+        showToast(
+          'No Internet',
+          'Please check your internet connection.',
+          'error',
+        );
+        return;
+      }
+
+      showToast(
+        'Update failed',
+        err.response?.data?.detail || err.message || 'Something went wrong',
+        'error',
+      );
     } finally {
       hideLoading();
     }
