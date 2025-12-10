@@ -60,6 +60,7 @@ const HomeScreen = ({ navigation }: any) => {
   const user = useUserStore(state => state.user);
   const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
   const { setProfileDetails } = useUserStore();
+  const userMail = getItem('logged_in_email');
 
   const EMOJI_TO_EMOTION: Record<string, string> = {
     '😄': 'joyful',
@@ -228,7 +229,12 @@ const HomeScreen = ({ navigation }: any) => {
               </View>
 
               <CalmingAudio />
-              <VisionBoard setScrollingEnabled={setScrollEnabled} />
+              {(userMail || user?.email) && (
+                <VisionBoard
+                  userEmail={userMail ?? user?.email}
+                  setScrollingEnabled={setScrollEnabled}
+                />
+              )}
             </Animated.ScrollView>
           </View>
 

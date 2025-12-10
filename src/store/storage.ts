@@ -18,17 +18,20 @@ const visionBoardStorage = createMMKV({
   id: 'visionBoardStorage',
 });
 
-export const getVisionBoard = () => {
-  const value = visionBoardStorage.getString('VISION_BOARD_TILES');
+export const getVisionBoard = (email: string) => {
+  const key = `VISION_BOARD_TILES_${email}`;
+  const value = visionBoardStorage.getString(key);
   return value ? JSON.parse(value) : null;
 };
 
-export const setVisionBoard = (tiles: any[]) => {
-  visionBoardStorage.set('VISION_BOARD_TILES', JSON.stringify(tiles));
+export const setVisionBoard = (email: string, tiles: any[]) => {
+  const key = `VISION_BOARD_TILES_${email}`;
+  visionBoardStorage.set(key, JSON.stringify(tiles));
 };
 
-export const removeVisionBoard = () => {
-  visionBoardStorage.remove('VISION_BOARD_TILES');
+export const removeVisionBoard = (email: string) => {
+  const key = `VISION_BOARD_TILES_${email}`;
+  visionBoardStorage.remove(key);
 };
 
 export const setTokens = (accessToken: string, refreshToken: string) => {

@@ -51,6 +51,7 @@ const SignInScreen = ({ navigation }: any) => {
       setIsVerified(res.user.is_verified);
 
       setTokens(res.access_token, res.refresh_token);
+      setItem('logged_in_email', data.email);
       setItem('is_verified', res.user.is_verified ? 'true' : 'false');
       setItem('pending_email', data.email);
 
