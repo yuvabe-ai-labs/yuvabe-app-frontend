@@ -33,7 +33,7 @@ export const useChatStore = create<ChatState>((set) => ({
   messages: [],
 
   chatHistory: [
-    { role: "system", content: SYSTEM_PROMPT }
+    { role: "system", content: SYSTEM_PROMPT() }
   ],
 
   suggestionsUsed: false,
@@ -57,7 +57,7 @@ export const useChatStore = create<ChatState>((set) => ({
   resetChat: () =>
     set({
       messages: [],
-      chatHistory: [{ role: "system", content: SYSTEM_PROMPT }],
+      chatHistory: [{ role: "system", content: SYSTEM_PROMPT() }],
       suggestionsUsed: false,
     }),
 }));

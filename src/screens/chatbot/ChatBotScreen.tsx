@@ -165,7 +165,7 @@ const ChatScreen = () => {
       const { contextText } = await retrieveContextForQuery(session, text);
 
       const modelUserMessage = contextText
-        ? `Context:\n${contextText}\n\nUser Question: ${text} Respond concisely on what user asked for and use image only when relevant to the user question and less elaboration`
+        ? `Context:\n${contextText}\n\n Respond to this user query properly, concisely and with keywords in markdown and add image when relevant to question. User Question: ${text} `
         : text;
 
       const finalText = await qwenChat(
@@ -189,7 +189,7 @@ const ChatScreen = () => {
       addTurn({ role: 'assistant', content: finalText });
     } catch (e) {
       updateMessage(botMsgId, {
-        text: `Error: ${e}`,
+        text: `${e}`,
         streaming: false,
       });
     } finally {
