@@ -52,6 +52,7 @@ const ChatScreen = () => {
   const currentBotMsgIdRef = useRef<string | null>(null);
   const isDisabled = downloadState !== 'completed' || !session || !modelsLoaded;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -108,6 +109,9 @@ const ChatScreen = () => {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+
+    if (isProcessing) return;
+    setIsProcessing(true);
 
     Keyboard.dismiss();
 
@@ -168,6 +172,8 @@ const ChatScreen = () => {
         text: `Error: ${e}`,
         streaming: false,
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -320,14 +326,18 @@ const ChatScreen = () => {
             value={input}
             onChangeText={setInput}
             placeholder={
-              isDisabled ? 'Downloading models...' : 'Type a message...'
+              isDisabled
+                ? 'Downloading models...'
+                : isProcessing
+                  ? 'Thinking...'
+                  : 'Type a message...'
             }
             placeholderTextColor="#999"
             style={[
               styles.input,
               isDisabled && { backgroundColor: '#e5e5e5', color: '#999' },
             ]}
-            editable={!isDisabled}
+            editable={!isDisabled && !isProcessing}
             returnKeyType="send"
             onSubmitEditing={!isDisabled ? sendMessage : undefined}
           />
@@ -335,10 +345,10 @@ const ChatScreen = () => {
           <TouchableOpacity
             style={[
               styles.sendBtn,
-              isDisabled && { backgroundColor: '#b5b5b5' },
+              (isDisabled || isProcessing) && { backgroundColor: '#b5b5b5' },
             ]}
-            onPress={!isDisabled ? sendMessage : undefined}
-            disabled={isDisabled}
+            onPress={!isDisabled && !isProcessing ? sendMessage : undefined}
+            disabled={isDisabled || isProcessing}
           >
             <Text style={styles.sendText}>Send</Text>
           </TouchableOpacity>
