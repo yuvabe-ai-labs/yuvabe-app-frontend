@@ -297,6 +297,7 @@ const ChatScreen = () => {
           >
             <DefaultSuggestions
               onSelect={text => {
+                if (isDisabled) return;
                 setInput(text);
                 Keyboard.dismiss();
               }}
