@@ -9,20 +9,41 @@ export const styles = StyleSheet.create({
 
   bubble: {
     padding: SIZES.base * 1.25,
-    marginVertical: SIZES.base * 0.6,
-    borderRadius: SIZES.radius,
-    maxWidth: '80%',
+    marginVertical: 8,
+    borderRadius: 16,
+    maxWidth: '75%',
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    backgroundColor: 'transparent',
+    borderWidth: 1.4,
   },
+
   userBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#6C2CF8',
+    borderColor: '#6C2CF8',
   },
+  thinkingBubble: {
+    alignSelf: 'flex-start',
+    borderRadius: 16,
+    padding: 12,
+    maxWidth: '60%',
+    borderWidth: 1,
+    borderColor: '#D0C2FF',
+  },
+  thinkingText: {
+    color: '#8A6BE7',
+    fontSize: 14,
+    fontFamily: FONTS.gilroy.medium,
+  },
+
   botBubble: {
     alignSelf: 'flex-start',
-    backgroundColor: COLORS.lightGray,
+    borderColor: '#CCB6FF',
   },
   botText: {
-    color: 'black',
+    color: '#592AC7',
     fontSize: SIZES.md,
     fontFamily: FONTS.gilroy.regular,
   },

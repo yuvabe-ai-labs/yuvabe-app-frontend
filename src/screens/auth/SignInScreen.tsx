@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
-  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -20,6 +19,7 @@ import { fetchUserDetails, signIn } from '../../api/auth-api/authApi';
 import { signInSchema, SignInSchemaType } from '../../schemas/authSchema';
 import { setItem, setTokens } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
+import { YBSymbol } from '../../utils/customIcons';
 import { COLORS } from '../../utils/theme';
 import { showToast } from '../../utils/ToastHelper';
 import styles from './styles/AuthStyles';
@@ -95,10 +95,12 @@ const SignInScreen = ({ navigation }: any) => {
               keyboardShouldPersistTaps="handled"
             >
               <View style={styles.container}>
-                <Image
-                  source={require('../../assets/logo/yuvabe-logo.png')}
-                  style={styles.logo}
-                />
+                <View style={styles.logo}>
+                  <YBSymbol
+                    width={styles.logo.width}
+                    height={styles.logo.height}
+                  />
+                </View>
 
                 <Text style={styles.title}>Welcome Back</Text>
                 <Text style={styles.subtitle}>
