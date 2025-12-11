@@ -1,10 +1,12 @@
 import * as RNFS from '@dr.pogodin/react-native-fs';
-import { Pause, Play } from 'lucide-react-native';
+import { Pause } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import Sound, { createSound } from 'react-native-nitro-sound';
 import { getItem, removeItem, setItem } from '../../../store/storage';
+import { Play } from '../../../utils/customIcons';
 import styles from '../HomeStyles';
+import AudioPlayerModal from './AudioPlayerModal';
 
 const tracks = [
   {
@@ -54,10 +56,26 @@ const CalmingAudio = () => {
     {},
   );
   const [paused, setPaused] = useState(false);
-
+  const [isMuted, setIsMuted] = useState(false);
   const [playTime, setPlayTime] = useState('00:00');
   const [duration, setDuration] = useState('00:00');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState(null);
 
+  const openModal = track => {
+    setSelectedTrack(track);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => setModalVisible(false);
+  const handleToggleMute = async () => {
+    if (isMuted) {
+      await Sound.setVolume(1);
+    } else {
+      await Sound.setVolume(0);
+    }
+    setIsMuted(prev => !prev);
+  };
   useEffect(() => {
     return () => {
       Sound.removePlayBackListener();
@@ -109,6 +127,9 @@ const CalmingAudio = () => {
 
     await Sound.startPlayer(localPath);
 
+    // Ensure correct volume when starting
+    await Sound.setVolume(isMuted ? 0 : 1);
+
     if (savedPos > 0) {
       await Sound.seekToPlayer(savedPos);
     }
@@ -120,14 +141,14 @@ const CalmingAudio = () => {
 
         setPlayTime(formatMMSS(pos));
         setDuration(formatMMSS(dur));
+
         setItem(
           `audioProgress_${track.id}`,
           JSON.stringify({ position: pos, duration: dur }),
         );
+
         setItem('lastPlayedTrack', track.id);
-      } catch (err) {
-        console.log('Timestamp error:', err);
-      }
+      } catch {}
     });
 
     Sound.addPlaybackEndListener(() => {
@@ -235,41 +256,63 @@ const CalmingAudio = () => {
         const isActive = currentTrack === track.id;
 
         return (
-          <View key={track.id} style={styles.row}>
-            <Image source={track.thumbnail} style={styles.thumbnail} />
+          <View key={track.id}>
+            {/* Row content */}
+            <View style={styles.row}>
+              <Image source={track.thumbnail} style={styles.thumbnail} />
 
-            <View style={styles.middle}>
-              <Text style={styles.title}>{track.title}</Text>
-              <Text style={styles.author}>{track.author}</Text>
+              <TouchableOpacity
+                style={styles.middle}
+                onPress={() => openModal(track)}
+              >
+                <Text style={styles.title}>{track.title}</Text>
+                <Text style={styles.author}>{track.author}</Text>
 
-              <Text style={styles.time}>
-                {isActive
-                  ? `${playTime} / ${duration}`
-                  : (() => {
-                      const saved = getItem(`audioProgress_${track.id}`);
-                      if (!saved)
-                        return `00:00 / ${trackDurations[track.id] ?? '00:00'}`;
+                <Text style={styles.time}>
+                  {isActive
+                    ? `${playTime} / ${duration}`
+                    : (() => {
+                        const saved = getItem(`audioProgress_${track.id}`);
+                        if (!saved)
+                          return `00:00 / ${trackDurations[track.id] ?? '00:00'}`;
 
-                      const { position, duration } = JSON.parse(saved);
-                      return `${formatMMSS(position)} / ${
-                        duration
-                          ? formatMMSS(duration)
-                          : (trackDurations[track.id] ?? '00:00')
-                      }`;
-                    })()}
-              </Text>
+                        const { position, duration } = JSON.parse(saved);
+                        return `${formatMMSS(position)} / ${
+                          duration
+                            ? formatMMSS(duration)
+                            : (trackDurations[track.id] ?? '00:00')
+                        }`;
+                      })()}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => handlePlayPause(track)}>
+                {isActive && isPlaying ? (
+                  <Pause size={26} strokeWidth={2} />
+                ) : (
+                  <Play height={18} width={16} />
+                )}
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity onPress={() => handlePlayPause(track)}>
-              {isActive && isPlaying ? (
-                <Pause size={26} strokeWidth={2} />
-              ) : (
-                <Play size={26} strokeWidth={2} />
-              )}
-            </TouchableOpacity>
+            {track.id !== tracks[tracks.length - 1].id && (
+              <View style={styles.separator} />
+            )}
           </View>
         );
       })}
+      <AudioPlayerModal
+        visible={modalVisible}
+        track={selectedTrack}
+        onClose={closeModal}
+        isPlaying={isPlaying}
+        playTime={playTime}
+        duration={duration}
+        onPlayPause={() => handlePlayPause(selectedTrack)}
+        onReset={handleReset}
+        isMuted={isMuted}
+        onToggleMute={handleToggleMute}
+      />
     </View>
   );
 };

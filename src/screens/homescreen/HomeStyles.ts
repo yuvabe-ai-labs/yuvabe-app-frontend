@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
 
   welcomeText: {
     ...TEXT_STYLES.large,
-    marginTop: 30,
+    marginTop: 15,
   },
 
   thoughtContainer: {
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFCA2D',
     borderWidth: 1,
     marginTop: 15,
-    marginBottom: SIZES.base * 2.5,
+    marginBottom: SIZES.base * 2,
     alignItems: 'center',
   },
 
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   thoughtText: {
     ...TEXT_STYLES.regular,
     fontSize: 16,
-    fontStyle: 'normal',
+    fontWeight:'600',
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 10,
@@ -102,74 +102,34 @@ const styles = StyleSheet.create({
   moodHistoryTitle: {
     ...TEXT_STYLES.title,
   },
-  // audioContainer: {
-  //   backgroundColor: COLORS.lightGray,
-  //   padding: SIZES.base * 2,
-  //   borderRadius: SIZES.radius,
-  //   marginBottom: SIZES.base * 2.5,
-  // },
-
-  // audioTitle: {
-  //   ...TEXT_STYLES.title,
-  //   fontSize: SIZES.lg,
-  //   marginBottom: 8,
-  // },
-
-  // audioItem: {
-  //   backgroundColor: COLORS.background,
-  //   padding: SIZES.base * 1.5,
-  //   borderRadius: SIZES.radius,
-  //   marginTop: SIZES.base,
-  //   shadowColor: COLORS.textPrimary,
-  //   shadowOpacity: 0.05,
-  //   shadowRadius: 2,
-  //   elevation: 2,
-  // },
-
-  // audioItemTitle: {
-  //   ...TEXT_STYLES.large,
-  //   fontSize: SIZES.md,
-  //   marginBottom: 10,
-  // },
-
-  // audioControls: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginTop: 6,
-  // },
-
-  // audioButton: {
-  //   marginRight: 20,
-  // },
-
-  // audioButtonText: {
-  //   ...TEXT_STYLES.regular,
-  //   fontSize: 16,
-  // },
   section: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingRight: 16,
   },
 
   heading: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 14,
+    ...TEXT_STYLES.regular,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    marginTop: 20,
   },
 
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 16,
+  },
+
+  rowBorder: {
     borderBottomWidth: 1,
     borderBottomColor: '#e6e6e6',
   },
 
   thumbnail: {
-    width: 56,
-    height: 56,
-    borderRadius: 10,
-    marginRight: 14,
+    width: 63,
+    height: 63,
+    borderRadius: 12,
+    marginRight: 20,
   },
 
   middle: {
@@ -178,20 +138,25 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: 'bold',
+    color: '#2F2F2F',
   },
 
   author: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 2,
+    color: '#858585',
   },
 
   time: {
-    fontSize: 13,
-    color: '#777',
-    marginTop: 4,
+    fontSize: 12,
+    color: '#6C6C6C',
+    marginTop: 5,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#e6e6e6',
+    marginLeft: 0,
+    marginRight: 0,
   },
 
   logoutButton: {

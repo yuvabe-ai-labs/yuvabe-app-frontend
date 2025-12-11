@@ -1,7 +1,6 @@
 'use client';
 
 import messaging from '@react-native-firebase/messaging';
-import { Bell, Menu } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -23,6 +22,7 @@ import AppDrawer from '../../components/AppDrawer';
 import DrawerContent from '../../components/DrawerContent';
 import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
+import { Alert, HamburgerMenu, YBLogo } from '../../utils/customIcons';
 import { COLORS } from '../../utils/theme';
 import styles from './HomeStyles';
 import BreathingModal from './components/BreathingModal';
@@ -30,9 +30,6 @@ import CalmingAudio from './components/CalmingAudio';
 import EmotionCheckIn from './components/EmotionCheckIn';
 import GroundingExerciseModal from './components/GroundingExerciseModal';
 import VisionBoard from './components/VisionBoard';
-import YBLogo from '../../assets/logo/YB_Home_Logo.svg';
-import HamburgerMenu from '../../assets/logo/Hamburger_Menu.svg';
-import Alert from '../../assets/logo/Alert.svg';
 
 export async function requestNotificationPermission() {
   if (Platform.OS === 'android') {
@@ -219,7 +216,11 @@ const HomeScreen = ({ navigation }: any) => {
                 <Text style={styles.thoughtText}>“{quote}“</Text>
                 <Text
                   style={[
-                    { fontStyle: 'italic', fontSize: 14 , alignSelf:'flex-end'},
+                    {
+                      fontStyle: 'italic',
+                      fontSize: 14,
+                      alignSelf: 'flex-end',
+                    },
                   ]}
                 >
                   — {author}
