@@ -74,7 +74,7 @@ const AssetSection = () => {
 
         <View style={{ flex: 1 }}>
           
-          <Text style={styles.assetName}>{item.id}</Text>
+          <Text style={styles.assetName}>{item.asset_id}</Text>
           <Text style={styles.assetType}>{item.type}</Text>
         </View>
 

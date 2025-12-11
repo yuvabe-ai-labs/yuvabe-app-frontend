@@ -32,8 +32,7 @@ export default function TeamLeaveHistoryScreen() {
     showLoading('teamHistory', 'Loading  leave history ');
     try {
       const res = await fetchTeamLeaveHistory();
-      const sorted = [...res.data.data].reverse();
-      setLeaves(sorted);
+      setLeaves(res.data.data);
     } finally {
       hideLoading();
     }
