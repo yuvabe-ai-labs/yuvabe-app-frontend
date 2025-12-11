@@ -27,9 +27,6 @@ const GroundingExerciseModal: React.FC<Props> = ({
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.box}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeText}>✖</Text>
-          </TouchableOpacity>
 
           <Text style={styles.title}>5-4-3-2-1 Grounding Exercise</Text>
           <Text style={styles.subtitle}>Choose a sense to focus on</Text>

@@ -30,6 +30,7 @@ export default function RequestLeaveScreen() {
 
   const [leaveType, setLeaveType] = useState('Sick Leave');
   const [showLeaveType, setShowLeaveType] = useState(false);
+  const [balanceLoading, setBalanceLoading] = useState(true);
 
   const [fromDate, setFromDate] = useState(new Date());
   const [toDate, setToDate] = useState(new Date());
@@ -65,6 +66,7 @@ export default function RequestLeaveScreen() {
 
   const loadBalance = async () => {
     try {
+      setBalanceLoading(true);
       const res = await fetchLeaveBalance();
       const data = res.data.data;
 
@@ -72,6 +74,8 @@ export default function RequestLeaveScreen() {
       setCasualCount(data.casual_remaining);
     } catch (err) {
       console.log('Balance error:', err);
+    } finally {
+      setBalanceLoading(false);
     }
   };
 
@@ -125,7 +129,17 @@ export default function RequestLeaveScreen() {
         routes: [{ name: 'Home' }],
       });
     } catch (err: any) {
-      showToast('Error', err.message, 'error');
+      const msg = err?.message?.toLowerCase() || '';
+
+      if (msg.includes('network')) {
+        showToast(
+          'No Internet',
+          'Please check your connection and try again.',
+          'error',
+        );
+      } else {
+        showToast('Error', err.message || 'Something went wrong.', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -198,12 +212,16 @@ export default function RequestLeaveScreen() {
           <View style={styles.countContainer}>
             <View style={styles.countCard}>
               <Text style={styles.countLabel}>Sick Count</Text>
-              <Text style={styles.countValue}>{sickCount}</Text>
+              <Text style={styles.countValue}>
+                {balanceLoading ? '--' : sickCount}
+              </Text>
             </View>
 
             <View style={styles.countCard}>
               <Text style={styles.countLabel}>Casual Count</Text>
-              <Text style={styles.countValue}>{casualCount}</Text>
+              <Text style={styles.countValue}>
+                {balanceLoading ? '--' : casualCount}
+              </Text>
             </View>
           </View>
 

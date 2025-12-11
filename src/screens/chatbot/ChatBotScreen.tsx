@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Bot, ChevronLeft, User } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Dimensions,
   FlatList,
   Image,
   Keyboard,
@@ -52,7 +53,9 @@ const ChatScreen = () => {
   const currentBotMsgIdRef = useRef<string | null>(null);
   const isDisabled = downloadState !== 'completed' || !session || !modelsLoaded;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigation = useNavigation();
+  const MAX_WIDTH = Dimensions.get('window').width * 0.7;
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () =>
@@ -106,8 +109,29 @@ const ChatScreen = () => {
     }
   }, []);
 
+  const markdownImageRenderer = (node: any) => {
+  const uri = node.attributes.src;
+
+  return (
+    <Image
+      source={{ uri }}
+      style={{
+        width: MAX_WIDTH,
+        height: undefined,
+        aspectRatio: 1,
+        resizeMode: 'contain',
+        borderRadius: 12,
+        marginTop: 8,
+      }}
+    />
+  );
+};
+
   const sendMessage = async () => {
     if (!input.trim()) return;
+
+    if (isProcessing) return;
+    setIsProcessing(true);
 
     Keyboard.dismiss();
 
@@ -141,7 +165,7 @@ const ChatScreen = () => {
       const { contextText } = await retrieveContextForQuery(session, text);
 
       const modelUserMessage = contextText
-        ? `Context:\n${contextText}\n\nUser Question: ${text} Respond concisely on what user asked for and use image only when relevant to the user question and less elaboration`
+        ? `Context:\n${contextText}\n\n Respond to this user query properly, concisely and with keywords in markdown and add image when relevant to question. User Question: ${text} `
         : text;
 
       const finalText = await qwenChat(
@@ -165,9 +189,11 @@ const ChatScreen = () => {
       addTurn({ role: 'assistant', content: finalText });
     } catch (e) {
       updateMessage(botMsgId, {
-        text: `Error: ${e}`,
+        text: `${e}`,
         streaming: false,
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -205,12 +231,9 @@ const ChatScreen = () => {
                   fontSize: 14,
                   fontFamily: 'gilroy-regular',
                 },
-                image: {
-                  width: 240,
-                  height: 240,
-                  borderRadius: 12,
-                  marginTop: 8,
-                },
+              }}
+              rules={{
+                image: markdownImageRenderer,
               }}
             >
               {item.text}
@@ -297,6 +320,7 @@ const ChatScreen = () => {
           >
             <DefaultSuggestions
               onSelect={text => {
+                if (isDisabled) return;
                 setInput(text);
                 Keyboard.dismiss();
               }}
@@ -319,14 +343,18 @@ const ChatScreen = () => {
             value={input}
             onChangeText={setInput}
             placeholder={
-              isDisabled ? 'Downloading models...' : 'Type a message...'
+              isDisabled
+                ? 'Downloading models...'
+                : isProcessing
+                  ? 'Thinking...'
+                  : 'Type a message...'
             }
             placeholderTextColor="#999"
             style={[
               styles.input,
               isDisabled && { backgroundColor: '#e5e5e5', color: '#999' },
             ]}
-            editable={!isDisabled}
+            editable={!isDisabled && !isProcessing}
             returnKeyType="send"
             onSubmitEditing={!isDisabled ? sendMessage : undefined}
           />
@@ -334,10 +362,10 @@ const ChatScreen = () => {
           <TouchableOpacity
             style={[
               styles.sendBtn,
-              isDisabled && { backgroundColor: '#b5b5b5' },
+              (isDisabled || isProcessing) && { backgroundColor: '#b5b5b5' },
             ]}
-            onPress={!isDisabled ? sendMessage : undefined}
-            disabled={isDisabled}
+            onPress={!isDisabled && !isProcessing ? sendMessage : undefined}
+            disabled={isDisabled || isProcessing}
           >
             <Text style={styles.sendText}>Send</Text>
           </TouchableOpacity>
