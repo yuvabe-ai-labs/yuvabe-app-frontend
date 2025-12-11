@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { COLORS } from '../../utils/theme';
+import { COLORS, FONTS } from '../../utils/theme';
 
 export const styles = StyleSheet.create({
   container: {
@@ -26,6 +26,8 @@ export const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: -50,
     padding: 20,
+    borderWidth: 1,
+    borderColor: '#592AC7',
     borderRadius: 16,
     alignItems: 'center',
   },
@@ -42,19 +44,23 @@ export const styles = StyleSheet.create({
   name: {
     fontSize: 22,
     fontWeight: '700',
+    fontFamily: FONTS.gilroy.medium,
     color: '#1A1A1A',
   },
   email: {
     fontSize: 15,
     color: '#6C757D',
+    fontFamily: FONTS.gilroy.medium,
     marginTop: 4,
   },
 
   /* Sections */
   sectionWrapper: {
     backgroundColor: '#FFFFFF',
-    marginTop: 40,
+    marginTop: 20,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#592AC7',
     marginHorizontal: 20,
     overflow: 'hidden',
   },
@@ -68,10 +74,11 @@ export const styles = StyleSheet.create({
   },
   sectionLabel: {
     flex: 1,
+    fontFamily: FONTS.gilroy.medium,
+    fontWeight: '700',
     marginLeft: 14,
     fontSize: 17,
     color: '#1A1A1A',
-    fontWeight: '500',
   },
 
   /* Logout */
@@ -83,18 +90,18 @@ export const styles = StyleSheet.create({
     marginTop: 40,
     paddingVertical: 15,
     borderRadius: 12,
-    backgroundColor: '#FFE8E8',
+    backgroundColor: '#FF383C',
   },
   logoutText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#FF3B30',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
 
   infoIcon: {
     marginRight: 8,
-    color: '#4A90E2',
+    color: '#000000',
   },
   infoRow: {
     flexDirection: 'row',
@@ -105,11 +112,15 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     marginLeft: 6,
-    width: 70, // to align labels
+    fontWeight: '500',
+    fontFamily: FONTS.gilroy.medium,
+    width: 70,
   },
   infoValue: {
     fontSize: 14,
     color: '#000',
+    fontWeight: '600',
+    fontFamily: FONTS.gilroy.medium,
     marginLeft: 4,
     flexShrink: 1,
   },

@@ -21,6 +21,7 @@ import {
 } from '../../api/payslip/paySlipApi';
 import { useUserStore } from '../../store/useUserStore';
 import { showToast } from '../../utils/ToastHelper';
+import { FONTS } from '../../utils/theme';
 
 export default function PayslipScreen({ navigation }: any) {
   const user = useUserStore(state => state.user);
@@ -44,7 +45,7 @@ export default function PayslipScreen({ navigation }: any) {
 
   // JOIN DATE LOGIC COMES FROM USER STORE
   const rawJoinDate = user?.join_date;
-  const now = new Date();
+
   const joinDate = rawJoinDate
     ? new Date(rawJoinDate) // use actual date
     : new Date(2020, 3, 1); // fallback: 2020 April 1
@@ -126,7 +127,11 @@ export default function PayslipScreen({ navigation }: any) {
     const toDate = new Date(toY, toM - 1);
 
     if (fromDate >= toDate) {
-      showToast('Invalid Range', 'Start month must be earlier than end month.', 'error');
+      showToast(
+        'Invalid Range',
+        'Start month must be earlier than end month.',
+        'error',
+      );
       return false;
     }
 
@@ -260,14 +265,14 @@ export default function PayslipScreen({ navigation }: any) {
     }
   };
   const isRequestDisabled = () => {
-  if (loading) return true;
+    if (loading) return true;
 
-  if (mode === 'manual') {
-    return !fromMonth || !toMonth;
-  }
+    if (mode === 'manual') {
+      return !fromMonth || !toMonth;
+    }
 
-  return false;
-};
+    return false;
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
@@ -277,22 +282,26 @@ export default function PayslipScreen({ navigation }: any) {
           flexDirection: 'row',
           alignItems: 'center',
           paddingTop: 20,
+          paddingBottom: 16,
           paddingHorizontal: 16,
-          paddingBottom: 24,
-          backgroundColor: '#FFFFFF',
           borderBottomWidth: 0,
-          borderBottomColor: '#E9E5FF',
+          backgroundColor: '#FFFFFF',
+          justifyContent: 'center',
         }}
       >
-        <TouchableOpacity onPress={() => navigation?.goBack()}>
-          <ChevronLeft size={24} color="#5B21B6" strokeWidth={2.5} />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ position: 'absolute', left: 16 }}
+        >
+          <ChevronLeft size={24} color="#5B21B6" strokeWidth={2} />
         </TouchableOpacity>
+
         <Text
           style={{
-            fontSize: 24,
+            fontSize: 18,
+            fontFamily: FONTS.gilroy.bold,
             fontWeight: '700',
-            color: '#1F2937',
-            marginLeft: 12,
+            color: '#475569',
           }}
         >
           Request Payslip
@@ -300,278 +309,274 @@ export default function PayslipScreen({ navigation }: any) {
       </View>
 
       <ScrollView
-        style={{ flex: 1, padding: 16 }}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        style={{ flex: 1, paddingHorizontal: 16 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* MODE SELECTION CARD */}
-        <View
+        {/* Choose Duration Title */}
+        <Text
           style={{
-            backgroundColor: '#FFFFFF',
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 20,
-            borderWidth: 1,
-            borderColor: '#E9E5FF',
+            fontSize: 18,
+            fontFamily: FONTS.gilroy.medium,
+            fontWeight: '700',
+            color: '#1F2937',
+            marginTop: 10,
+            marginBottom: 10,
           }}
         >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: '600',
-              color: '#6B7280',
-              marginBottom: 12,
-            }}
-          >
-            Select Period Type
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            {[
-              { id: 'preset', label: 'Preset Range' },
-              { id: 'manual', label: 'Custom Range' },
-            ].map(option => (
-              <TouchableOpacity
-                key={option.id}
-                onPress={() => setMode(option.id as any)}
+          Choose Duration
+        </Text>
+
+        {/* LAST 3 & 6 MONTHS CARDS */}
+        <View style={{ gap: 12 }}>
+          {[
+            {
+              value: '3_months',
+              label: 'Last 3 Months',
+              desc: getPresetDateRange('3_months'),
+            },
+            {
+              value: '6_months',
+              label: 'Last 6 Months',
+              desc: getPresetDateRange('6_months'),
+            },
+          ].map(option => (
+            <TouchableOpacity
+              key={option.value}
+              onPress={() => {
+                // Switch to preset mode
+                setMode('preset');
+
+                // Highlight selected preset
+                setPresetMode(option.value as any);
+
+                // Reset custom dates when preset is chosen
+                setFromMonth('');
+                setToMonth('');
+              }}
+              style={{
+                paddingVertical: 16,
+                paddingHorizontal: 14,
+                borderRadius: 12,
+                backgroundColor:
+                  presetMode === option.value ? '#F3E8FF' : '#FFFFFF',
+                borderWidth: 1.5,
+                borderColor:
+                  presetMode === option.value ? '#5B21B6' : '#E5E7EB',
+              }}
+            >
+              <Text
                 style={{
-                  flex: 1,
-                  paddingVertical: 12,
-                  paddingHorizontal: 16,
-                  borderRadius: 8,
-                  backgroundColor: mode === option.id ? '#5B21B6' : '#F3F4F6',
-                  borderWidth: 1.5,
-                  borderColor: mode === option.id ? '#5B21B6' : '#E5E7EB',
+                  fontSize: 15,
+                  fontFamily: FONTS.gilroy.medium,
+                  fontWeight: '700',
+                  color: presetMode === option.value ? '#5B21B6' : '#1F2937',
                 }}
               >
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    fontSize: 13,
-                    fontWeight: '600',
-                    color: mode === option.id ? '#FFFFFF' : '#4B5563',
-                  }}
-                >
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                {option.label}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontFamily: FONTS.gilroy.medium,
+                  marginTop: 4,
+                  color: '#6B7280',
+                }}
+              >
+                {option.desc}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* PRESET MODE - 3/6 MONTHS */}
-        {mode === 'preset' && (
+        {/* Divider with "or" */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginVertical: 40,
+          }}
+        >
           <View
             style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: 12,
-              padding: 16,
-              marginBottom: 20,
-              borderWidth: 1,
-              borderColor: '#E9E5FF',
+              flex: 1,
+              height: 1,
+              backgroundColor: '#E5E7EB',
+            }}
+          />
+          <Text
+            style={{
+              marginHorizontal: 12,
+              fontSize: 14,
+              color: '#6B7280',
+              fontWeight: '500',
             }}
           >
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#6B7280',
-                marginBottom: 12,
-              }}
-            >
-              Choose Duration
-            </Text>
-            <View style={{ gap: 10 }}>
-              {[
-                {
-                  value: '3_months',
-                  label: 'Last 3 Months',
-                  desc: getPresetDateRange('3_months'),
-                },
-                {
-                  value: '6_months',
-                  label: 'Last 6 Months',
-                  desc: getPresetDateRange('6_months'),
-                },
-              ].map(option => (
-                <TouchableOpacity
-                  key={option.value}
-                  onPress={() => setPresetMode(option.value as any)}
-                  style={{
-                    paddingVertical: 14,
-                    paddingHorizontal: 14,
-                    borderRadius: 10,
-                    backgroundColor:
-                      presetMode === option.value ? '#F3E8FF' : '#F9FAFB',
-                    borderWidth: 2,
-                    borderColor:
-                      presetMode === option.value ? '#5B21B6' : '#E5E7EB',
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '600',
-                      color:
-                        presetMode === option.value ? '#5B21B6' : '#1F2937',
-                    }}
-                  >
-                    {option.label}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: '#6B7280',
-                      marginTop: 4,
-                    }}
-                  >
-                    {option.desc}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* MANUAL MODE - CUSTOM DATE RANGE */}
-        {mode === 'manual' && (
+            or
+          </Text>
           <View
             style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: 12,
-              padding: 16,
-              marginBottom: 20,
-              borderWidth: 1,
-              borderColor: '#E9E5FF',
+              flex: 1,
+              height: 1,
+              backgroundColor: '#E5E7EB',
             }}
-          >
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#6B7280',
-                marginBottom: 12,
-              }}
-            >
-              Enter Date Range
-            </Text>
-            <Text style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 12 }}>
-              Format: MM/YYYY (e.g., 01/2024)
-            </Text>
+          />
+        </View>
 
-            {/* From Month */}
+        {/* CUSTOM DATE TITLE */}
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '700',
+            color: '#1F2937',
+            marginBottom: 12,
+          }}
+        >
+          Choose custom date
+        </Text>
+
+        {/* FROM + TO INPUTS */}
+        {/* PARENT ROW FOR BOTH COLUMNS */}
+        <View style={{ flexDirection: 'row', gap: 14 }}>
+          {/* LEFT COLUMN (FROM) */}
+          <View style={{ flex: 1 }}>
             <Text
               style={{
                 fontSize: 13,
-                fontWeight: '500',
-                color: '#374151',
+                fontWeight: '600',
+                color: '#6B7280',
                 marginBottom: 6,
               }}
             >
               From
             </Text>
+
             <TouchableOpacity
-              onPress={() => setShowFromPicker(true)}
+              onPress={() => {
+                setMode('manual');
+                setPresetMode(null as any);
+                setShowFromPicker(true);
+              }}
               style={{
                 borderWidth: 1.5,
                 borderColor: '#E5E7EB',
-                borderRadius: 8,
+                borderRadius: 10,
+                paddingVertical: 14,
                 paddingHorizontal: 12,
-                paddingVertical: 10,
-                marginBottom: 16,
               }}
             >
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: 15,
                   color: fromMonth ? '#1F2937' : '#9CA3AF',
                 }}
               >
-                {fromMonth || 'Select From Month'}
+                {fromMonth || 'Select date'}
               </Text>
             </TouchableOpacity>
+          </View>
 
-            {/* To Month */}
+          {/* RIGHT COLUMN (TO) */}
+          <View style={{ flex: 1 }}>
             <Text
               style={{
                 fontSize: 13,
-                fontWeight: '500',
-                color: '#374151',
+                fontWeight: '600',
+                color: '#6B7280',
                 marginBottom: 6,
+                textAlign: 'left',
               }}
             >
               To
             </Text>
+
             <TouchableOpacity
-              onPress={() => setShowToPicker(true)}
+              onPress={() => {
+                setMode('manual');
+                setPresetMode(null as any);
+                setShowToPicker(true);
+              }}
               style={{
                 borderWidth: 1.5,
                 borderColor: '#E5E7EB',
-                borderRadius: 8,
+                borderRadius: 10,
+                paddingVertical: 14,
                 paddingHorizontal: 12,
-                paddingVertical: 10,
               }}
             >
               <Text
-                style={{ fontSize: 14, color: toMonth ? '#1F2937' : '#9CA3AF' }}
+                style={{
+                  fontSize: 15,
+                  color: toMonth ? '#1F2937' : '#9CA3AF',
+                }}
               >
-                {toMonth || 'Select To Month'}
+                {toMonth || 'Select date'}
               </Text>
             </TouchableOpacity>
           </View>
-        )}
+        </View>
       </ScrollView>
 
-      {/* REQUEST BUTTON - FIXED AT BOTTOM */}
+      {/* BOTTOM BUTTON */}
       <View
         style={{
-          paddingHorizontal: 16,
-          paddingVertical: 16,
-          borderTopWidth: 1,
-          borderTopColor: '#E9E5FF',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: 16,
           backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E7EB',
         }}
       >
         <TouchableOpacity
           disabled={isRequestDisabled()}
           onPress={handleRequestPayslip}
           style={{
-            paddingVertical: 14,
-            borderRadius: 10,
-            backgroundColor: isRequestDisabled() ? '#D1D5DB' : '#5B21B6',
-            flexDirection: 'row',
-            justifyContent: 'center',
+            paddingVertical: 16,
+            borderRadius: 12,
+            backgroundColor: isRequestDisabled() ? '#BDA0FF' : '#592AC7',
             alignItems: 'center',
           }}
         >
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600' }}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: '#FFFFFF',
+                fontWeight: '600',
+              }}
+            >
               Request Payslip
             </Text>
           )}
         </TouchableOpacity>
-        {showFromPicker && (
-          <DateTimePicker
-            value={new Date()}
-            mode="date"
-            display="calendar"
-            minimumDate={joinDate}
-            maximumDate={new Date()}
-            onChange={handleFromDate}
-          />
-        )}
-
-        {showToPicker && (
-          <DateTimePicker
-            value={new Date()}
-            mode="date"
-            display="calendar"
-            minimumDate={getFromDateForMin()}
-            maximumDate={new Date()}
-            onChange={handleToDate}
-          />
-        )}
       </View>
+
+      {/* DATE PICKERS + GMAIL MODAL REMAIN EXACTLY SAME */}
+      {showFromPicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="date"
+          display="calendar"
+          minimumDate={joinDate}
+          maximumDate={new Date()}
+          onChange={handleFromDate}
+        />
+      )}
+
+      {showToPicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="date"
+          display="calendar"
+          minimumDate={getFromDateForMin()}
+          maximumDate={new Date()}
+          onChange={handleToDate}
+        />
+      )}
 
       {/* GMAIL CONNECTION MODAL */}
       <Modal

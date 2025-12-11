@@ -12,6 +12,8 @@ export const editProfileSchema = z
 
     email: z.string().email('Enter a valid email'),
 
+    team: z.string().optional(),
+
     dob: z.string().min(1, 'Date of Birth is required'),
 
     currentPassword: z.string().optional(),

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { COLORS } from '../../utils/theme';
+import { COLORS, FONTS } from '../../utils/theme';
 
 export const styles = StyleSheet.create({
   container: {
@@ -12,6 +12,15 @@ export const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 30,
+  },
+  headerBg: {
+    height: 160,
+    justifyContent: 'flex-end',
+    paddingBottom: 25,
+    paddingHorizontal: 20,
+  },
+  editTopWrapper: {
+    marginTop: -60,
   },
   profileImage: {
     width: 110,
@@ -34,9 +43,17 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
+  title: {
+    marginBottom: 20,
+    fontSize: 20,
+    fontFamily: FONTS.gilroy.medium,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
   label: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
+    fontFamily: FONTS.gilroy.medium,
     marginBottom: 6,
     color: '#1A1A1A',
   },

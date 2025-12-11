@@ -82,69 +82,92 @@ export default function MyLeaveHistoryScreen() {
       (item.status === 'Approved' || item.status === 'Pending') &&
       leaveDate > today;
 
+    const statusColors: any = {
+      Approved: '#4CAF50',
+      Pending: '#FFA000',
+      Cancelled: '#3F1ABF',
+      Rejected: '#FF3B30',
+    };
+
     return (
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() =>
           navigation.navigate('LeaveDetails', { leaveId: item.id })
         }
+        style={{
+          marginBottom: 18,
+        }}
       >
         <View
           style={{
-            backgroundColor: '#F5F5F5',
-            padding: 15,
-            marginVertical: 10,
-            borderRadius: 12,
+            backgroundColor: '#FFFFFF',
+            padding: 18,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: '#592AC7',
           }}
         >
-          <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
-            {item.leave_type} ({item.status})
-          </Text>
+          {/* TITLE + STATUS BADGE */}
+          <View
+            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+          >
+            <Text style={{ fontSize: 17, fontWeight: '700', color: '#000' }}>
+              {item.leave_type}
+            </Text>
 
-          <Text style={{ marginTop: 4 }}>
+            <View
+              style={{
+                backgroundColor: statusColors[item.status] || '#999',
+                paddingVertical: 4,
+                paddingHorizontal: 14,
+                borderRadius: 20,
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>
+                {item.status}
+              </Text>
+            </View>
+          </View>
+
+          {/* DATES */}
+          <Text style={{ marginTop: 10, fontSize: 14, color: '#000' }}>
             {formatDate(item.from_date)} → {formatDate(item.to_date)}
           </Text>
 
-          <Text style={{ marginTop: 2 }}>Days: {item.days}</Text>
-          <Text style={{ marginTop: 2 }}>
-            Mentor: {item.mentor_name || '—'}
+          {/* DAYS */}
+          <Text style={{ marginTop: 10, fontSize: 14, color: '#000' }}>
+            Number of Days: {item.days}
           </Text>
 
-          {/* FOOTER */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: 12,
-            }}
-          >
-            <Text style={{ color: 'gray', fontSize: 13 }}>
-              Updated: {formatDate(item.updated_at)}
-            </Text>
+          {/* APPROVED BY */}
+          <Text style={{ marginTop: 10, fontSize: 14, color: '#000' }}>
+            Approved by: {item.mentor_name || '—'}
+          </Text>
 
-            {canCancel && (
-              <TouchableOpacity
-                onPress={() => handleCancel(item)}
-                style={{
-                  backgroundColor: '#E53935',
-                  paddingVertical: 6,
-                  paddingHorizontal: 14,
-                  borderRadius: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    color: '#fff',
-                    fontWeight: 'bold',
-                    fontSize: 13,
-                  }}
-                >
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          {/* UPDATED ON */}
+          <Text style={{ marginTop: 12, fontSize: 13, color: '#8A8A8A' }}>
+            Updated on: {formatDate(item.updated_at)}
+          </Text>
+
+          {/* CANCEL BUTTON (same logic) */}
+          {canCancel && (
+            <TouchableOpacity
+              onPress={() => handleCancel(item)}
+              style={{
+                marginTop: 12,
+                backgroundColor: '#E53935',
+                paddingVertical: 7,
+                paddingHorizontal: 18,
+                borderRadius: 20,
+                alignSelf: 'flex-end',
+              }}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -165,26 +188,26 @@ export default function MyLeaveHistoryScreen() {
           }}
         >
           {/* LEFT SIDE: Arrow + Title */}
+          {/* CUSTOM HEADER */}
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              flex: 1,
+              paddingVertical: 14,
+              paddingHorizontal: 2,
+              backgroundColor: '#fff',
+              marginBottom: 0,
             }}
           >
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <ChevronLeft size={28} color="#000" />
             </TouchableOpacity>
 
-            <Text
-              style={{
-                marginLeft: 15, // 👈 spacing between arrow & title
-                fontSize: 18,
-                fontWeight: '600',
-              }}
-            >
-              My Leave History
-            </Text>
+            <View style={{ flex: 1, alignItems: 'center', marginLeft: -28 }}>
+              <Text style={{ fontSize: 18, fontWeight: '600' }}>
+                Leave History
+              </Text>
+            </View>
           </View>
 
           {/* RIGHT SIDE: LOGO */}
