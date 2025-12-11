@@ -60,7 +60,6 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
       channelId,
       importance: AndroidImportance.HIGH,
       smallIcon: 'ic_stat_yuvabe',
-      largeIcon: require('../yuvabe-app-frontend/src/assets/logo/yuvabe-logo.png'),
       pressAction: { id: 'default' }, // FIXED
     },
   });
@@ -199,7 +198,6 @@ function App(): React.JSX.Element {
             channelId: 'default',
             importance: AndroidImportance.HIGH,
             smallIcon: 'ic_stat_yuvabe',
-            largeIcon: require('../yuvabe-app-frontend/src/assets/logo/yuvabe-logo.png'),
             pressAction: { id: 'default' }, // FIXED
           },
         });

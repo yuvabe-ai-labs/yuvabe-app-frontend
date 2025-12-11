@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Droplets,
-  TrendingUp,
-} from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Droplets } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   Animated,
@@ -20,33 +15,28 @@ import {
 import { BarChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { storage } from '../../../store/storage';
-import { showToast } from '../../../utils/ToastHelper';
 import { useWeeklyWaterChart } from './useWeeklyWaterChart';
 
-import {
-  fetchWaterLogs,
-  logWater,
-  updateWaterLog,
-} from '../../../api/wellbeing/wellBeingApi';
+import { fetchWaterLogs } from '../../../api/wellbeing/wellBeingApi';
+import { useWaterStore } from '../../../store/useWaterStore';
 import { TEXT_STYLES } from '../../../utils/theme';
 import { styles } from './WaterTrackingStyles';
 
 const DAILY_GOAL = 3000;
 const presetAmounts = [250, 500, 1000];
 const WATER_TODAY = 'water_today';
-const WATER_LAST_UPDATE = 'water_last_update';
 
 const WaterTrackerScreen = ({ navigation }: any) => {
-  const [todayTotal, setTodayTotal] = useState(0);
-  const [lastLogId, setLastLogId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [showSave, setShowSave] = useState(false);
+
   const [mode, setMode] = useState<'add' | 'remove'>('add');
 
   const fillAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
-  let saveTimeout: any = null;
+
+  const todayTotal = useWaterStore(s => s.today);
+  const setToday = useWaterStore(s => s.setToday);
+  const loadToday = useWaterStore(s => s.loadToday);
 
   useEffect(() => {
     const loadData = async () => {
@@ -61,22 +51,22 @@ const WaterTrackerScreen = ({ navigation }: any) => {
 
         if (todaysLogs.length > 0) {
           const latest = todaysLogs[todaysLogs.length - 1];
-          setTodayTotal(latest.amount_ml);
-          setLastLogId(latest.id);
+          loadToday(latest.amount_ml, latest.id);
+
           storage.set(WATER_TODAY, latest.amount_ml);
         } else {
           const saved = storage.getNumber(WATER_TODAY) ?? 0;
-          setTodayTotal(saved);
+          setToday(saved);
         }
       } catch (err) {
         console.log('API failed, using local:', err);
         const saved = storage.getNumber(WATER_TODAY) ?? 0;
-        setTodayTotal(saved);
+        setToday(saved);
       }
     };
 
     loadData();
-  }, []);
+  }, [loadToday, setToday]);
 
   useEffect(() => {
     Animated.timing(fillAnim, {
@@ -101,70 +91,24 @@ const WaterTrackerScreen = ({ navigation }: any) => {
     ]).start();
   };
 
-  const autoSaveToDB = (value: number) => {
-    clearTimeout(saveTimeout);
-
-    saveTimeout = setTimeout(async () => {
-      try {
-        if (lastLogId) {
-          const saved = await updateWaterLog(lastLogId, value);
-          console.log(saved);
-        } else {
-          const saved = await logWater(value);
-          setLastLogId(saved.id);
-        }
-
-        storage.set(WATER_TODAY, value);
-        storage.set(WATER_LAST_UPDATE, Date.now());
-        console.log('Auto synced to DB');
-      } catch (err) {
-        console.log('Auto-sync failed:', err);
-        showToast('Error', 'Failed to update. Will retry.', 'error');
-      }
-    }, 800);
-  };
-
   const addWater = (ml: number) => {
     pulseAnimation();
     const newTotal = Math.min(todayTotal + ml, DAILY_GOAL);
-    setTodayTotal(newTotal);
+    setToday(newTotal);
     storage.set(WATER_TODAY, newTotal);
     setModalVisible(false);
-    autoSaveToDB(newTotal);
+
+    refresh();
   };
 
   const removeWater = (ml = 250) => {
     pulseAnimation();
     const newTotal = Math.max(todayTotal - ml, 0);
-    setTodayTotal(newTotal);
+    setToday(newTotal);
     storage.set(WATER_TODAY, newTotal);
     setModalVisible(false);
-    autoSaveToDB(newTotal);
-  };
 
-  const handleSaveToDB = async () => {
-    setIsSaving(true);
-    try {
-      let saved;
-
-      if (lastLogId) {
-        saved = await updateWaterLog(lastLogId, todayTotal);
-      } else {
-        saved = await logWater(todayTotal);
-        setLastLogId(saved.id);
-      }
-
-      storage.set(WATER_LAST_UPDATE, Date.now());
-      storage.set(WATER_TODAY, todayTotal);
-
-      setShowSave(false);
-      showToast('Success', 'Water intake saved!', 'success');
-    } catch (err) {
-      console.log('Failed to save:', err);
-      showToast('Error', 'Failed to update DB', 'error');
-    } finally {
-      setIsSaving(false);
-    }
+    refresh();
   };
 
   const waterHeight = fillAnim.interpolate({
@@ -174,8 +118,15 @@ const WaterTrackerScreen = ({ navigation }: any) => {
 
   const progressPercent = Math.round((todayTotal / DAILY_GOAL) * 100);
   const remaining = Math.max(DAILY_GOAL - todayTotal, 0);
-  const { weekOffset, setWeekOffset, chartData, isLoading, error } =
-    useWeeklyWaterChart();
+  const {
+    weekOffset,
+    setWeekOffset,
+    chartData,
+    isLoading,
+    error,
+    weekLabel,
+    refresh,
+  } = useWeeklyWaterChart(todayTotal);
 
   const screenWidth = Dimensions.get('window').width;
 
@@ -267,21 +218,6 @@ const WaterTrackerScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
 
-        {showSave && (
-          <Animated.View style={styles.saveButtonContainer}>
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={handleSaveToDB}
-              disabled={isSaving}
-            >
-              <TrendingUp size={20} color="white" />
-              <Text style={styles.saveText}>
-                {isSaving ? 'Saving...' : 'Save Progress'}
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
         <View style={{ marginTop: 30 }}>
           <View
             style={{
@@ -297,9 +233,13 @@ const WaterTrackerScreen = ({ navigation }: any) => {
             >
               <ChevronLeft size={28} color={isLoading ? '#ccc' : '#000'} />
             </TouchableOpacity>
-            <Text style={{ fontSize: 18, fontWeight: '700' }}>
-              Weekly Intake
-            </Text>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 18, fontWeight: '700' }}>
+                Weekly Intake
+              </Text>
+              <Text style={{ fontSize: 13, color: '#666' }}>{weekLabel}</Text>
+            </View>
+
             <TouchableOpacity
               disabled={weekOffset === 0 || isLoading}
               onPress={() => setWeekOffset(prev => prev + 1)}

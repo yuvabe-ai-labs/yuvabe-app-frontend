@@ -30,7 +30,8 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
   const userData = useUserStore(state => state.user);
 
   const role = userData?.role ?? 'user';
-  const isMentor = role === 'mentor';
+  const isMentor = role === 'mentor' || role === 'sub mentor';;
+  console.log('Drawer role:', role);
 
   const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
 

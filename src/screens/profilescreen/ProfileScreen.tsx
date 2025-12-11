@@ -20,7 +20,7 @@ import { styles } from './ProfileStyles';
 const ProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { user } = useUserStore();
-  const { team_name, mentor_name } = useUserStore();
+  const { team_name, lead_label, lead_name } = useUserStore();
 
   // Saved image from storage
   const storedImage = getItem('profile_image');
@@ -123,8 +123,8 @@ const ProfileScreen = () => {
                 color="#4A90E2"
                 style={styles.infoIcon}
               />
-              <Text style={styles.infoLabel}>Mentor:</Text>
-              <Text style={styles.infoValue}>{mentor_name || '—'}</Text>
+              <Text style={styles.infoLabel}>{lead_label}:</Text>
+              <Text style={styles.infoValue}>{lead_name || '—'}</Text>
             </View>
           </View>
         </View>

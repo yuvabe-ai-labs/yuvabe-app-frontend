@@ -37,6 +37,26 @@ export default function MyLeaveHistoryScreen() {
     try {
       const res = await fetchMyLeaveHistory();
       setLeaves(res.data.data);
+    } catch (err: any) {
+      const isNetworkError =
+        err.message?.toLowerCase().includes('network') ||
+        err.code === 'ERR_NETWORK' ||
+        (err.response === undefined && err.request); // <-- best RN check
+
+      if (isNetworkError) {
+        showToast(
+          'No Internet',
+          'Please check your internet connection.',
+          'error',
+        );
+        return;
+      }
+
+      showToast(
+        'Update failed',
+        err.response?.data?.detail || err.message || 'Something went wrong',
+        'error',
+      );
     } finally {
       hideLoading();
       setRefreshing(false);
@@ -100,7 +120,7 @@ export default function MyLeaveHistoryScreen() {
             }}
           >
             <Text style={{ color: 'gray', fontSize: 13 }}>
-              Updated: {item.updated_at?.slice(0, 10)}
+              Updated: {formatDate(item.updated_at)}
             </Text>
 
             {canCancel && (
