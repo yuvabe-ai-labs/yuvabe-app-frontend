@@ -19,28 +19,52 @@ interface VisionItem {
 const TILE_HEIGHTS = [180, 140, 220, 160, 200, 150];
 
 const VisionBoard: React.FC<{
+  userEmail: string;
   setScrollingEnabled: (enabled: boolean) => void;
-}> = ({ setScrollingEnabled }) => {
+}> = ({ userEmail, setScrollingEnabled }) => {
   const tileLayouts = useRef<{
     [id: string]: { x: number; y: number; width: number; height: number };
   }>({});
 
-  const savedTiles = getVisionBoard();
-  const initialTiles: VisionItem[] =
-    savedTiles ||
-    TILE_HEIGHTS.map((h, i) => ({
-      id: String(i + 1),
-      height: h,
-      imageUrl: null,
-    }));
+  useEffect(() => {
+    if (!userEmail) {
+      return (
+        <View style={styles.boardContainer}>
+          <Text style={styles.thoughtTitle}>Vision Board</Text>
+          <Text style={{ marginTop: 10 }}>Loading...</Text>
+        </View>
+      );
+    }
 
-  const [tiles, setTiles] = useState<VisionItem[]>(initialTiles);
+    const saved = getVisionBoard(userEmail);
+
+    if (saved) {
+      setTiles(saved);
+    } else {
+      setTiles(
+        TILE_HEIGHTS.map((h, i) => ({
+          id: String(i + 1),
+          height: h,
+          imageUrl: null,
+        })),
+      );
+    }
+  }, [userEmail]);
+
+  const [tiles, setTiles] = useState<VisionItem[]>([]);
   const [editMode, setEditMode] = useState(false);
   const { showAlert, hideAlert } = useAlertStore.getState();
 
   useEffect(() => {
-    setVisionBoard(tiles);
-  }, [tiles]);
+    const saved = getVisionBoard(userEmail);
+    if (saved) {
+      setTiles(saved);
+    }
+  }, [userEmail]);
+
+  useEffect(() => {
+    setVisionBoard(userEmail, tiles);
+  }, [tiles, userEmail]);
 
   const toggleEdit = () => setEditMode(prev => !prev);
 

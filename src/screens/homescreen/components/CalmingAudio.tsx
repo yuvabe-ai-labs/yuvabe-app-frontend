@@ -2,7 +2,8 @@ import * as RNFS from '@dr.pogodin/react-native-fs';
 import { Pause, Play, Square } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import Sound from 'react-native-nitro-sound';
+import Sound, { createSound } from 'react-native-nitro-sound';
+import { getItem, removeItem, setItem } from '../../../store/storage';
 import styles from '../HomeStyles';
 
 const tracks = [
@@ -45,6 +46,10 @@ const loadLocalAudioFile = async (assetPath: string): Promise<string> => {
 const CalmingAudio = () => {
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [trackDurations, setTrackDurations] = useState<Record<string, string>>(
+    {},
+  );
+  const [paused, setPaused] = useState(false);
 
   const [playTime, setPlayTime] = useState('00:00');
   const [duration, setDuration] = useState('00:00');
@@ -56,12 +61,53 @@ const CalmingAudio = () => {
     };
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      for (const track of tracks) {
+        const durMs = await preloadDuration(track);
+
+        setTrackDurations(prev => ({
+          ...prev,
+          [track.id]: formatMMSS(durMs),
+        }));
+      }
+
+      await Sound.setVolume(1);
+    })();
+  }, []);
+
+  useEffect(() => {
+    const last = getItem('lastPlayedTrack');
+    if (!last) return;
+
+    const saved = getItem(`audioProgress_${last}`);
+    if (!saved) return;
+
+    const { position, duration } = JSON.parse(saved);
+
+    setCurrentTrack(last);
+    setPlayTime(formatMMSS(position));
+    setDuration(formatMMSS(duration));
+    setPaused(true);
+    setIsPlaying(false);
+  }, []);
+
   const startTrack = async (track: any) => {
+    Sound.removePlayBackListener();
+    Sound.removePlaybackEndListener();
+
     const localPath = await loadLocalAudioFile(track.file);
 
     await Sound.stopPlayer();
 
+    const saved = getItem(`audioProgress_${track.id}`);
+    const savedPos = saved ? JSON.parse(saved).position : 0;
+
     await Sound.startPlayer(localPath);
+
+    if (savedPos > 0) {
+      await Sound.seekToPlayer(savedPos);
+    }
 
     Sound.addPlayBackListener(e => {
       try {
@@ -70,6 +116,11 @@ const CalmingAudio = () => {
 
         setPlayTime(formatMMSS(pos));
         setDuration(formatMMSS(dur));
+        setItem(
+          `audioProgress_${track.id}`,
+          JSON.stringify({ position: pos, duration: dur }),
+        );
+        setItem('lastPlayedTrack', track.id);
       } catch (err) {
         console.log('Timestamp error:', err);
       }
@@ -82,26 +133,94 @@ const CalmingAudio = () => {
 
     setCurrentTrack(track.id);
     setIsPlaying(true);
+    setPaused(false);
   };
 
   const handlePlayPause = async (track: any) => {
-    if (!isPlaying) {
+    const saved = getItem(`audioProgress_${track.id}`);
+    const isSameTrack = currentTrack === track.id;
+
+    if (!saved || !isSameTrack) {
       await startTrack(track);
-    } else {
+      setPaused(false);
+      return;
+    }
+
+    const { position } = JSON.parse(saved);
+
+    if (!isPlaying && paused) {
+      Sound.removePlayBackListener();
+      Sound.removePlaybackEndListener();
+
+      const localPath = await loadLocalAudioFile(track.file);
+
+      await Sound.startPlayer(localPath);
+      await Sound.seekToPlayer(position);
+
+      Sound.addPlayBackListener(e => {
+        const pos = Math.floor(e.currentPosition);
+        const dur = Math.floor(e.duration);
+
+        setPlayTime(formatMMSS(pos));
+        setDuration(formatMMSS(dur));
+
+        setItem(
+          `audioProgress_${track.id}`,
+          JSON.stringify({ position: pos, duration: dur }),
+        );
+
+        setItem('lastPlayedTrack', track.id);
+      });
+
+      await Sound.resumePlayer();
+
+      setIsPlaying(true);
+      setPaused(false);
+      return;
+    }
+
+    if (isPlaying) {
       await Sound.pausePlayer();
+      setPaused(true);
       setIsPlaying(false);
+      return;
     }
   };
 
   const handleReset = async () => {
     await Sound.stopPlayer();
     setIsPlaying(false);
+    setPaused(false);
     setCurrentTrack(null);
     setPlayTime('00:00');
     setDuration('00:00');
+    if (currentTrack) {
+      removeItem(`audioProgress_${currentTrack}`);
+    }
 
     Sound.removePlayBackListener();
     Sound.removePlaybackEndListener();
+  };
+
+  const preloadDuration = async (track: any) => {
+    const localPath = await loadLocalAudioFile(track.file);
+
+    const temp = createSound();
+    await temp.setVolume(0);
+    await temp.startPlayer(localPath);
+
+    return new Promise<number>(resolve => {
+      const listener = (e: any) => {
+        const dur = Math.floor(e.duration);
+
+        temp.removePlayBackListener();
+        temp.stopPlayer();
+
+        resolve(dur);
+      };
+
+      temp.addPlayBackListener(listener);
+    });
   };
 
   return (
@@ -149,7 +268,18 @@ const CalmingAudio = () => {
                 <Text
                   style={{ marginLeft: 'auto', fontSize: 14, color: '#444' }}
                 >
-                  00:00 / 00:00
+                  {(() => {
+                    const saved = getItem(`audioProgress_${track.id}`);
+                    if (!saved)
+                      return `00:00 / ${trackDurations[track.id] ?? '00:00'}`;
+
+                    const { position, duration } = JSON.parse(saved);
+                    return `${formatMMSS(position)} / ${
+                      duration
+                        ? formatMMSS(duration)
+                        : (trackDurations[track.id] ?? '00:00')
+                    }`;
+                  })()}
                 </Text>
               )}
             </View>

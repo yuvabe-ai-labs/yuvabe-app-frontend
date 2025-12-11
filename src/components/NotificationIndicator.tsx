@@ -19,11 +19,6 @@ const NotificationIndicator = () => {
         borderWidth: 1,
         paddingVertical: 8,
         paddingHorizontal: 12,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 999,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -31,7 +26,7 @@ const NotificationIndicator = () => {
     >
       <Bell size={18} color="#CC7A00" />
       <Text style={{ marginLeft: 6, color: '#CC7A00', fontWeight: '600' }}>
-        Notifications are off — tap to enable
+        Notifications are Off — Tap to Enable
       </Text>
     </TouchableOpacity>
   );

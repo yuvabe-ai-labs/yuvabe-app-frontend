@@ -41,10 +41,6 @@ const BreathingModal: React.FC<Props> = ({
       <View style={styles.overlay}>
         <View style={styles.container}>
 
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeText}>✖</Text>
-          </TouchableOpacity>
-
           <Text style={styles.title}>Take a moment and pause</Text>
 
           <LottieView

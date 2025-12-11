@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Button,
   Keyboard,
   Modal,
@@ -30,6 +31,7 @@ const TileModal: React.FC<TileModalProps> = ({
 }) => {
   const [tempImageUrl, setTempImageUrl] = useState(imageUrl || '');
   const [tempKeyword, setTempKeyword] = useState('');
+  const [searching, setSearching] = useState(false);
   const API_KEY: string = Config.PEXELS_API || '';
 
   useEffect(() => {
@@ -72,7 +74,12 @@ const TileModal: React.FC<TileModalProps> = ({
 
   const handleSearch = async () => {
     Keyboard.dismiss();
+    setSearching(true);
+
     const imageUrl = await fetchImageFromPexels(tempKeyword);
+
+    setSearching(false);
+
     if (imageUrl) {
       setTempImageUrl(imageUrl);
       onSave(imageUrl);
@@ -106,7 +113,11 @@ const TileModal: React.FC<TileModalProps> = ({
               style={styles.modalTextInput}
             />
             <View style={styles.modalButton}>
-              <Button title="Search" onPress={handleSearch} />
+              {searching ? (
+                <ActivityIndicator size="small" color="#000" />
+              ) : (
+                <Button title="Search" onPress={handleSearch} />
+              )}
             </View>
 
             {tempImageUrl ? (

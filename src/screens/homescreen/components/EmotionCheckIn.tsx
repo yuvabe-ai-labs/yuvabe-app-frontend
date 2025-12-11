@@ -38,9 +38,6 @@ const EmotionCheckIn: React.FC<Props> = ({
       <View style={styles.overlay}>
         <TouchableWithoutFeedback>
           <View style={styles.container}>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeText}>✖</Text>
-            </TouchableOpacity>
             <Text style={styles.message}>{message}</Text>
 
             <View style={styles.emojiRow}>
