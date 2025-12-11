@@ -5,7 +5,6 @@ import { Bell, Menu } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   PermissionsAndroid,
   Platform,
   StatusBar,
@@ -31,6 +30,9 @@ import CalmingAudio from './components/CalmingAudio';
 import EmotionCheckIn from './components/EmotionCheckIn';
 import GroundingExerciseModal from './components/GroundingExerciseModal';
 import VisionBoard from './components/VisionBoard';
+import YBLogo from '../../assets/logo/YB_Home_Logo.svg';
+import HamburgerMenu from '../../assets/logo/Hamburger_Menu.svg';
+import Alert from '../../assets/logo/Alert.svg';
 
 export async function requestNotificationPermission() {
   if (Platform.OS === 'android') {
@@ -196,32 +198,28 @@ const HomeScreen = ({ navigation }: any) => {
                 style={[styles.header, { justifyContent: 'space-between' }]}
               >
                 <TouchableOpacity onPress={openDrawer}>
-                  <Menu size={28} color="#000" strokeWidth={1.7} />
+                  <HamburgerMenu width={24} height={16} />
                 </TouchableOpacity>
 
-                <Image
-                  source={require('../../assets/logo/yuvabe-logo.png')}
-                  style={{ width: 45, height: 45, resizeMode: 'contain' }}
-                />
+                <YBLogo width={100} height={28} />
 
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Notifications')}
                 >
-                  <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
+                  <Alert width={20} height={24} />
                 </TouchableOpacity>
               </View>
 
               <Text style={[styles.welcomeText]}>
-                Welcome, {user?.name || 'Loading...'}
+                Welcome, {user?.name || 'Loading...'} !
               </Text>
 
               <View style={styles.thoughtContainer}>
                 <Text style={styles.thoughtTitle}>Thought of the Day</Text>
-                <Text style={styles.thoughtText}>"{quote}"</Text>
+                <Text style={styles.thoughtText}>“{quote}“</Text>
                 <Text
                   style={[
-                    styles.thoughtText,
-                    { fontStyle: 'italic', fontSize: 14 },
+                    { fontStyle: 'italic', fontSize: 14 , alignSelf:'flex-end'},
                   ]}
                 >
                   — {author}
