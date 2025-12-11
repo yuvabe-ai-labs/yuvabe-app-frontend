@@ -11,6 +11,7 @@ import {
 import React from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { getItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { logoutUser } from '../../utils/LogoutHelper';
@@ -38,7 +39,26 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* 🔵 Gradient Header */}
-        <View style={[styles.headerBg, { backgroundColor: COLORS.primary }]} />
+        <Svg
+          width="100%"
+          height={styles.headerBg.height} // ensure this matches your header height
+          style={styles.headerBg}
+        >
+          <Defs>
+            <LinearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0%" stopColor="#592AC7" />
+              <Stop offset="100%" stopColor="#CCB6FF" />
+            </LinearGradient>
+          </Defs>
+
+          <Rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="url(#headerGrad)"
+          />
+        </Svg>
 
         {/* 🔙 Back Button */}
         <TouchableOpacity

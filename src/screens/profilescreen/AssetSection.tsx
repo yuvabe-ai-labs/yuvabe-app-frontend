@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AssetDTO, fetchAssets } from '../../api/profile-api/assetsApi';
 import { useLoadingStore } from '../../store/useLoadingStore';
 import { styles } from './AssetStyle';
+import { LaptopFigure } from '../../utils/customIcons';
 
 export const ASSET_ICONS: Record<string, string> = {
   laptop: '💻',
@@ -71,7 +72,7 @@ const AssetSection = () => {
     return (
       <View style={styles.assetCard}>
         <Text style={styles.assetIcon}>{icon}</Text>
-
+        <LaptopFigure/>
         <View style={{ flex: 1 }}>
           
           <Text style={styles.assetName}>{item.asset_id}</Text>
