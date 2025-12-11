@@ -22,9 +22,11 @@ import {
 } from '../../api/profile-api/profileApi';
 import AppDrawer from '../../components/AppDrawer';
 import DrawerContent from '../../components/DrawerContent';
+import NotificationDrawer from '../../components/NotificationDrawer';
 import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { COLORS } from '../../utils/theme';
+import NotificationScreen from '../notification/NotificationScreen';
 import styles from './HomeStyles';
 import BreathingModal from './components/BreathingModal';
 import CalmingAudio from './components/CalmingAudio';
@@ -61,6 +63,7 @@ const HomeScreen = ({ navigation }: any) => {
   const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
   const { setProfileDetails } = useUserStore();
   const userMail = getItem('logged_in_email');
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
 
   const EMOJI_TO_EMOTION: Record<string, string> = {
     '😄': 'joyful',
@@ -205,7 +208,7 @@ const HomeScreen = ({ navigation }: any) => {
                 />
 
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('Notifications')}
+                  onPress={() => setShowNotificationDrawer(true)}
                 >
                   <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
                 </TouchableOpacity>
@@ -308,6 +311,17 @@ const HomeScreen = ({ navigation }: any) => {
               </View>
             </View>
           )}
+          <NotificationDrawer
+            visible={showNotificationDrawer}
+            onClose={() => setShowNotificationDrawer(false)}
+          >
+            <NotificationScreen
+              navigation={{
+                goBack: () => setShowNotificationDrawer(false),
+                navigate: navigation.navigate,
+              }}
+            />
+          </NotificationDrawer>
         </SafeAreaView>
       )}
     </AppDrawer>

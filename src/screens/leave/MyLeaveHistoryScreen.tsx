@@ -113,7 +113,7 @@ export default function MyLeaveHistoryScreen() {
             style={{ flexDirection: 'row', justifyContent: 'space-between' }}
           >
             <Text style={{ fontSize: 17, fontWeight: '700', color: '#000' }}>
-              {item.leave_type}
+              {item.leave_type} Leave
             </Text>
 
             <View
@@ -125,7 +125,7 @@ export default function MyLeaveHistoryScreen() {
               }}
             >
               <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>
-                {item.status}
+                {item.status} 
               </Text>
             </View>
           </View>
@@ -187,31 +187,33 @@ export default function MyLeaveHistoryScreen() {
             marginBottom: 10,
           }}
         >
-          {/* LEFT SIDE: Arrow + Title */}
-          {/* CUSTOM HEADER */}
+          {/* LEFT ARROW */}
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ChevronLeft size={28} color="#000" />
+          </TouchableOpacity>
+
+          {/* CENTER TITLE */}
           <View
             style={{
-              flexDirection: 'row',
+              flex: 1,
               alignItems: 'center',
-              paddingVertical: 14,
-              paddingHorizontal: 2,
-              backgroundColor: '#fff',
-              marginBottom: 0,
+              marginLeft: -28, // IMPORTANT: pulls title to perfect center
             }}
           >
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ChevronLeft size={28} color="#000" />
-            </TouchableOpacity>
-
-            <View style={{ flex: 1, alignItems: 'center', marginLeft: -28 }}>
-              <Text style={{ fontSize: 18, fontWeight: '600' }}>
-                Leave History
-              </Text>
-            </View>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: '#000',
+              }}
+            >
+              Leave History
+            </Text>
           </View>
+        </View>
 
-          {/* RIGHT SIDE: LOGO */}
-          {/* <Image
+        {/* RIGHT SIDE: LOGO */}
+        {/* <Image
             source={require('../../assets/logo/yuvabe-logo.png')}
             style={{
               width: 40,
@@ -219,7 +221,7 @@ export default function MyLeaveHistoryScreen() {
               resizeMode: 'contain',
             }}
           /> */}
-        </View>
+
         <CustomAlert
           visible={showCancelLeave}
           title="Cancel Leave"

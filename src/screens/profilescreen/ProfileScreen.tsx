@@ -6,11 +6,11 @@ import {
   LogOut,
   PencilIcon,
 } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { getItem } from '../../store/storage';
+import { getItem, loadNickname } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { MentorIcon, TeamIcon } from '../../utils/customIcons';
 import { logoutUser } from '../../utils/LogoutHelper';
@@ -19,12 +19,17 @@ import { styles } from './ProfileStyles';
 
 const ProfileScreen = () => {
   const navigation = useNavigation<any>();
-  const { user } = useUserStore();
+  const { user, nickname, setNickname } = useUserStore();
   const { team_name, lead_label, lead_name } = useUserStore();
 
   // Saved image from storage
   const storedImage = getItem('profile_image');
   const profileSrc = storedImage || user?.profile_picture;
+
+  useEffect(() => {
+    const nick = loadNickname();
+    if (nick) setNickname(nick);
+  }, []);
 
   const handleLogout = () => {
     logoutUser(navigation);
@@ -119,7 +124,10 @@ const ProfileScreen = () => {
           </View>
           {/* Details */}
           <View style={{ flex: 1 }}>
-            <Text style={styles.name}>{user?.name || 'User'}</Text>
+            <Text style={styles.name}>
+              {user?.name}
+              {nickname ? ` (${nickname})` : ''}
+            </Text>
             <Text style={styles.email}>
               {user?.email || 'example@yuvabe.com'}
             </Text>

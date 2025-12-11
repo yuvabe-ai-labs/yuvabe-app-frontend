@@ -22,6 +22,11 @@ export const styles = StyleSheet.create({
   editTopWrapper: {
     marginTop: -60,
   },
+  disabledInput: {
+    backgroundColor: '#F2F2F2',
+    color: '#555',
+  },
+
   profileImage: {
     width: 110,
     height: 110,

@@ -18,6 +18,7 @@ import InformationScreen from '../screens/profilescreen/InformationScreen';
 import ProfileScreen from '../screens/profilescreen/ProfileScreen';
 import RequestLeaveScreen from '../screens/requestLeave/RequestLeave';
 import WaterTrackerScreen from '../screens/wellbeing/water/WaterTrackingScreen';
+import MentorDetailLeaveScreen from '../screens/mentor/MentorDetailLeaveScreen';
 
 const AppStack = createNativeStackNavigator();
 
@@ -113,6 +114,11 @@ const AppNavigator = () => {
         <AppStack.Screen
           name="CreateJournal"
           component={CreateJournalScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="MentorDetailLeave"
+          component={MentorDetailLeaveScreen}
           options={{ headerShown: false }}
         />
       </AppStack.Navigator>

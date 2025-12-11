@@ -33,6 +33,7 @@ import {
   EditProfileForm,
   editProfileSchema,
 } from '../../schemas/profileSchema';
+import { loadNickname, saveNickname } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { showToast } from '../../utils/ToastHelper';
 import { styles } from './EditProfileStyles';
@@ -75,7 +76,7 @@ const PasswordInput = ({ field, error, placeholder }: any) => {
 };
 
 const EditProfileScreen = ({ navigation }: any) => {
-  const { user, setUser, team_name } = useUserStore();
+  const { user, setUser, team_name, setNickname } = useUserStore();
   const [loading, setLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
@@ -120,6 +121,7 @@ const EditProfileScreen = ({ navigation }: any) => {
   } = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
+      nickname: '',
       name: user?.name || '',
       email: user?.email || '',
       dob: '',
@@ -131,18 +133,22 @@ const EditProfileScreen = ({ navigation }: any) => {
   });
 
   useEffect(() => {
-    if (user) {
-      const formattedDob = user.dob ? isoToDDMMYYYY(user.dob) : '';
-      reset({
-        name: user.name,
-        email: user.email,
-        dob: formattedDob,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-    }
-  }, [user, reset]);
+    if (!user) return;
+
+    const formattedDob = user.dob ? isoToDDMMYYYY(user.dob) : '';
+    const nick = loadNickname(); // synchronous (MMKV)
+
+    reset({
+      nickname: nick || '',
+      name: user.name || '',
+      email: user.email || '',
+      dob: formattedDob,
+      team: user?.team_name || team_name || '',
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+  }, [user, reset, team_name]);
 
   const pickImage = () => {
     launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, response => {
@@ -207,6 +213,10 @@ const EditProfileScreen = ({ navigation }: any) => {
 
       const updatedUser = await updateProfile(payload);
       setUser(updatedUser);
+
+      saveNickname(data.nickname ?? '');
+      setNickname(data.nickname ?? '');
+
       showToast('Success', 'Profile updated successfully!', 'success');
 
       navigation.goBack();
@@ -310,6 +320,20 @@ const EditProfileScreen = ({ navigation }: any) => {
           <View style={styles.formContainer}>
             {/* Name */}
             <Text style={styles.title}>Personal Details</Text>
+            <Text style={styles.label}>Nick Name</Text>
+            <Controller
+              control={control}
+              name="nickname"
+              render={({ field }) => (
+                <TextInput
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  placeholder="Enter your nickname"
+                  style={[styles.input]}
+                />
+              )}
+            />
+
             <Text style={styles.label}>Full Name</Text>
             <Controller
               control={control}
@@ -318,7 +342,12 @@ const EditProfileScreen = ({ navigation }: any) => {
                 <TextInput
                   value={field.value}
                   onChangeText={field.onChange}
-                  style={[styles.input, errors.name && styles.inputError]}
+                  editable={false}
+                  style={[
+                    styles.input,
+                    styles.disabledInput,
+                    errors.name && styles.inputError,
+                  ]}
                 />
               )}
             />
@@ -338,7 +367,11 @@ const EditProfileScreen = ({ navigation }: any) => {
                   editable={false}
                   autoCapitalize="none"
                   keyboardType="email-address"
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[
+                    styles.input,
+                    styles.disabledInput,
+                    errors.email && styles.inputError,
+                  ]}
                 />
               )}
             />
@@ -357,7 +390,11 @@ const EditProfileScreen = ({ navigation }: any) => {
                   editable={false}
                   autoCapitalize="none"
                   keyboardType="email-address"
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[
+                    styles.input,
+                    styles.disabledInput,
+                    errors.email && styles.inputError,
+                  ]}
                 />
               )}
             />

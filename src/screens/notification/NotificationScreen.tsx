@@ -1,11 +1,9 @@
-import { ChevronLeft, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  markAllNotificationsRead,
-  markNotificationRead,
+  markNotificationRead
 } from '../../api/leave-api/leave_api';
 import { fetchNotifications } from '../../api/profile-api/profileApi';
 import { useUserStore } from '../../store/useUserStore';
@@ -58,21 +56,21 @@ export default function NotificationScreen({ navigation }: any) {
   };
 
   // ⭐ clear all animation (slower now)
-  const clearAllWithAnimation = async () => {
-    try {
-      await markAllNotificationsRead();
+  // const clearAllWithAnimation = async () => {
+  //   try {
+  //     await markAllNotificationsRead();
 
-      const count = notifications.length;
+  //     const count = notifications.length;
 
-      for (let i = 0; i < count; i++) {
-        // ⏳ make this a bit slower (was 120)
-        await new Promise(res => setTimeout(res, 220));
-        setNotifications(prev => prev.slice(1));
-      }
-    } catch (e) {
-      console.log('markAllNotificationsRead error:', e);
-    }
-  };
+  //     for (let i = 0; i < count; i++) {
+  //       // ⏳ make this a bit slower (was 120)
+  //       await new Promise(res => setTimeout(res, 220));
+  //       setNotifications(prev => prev.slice(1));
+  //     }
+  //   } catch (e) {
+  //     console.log('markAllNotificationsRead error:', e);
+  //   }
+  // };
 
   // ⭐ Invisible right action (required for swipe)
   const EmptyAction = () => <View style={{ width: 1 }} />;
@@ -82,41 +80,19 @@ export default function NotificationScreen({ navigation }: any) {
       {/* HEADER */}
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
           paddingVertical: 12,
           paddingHorizontal: 16,
         }}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ChevronLeft size={28} color="#000" />
-        </TouchableOpacity>
-
         <Text
           style={{
-            flex: 1,
-            textAlign: 'center',
-            fontSize: 18,
-            fontWeight: '600',
+            fontSize: 20,
+            fontWeight: '700',
+            color: '#000',
           }}
         >
           Notifications
         </Text>
-
-        {notifications.length > 0 ? (
-          <TouchableOpacity
-            onPress={clearAllWithAnimation}
-            style={{
-              backgroundColor: '#ff4d4d',
-              padding: 6,
-              borderRadius: 20,
-            }}
-          >
-            <X size={18} color="#fff" strokeWidth={2} />
-          </TouchableOpacity>
-        ) : (
-          <View style={{ width: 28 }} />
-        )}
       </View>
 
       {/* LIST */}
@@ -205,16 +181,7 @@ export default function NotificationScreen({ navigation }: any) {
 
                 <Text style={{ marginTop: 5 }}>{item.body}</Text>
 
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: 'gray',
-                    marginTop: 8,
-                    textAlign: 'right',
-                  }}
-                >
-                  {item.updated_at.slice(0, 10)}
-                </Text>
+                
               </TouchableOpacity>
             </Swipeable>
           </Animated.View>
