@@ -1,16 +1,4 @@
-import {
-  BookText,
-  Bot,
-  Box,
-  Clock,
-  Droplet,
-  FilePlus,
-  History,
-  LogOut,
-  NotebookPen,
-  User,
-  Users,
-} from 'lucide-react-native';
+import { Clock, User, Users } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
   ActivityIndicator,
@@ -22,6 +10,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getItem } from '../store/storage';
 import { useUserStore } from '../store/useUserStore';
+import {
+  Asset,
+  ChatBot,
+  Journaling,
+  LeaveHistory,
+  PaySlip,
+  RequestLeave,
+  WaterTracker,
+  LogOut
+} from '../utils/customIcons';
 import { logoutUser } from '../utils/LogoutHelper';
 import { COLORS } from '../utils/theme';
 
@@ -30,7 +28,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
   const userData = useUserStore(state => state.user);
 
   const role = userData?.role ?? 'user';
-  const isMentor = role === 'mentor' || role === 'sub mentor';;
+  const isMentor = role === 'mentor' || role === 'sub mentor';
   console.log('Drawer role:', role);
 
   const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
@@ -77,13 +75,13 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
             <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
               {userData?.name || 'User'}
             </Text>
-            <Text style={{ fontSize: 14, color: '#666' }}>View Profile</Text>
+            <Text style={{ fontSize: 14,fontWeight:'600', color: '#3F83F8' }}>View Profile</Text>
           </View>
         </TouchableOpacity>
 
         <DrawerItem
           label="Assets"
-          icon={<Box size={20} color="#444" strokeWidth={1.8} />}
+          icon={<Asset height={20} width={24} color="#444" strokeWidth={1.8} />}
           onPress={() => {
             closeDrawer();
             navigation.navigate('AssetsScreen');
@@ -91,17 +89,8 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
         />
 
         <DrawerItem
-          label="Chatbot"
-          icon={<Bot size={20} color="#444" strokeWidth={1.8} />}
-          onPress={() => {
-            closeDrawer();
-            navigation.navigate('Chat');
-          }}
-        />
-
-        <DrawerItem
           label="Journaling"
-          icon={<NotebookPen size={20} color="#444" strokeWidth={1.8} />}
+          icon={<Journaling height={20} width={24} color="#444" strokeWidth={1.8} />}
           onPress={() => {
             closeDrawer();
             navigation.navigate('Journaling');
@@ -110,7 +99,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
 
         <DrawerItem
           label="Water Track"
-          icon={<Droplet size={20} color="#444" strokeWidth={1.8} />}
+          icon={<WaterTracker height={20} width={24} color="#444" strokeWidth={1.8} />}
           onPress={() => {
             closeDrawer();
             navigation.navigate('WaterTracker');
@@ -119,7 +108,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
 
         <DrawerItem
           label="Payslip"
-          icon={<BookText size={20} color="#444" strokeWidth={1.8} />}
+          icon={<PaySlip height={20} width={24} color="#444" strokeWidth={1.8} />}
           onPress={() => {
             closeDrawer();
             navigation.navigate('PaySlip');
@@ -130,7 +119,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           <>
             <DrawerItem
               label="Pending Leaves"
-              icon={<Clock size={20} color="#444" strokeWidth={1.8} />}
+              icon={<Clock height={20} width={24} color="#444" strokeWidth={1.8} />}
               onPress={() => {
                 closeDrawer();
                 navigation.navigate('PendingLeaves');
@@ -139,7 +128,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
 
             <DrawerItem
               label="Team Leave History"
-              icon={<Users size={20} color="#444" strokeWidth={1.8} />}
+              icon={<Users height={20} width={24} color="#444" strokeWidth={1.8} />}
               onPress={() => {
                 closeDrawer();
                 navigation.navigate('TeamLeaveHistory');
@@ -150,7 +139,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           <>
             <DrawerItem
               label="Request Leave"
-              icon={<FilePlus size={20} color="#444" strokeWidth={1.8} />}
+              icon={<RequestLeave height={20} width={24} color="#444" strokeWidth={1.8} />}
               onPress={() => {
                 closeDrawer();
                 navigation.navigate('RequestLeave');
@@ -159,7 +148,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
 
             <DrawerItem
               label="Leave History"
-              icon={<History size={20} color="#444" strokeWidth={1.8} />}
+              icon={<LeaveHistory height={20} width={24} color="#444" strokeWidth={1.8} />}
               onPress={() => {
                 closeDrawer();
                 navigation.navigate('MyLeaveHistory');
@@ -167,6 +156,16 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
             />
           </>
         )}
+        <DrawerItem
+          label="Chatbot"
+          icon={
+            <ChatBot height={20} width={24} color="#444" strokeWidth={1.8} />
+          }
+          onPress={() => {
+            closeDrawer();
+            navigation.navigate('Chat');
+          }}
+        />
       </View>
 
       <TouchableOpacity
