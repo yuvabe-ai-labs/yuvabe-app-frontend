@@ -2,7 +2,7 @@ import api from '../client/axiosClient';
 
 export type AssetDTO = {
   id: string;
-  name: string;
+  asset_id: string;
   type: string;
   status: string;
 };

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AssetDTO, fetchAssets } from '../../api/profile-api/assetsApi';
 import { useLoadingStore } from '../../store/useLoadingStore';
 import { styles } from './AssetStyle';
+import { LaptopFigure } from '../../utils/customIcons';
 
 export const ASSET_ICONS: Record<string, string> = {
   laptop: '💻',
@@ -19,7 +20,7 @@ export const ASSET_ICONS: Record<string, string> = {
   mouse: '🖱️',
   monitor: '🖥️',
   mobile: '📱',
-  headset: '🎧',
+  headphone: '🎧',
   tablet: '📱',
 };
 
@@ -28,16 +29,28 @@ const AssetSection = () => {
 
   const [assets, setAssets] = useState<AssetDTO[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [networkError, setNetworkError] = useState(false); 
 
   const loadAssets = async () => {
     const { showLoading, hideLoading } = useLoadingStore.getState();
 
     showLoading('assets', 'Loading assets...');
+    setNetworkError(false); // reset every load
+
     try {
       const res = await fetchAssets();
       setAssets(res);
-    } catch (e) {
-      console.error('Failed to load assets', e);
+    } catch (e: any) {
+      console.log('Failed to load assets:', e);
+
+      const isNetworkError =
+        e.message?.toLowerCase().includes('network') ||
+        e.code === 'ERR_NETWORK' ||
+        (e.response === undefined && e.request); 
+      if (isNetworkError) {
+        setNetworkError(true);
+        setAssets([]);
+      }
     } finally {
       hideLoading();
     }
@@ -59,13 +72,14 @@ const AssetSection = () => {
     return (
       <View style={styles.assetCard}>
         <Text style={styles.assetIcon}>{icon}</Text>
-
+        <LaptopFigure/>
         <View style={{ flex: 1 }}>
-          <Text style={styles.assetName}>{item.name}</Text>
+          
+          <Text style={styles.assetName}>{item.asset_id}</Text>
           <Text style={styles.assetType}>{item.type}</Text>
         </View>
 
-        <View style={[styles.statusBadge]}>
+        <View style={styles.statusBadge}>
           <Text style={styles.statusText}>{item.status}</Text>
         </View>
       </View>
@@ -75,14 +89,13 @@ const AssetSection = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        {/* ⭐ CUSTOM HEADER */}
+        
         <View
           style={[
             styles.header,
             { flexDirection: 'row', alignItems: 'center' },
           ]}
         >
-          {/* LEFT SIDE: Back button + Title */}
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <ChevronLeft size={28} color="#000" />
@@ -92,20 +105,15 @@ const AssetSection = () => {
               My Assets
             </Text>
           </View>
-
-          {/* RIGHT SIDE: Logo in corner */}
-          {/* <Image
-            source={require('../../assets/logo/yuvabe-logo.png')}
-            style={{
-              width: 40,
-              height: 40,
-              resizeMode: 'contain',
-            }}
-          /> */}
         </View>
 
-        {/* ⭐ IF NO ASSETS SHOW MESSAGE */}
-        {assets.length === 0 ? (
+        
+        {networkError ? (
+          <View style={{ marginTop: 40, alignItems: 'center' }}>
+            <Text style={styles.empty}>Check your internet connection</Text>
+          </View>
+        ) : assets.length === 0 ? (
+         
           <FlatList
             data={[]}
             renderItem={() => null}
@@ -120,6 +128,7 @@ const AssetSection = () => {
             }
           />
         ) : (
+          
           <FlatList
             data={assets}
             keyExtractor={item => item.id}

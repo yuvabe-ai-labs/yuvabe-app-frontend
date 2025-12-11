@@ -11,6 +11,7 @@ import {
 import React from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { getItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { logoutUser } from '../../utils/LogoutHelper';
@@ -20,7 +21,7 @@ import { styles } from './ProfileStyles';
 const ProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { user } = useUserStore();
-  const { team_name, mentor_name } = useUserStore();
+  const { team_name, lead_label, lead_name } = useUserStore();
 
   // Saved image from storage
   const storedImage = getItem('profile_image');
@@ -38,7 +39,26 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* 🔵 Gradient Header */}
-        <View style={[styles.headerBg, { backgroundColor: COLORS.primary }]} />
+        <Svg
+          width="100%"
+          height={styles.headerBg.height} // ensure this matches your header height
+          style={styles.headerBg}
+        >
+          <Defs>
+            <LinearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0%" stopColor="#592AC7" />
+              <Stop offset="100%" stopColor="#CCB6FF" />
+            </LinearGradient>
+          </Defs>
+
+          <Rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="url(#headerGrad)"
+          />
+        </Svg>
 
         {/* 🔙 Back Button */}
         <TouchableOpacity
@@ -123,8 +143,8 @@ const ProfileScreen = () => {
                 color="#4A90E2"
                 style={styles.infoIcon}
               />
-              <Text style={styles.infoLabel}>Mentor:</Text>
-              <Text style={styles.infoValue}>{mentor_name || '—'}</Text>
+              <Text style={styles.infoLabel}>{lead_label}:</Text>
+              <Text style={styles.infoValue}>{lead_name || '—'}</Text>
             </View>
           </View>
         </View>

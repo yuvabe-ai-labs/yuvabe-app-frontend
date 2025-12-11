@@ -1,5 +1,5 @@
 import { Calendar, ChevronLeft, CloudOff } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState ,useCallback} from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -11,6 +11,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchPendingLeaves } from '../../api/profile-api/profileApi';
 import { useLoadingStore } from '../../store/useLoadingStore';
 
+import { useFocusEffect } from '@react-navigation/native';
+
 export default function MentorLeaveListScreen({ navigation }: any) {
   const [pendingLeaves, setPendingLeaves] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -18,6 +20,12 @@ export default function MentorLeaveListScreen({ navigation }: any) {
   useEffect(() => {
     loadPendingLeaves(); // 👉 first load uses GLOBAL LOADING
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadPendingLeaves(true); // refresh silently
+    }, []),
+  );
 
   const loadPendingLeaves = async (isRefresh = false) => {
     const { showLoading, hideLoading } = useLoadingStore.getState();

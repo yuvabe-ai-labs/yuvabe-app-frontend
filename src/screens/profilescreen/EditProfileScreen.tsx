@@ -106,15 +106,10 @@ const EditProfileScreen = ({ navigation }: any) => {
 
   const isoToDDMMYYYY = (iso: string) => {
     if (!iso) return '';
+    iso = iso.split('T')[0];
     const [year, month, day] = iso.split('-');
     return `${day}-${month}-${year}`;
   };
-
-  // const toDDMMYYYY = (dob: string | null) => {
-  //   if (!dob) return null;
-  //   const [day, month, year] = dob.split('-');
-  //   return `${day}.${month}.${year}`;
-  // };
 
   const {
     control,
@@ -180,8 +175,13 @@ const EditProfileScreen = ({ navigation }: any) => {
   const onDobChange = (onChange: any) => (_event: any, selectedDate?: Date) => {
     setShowDobPicker(false);
     if (!selectedDate) return;
-    const iso = selectedDate.toISOString().split('T')[0];
-    onChange(iso);
+
+    const day = String(selectedDate.getDate()).padStart(2, '0');
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const year = selectedDate.getFullYear();
+
+    // store DD-MM-YYYY only
+    onChange(`${day}-${month}-${year}`);
   };
 
   const ddmmyyyyToISO = (dob: string) => {
@@ -208,9 +208,23 @@ const EditProfileScreen = ({ navigation }: any) => {
 
       navigation.goBack();
     } catch (err: any) {
+      const isNetworkError =
+        err.message?.toLowerCase().includes('network') ||
+        err.code === 'ERR_NETWORK' ||
+        (err.response === undefined && err.request); // <-- best RN check
+
+      if (isNetworkError) {
+        showToast(
+          'No Internet',
+          'Please check your internet connection.',
+          'error',
+        );
+        return;
+      }
+
       showToast(
         'Update failed',
-        err.message || 'Something went wrong',
+        err.response?.data?.detail || err.message || 'Something went wrong',
         'error',
       );
     } finally {
@@ -331,7 +345,7 @@ const EditProfileScreen = ({ navigation }: any) => {
                     <TextInput
                       value={field.value}
                       editable={false}
-                      placeholder="YYYY-MM-DD"
+                      placeholder="DD-MM-YYYY"
                       style={[styles.input, errors.dob && styles.inputError]}
                     />
                   </TouchableOpacity>
@@ -381,11 +395,18 @@ const EditProfileScreen = ({ navigation }: any) => {
                   control={control}
                   name="currentPassword"
                   render={({ field }) => (
-                    <PasswordInput
-                      field={field}
-                      error={errors.currentPassword}
-                      placeholder="Current password"
-                    />
+                    <>
+                      <PasswordInput
+                        field={field}
+                        error={errors.currentPassword}
+                        placeholder="Current password"
+                      />
+                      {errors.currentPassword && (
+                        <Text style={styles.errorText}>
+                          {errors.currentPassword.message}
+                        </Text>
+                      )}
+                    </>
                   )}
                 />
 
@@ -394,11 +415,18 @@ const EditProfileScreen = ({ navigation }: any) => {
                   control={control}
                   name="newPassword"
                   render={({ field }) => (
-                    <PasswordInput
-                      field={field}
-                      error={errors.newPassword}
-                      placeholder="New password"
-                    />
+                    <>
+                      <PasswordInput
+                        field={field}
+                        error={errors.newPassword}
+                        placeholder="New password"
+                      />
+                      {errors.newPassword && (
+                        <Text style={styles.errorText}>
+                          {errors.newPassword.message}
+                        </Text>
+                      )}
+                    </>
                   )}
                 />
 
