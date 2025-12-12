@@ -19,7 +19,6 @@ import { useWeeklyWaterChart } from './useWeeklyWaterChart';
 
 import { fetchWaterLogs } from '../../../api/wellbeing/wellBeingApi';
 import { useWaterStore } from '../../../store/useWaterStore';
-import { TEXT_STYLES } from '../../../utils/theme';
 import { styles } from './WaterTrackingStyles';
 
 const DAILY_GOAL = 3000;
@@ -136,13 +135,36 @@ const WaterTrackerScreen = ({ navigation }: any) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View style={styles.header}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ChevronLeft size={28} color="#000" />
-            </TouchableOpacity>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            backgroundColor: '#fff',
+            marginBottom: 10,
+          }}
+        >
+          {/* LEFT ARROW */}
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ChevronLeft size={28} color="#000" />
+          </TouchableOpacity>
 
-            <Text style={[TEXT_STYLES.title, { marginLeft: 10 }]}>
+          {/* CENTER TITLE */}
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              marginLeft: -28, // IMPORTANT: pulls title to perfect center
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: '#000',
+              }}
+            >
               Water Intake
             </Text>
           </View>

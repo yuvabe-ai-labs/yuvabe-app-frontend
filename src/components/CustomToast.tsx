@@ -14,8 +14,8 @@ export const CustomToast = ({ text1, text2, status }: CustomToastProps) => {
     <View
       style={[
         styles.container,
-        { backgroundColor: isSuccess ? '#1B5E20' : '#B71C1C' },
-        { borderLeftColor: isSuccess ? '#00E676' : '#FF1744' },
+        { backgroundColor: isSuccess ? '#50C878' : '#D22B2B' },
+        { borderLeftColor: isSuccess ? '#4CAF50' : '#E53935' },
       ]}
     >
       <Text style={styles.title}>{text1}</Text>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   message: {
-    color: '#DDDDDD',
+    color: '#FFFFFF',
     fontSize: 14,
     marginTop: 5,
   },

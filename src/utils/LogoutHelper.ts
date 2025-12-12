@@ -42,6 +42,7 @@ export const logoutUser = (navigation: any) => {
         setItem('access_token', ''),
         setItem('refresh_token', ''),
         setItem('logged_in_email', ''),
+        setItem('nickname', ''),
       ]);
 
       // ⭐ GLOBAL LOADING ENDS

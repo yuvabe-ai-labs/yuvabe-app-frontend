@@ -175,25 +175,35 @@ export default function TeamLeaveHistoryScreen() {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          paddingVertical: 12,
+          paddingVertical: 14,
           paddingHorizontal: 16,
           backgroundColor: '#fff',
+          marginBottom: 10,
         }}
       >
+        {/* LEFT ARROW */}
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeft size={28} color="#000" />
         </TouchableOpacity>
 
-        <Text
+        {/* CENTER TITLE */}
+        <View
           style={{
-            marginLeft: 15,
-            fontSize: 18,
-            fontWeight: '600',
-            color: '#000',
+            flex: 1,
+            alignItems: 'center',
+            marginLeft: -28, // IMPORTANT: pulls title to perfect center
           }}
         >
-          Team Leave History
-        </Text>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '600',
+              color: '#000',
+            }}
+          >
+            Team Leave History
+          </Text>
+        </View>
       </View>
 
       {/* LIST */}
