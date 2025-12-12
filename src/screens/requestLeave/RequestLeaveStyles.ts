@@ -3,19 +3,17 @@ import { StyleSheet } from 'react-native';
 export const newLeaveStyles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
   },
 
-  // Heading
   heading: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 20,
+    color: '#000',
   },
 
-  // Count Row
+  // ======== COUNT CARDS ========
   countContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -24,96 +22,116 @@ export const newLeaveStyles = StyleSheet.create({
 
   countCard: {
     flex: 1,
-    padding: 15,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 10,
+    backgroundColor: '#FFF8E6', // overwritten below for casual
+    borderWidth: 1,
+    borderColor: '#F6DFA8',
+    paddingVertical: 18,
+    borderRadius: 14,
     alignItems: 'center',
-    marginHorizontal: 5,
-    marginTop: 30,
+    marginRight: 10,
+  },
+
+  countCardCasual: {
+    flex: 1,
+    backgroundColor: '#F4EDFF',
+    borderWidth: 1,
+    borderColor: '#C9B8F5',
+    paddingVertical: 18,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginLeft: 10,
   },
 
   countLabel: {
-    fontSize: 14,
-    color: '#777',
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
   },
 
   countValue: {
-    fontSize: 18,
+    fontSize: 28,
     fontWeight: '700',
-    marginTop: 5,
+    color: '#000',
+    marginBottom: 2,
   },
 
-  // Label
+  countSub: {
+    fontSize: 12,
+    color: '#777',
+  },
+
+  // ======== LABEL ========
   label: {
     fontSize: 15,
     fontWeight: '600',
-    marginTop: 15,
-    marginBottom: 5,
+    color: '#000',
+    marginBottom: 6,
   },
 
-  // Dropdown
+  // ======== DROPDOWN ========
   dropdownBox: {
-    padding: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderColor: '#E5E5E5',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 20,
+    backgroundColor: '#FFF',
   },
-
   dropdownText: {
-    fontSize: 16,
+    fontSize: 15,
+    color: '#000',
   },
-
   dropdownMenu: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#E5E5E5',
     borderRadius: 10,
-    marginTop: 5,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF',
+    marginBottom: 20,
   },
-
   dropdownItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
   },
 
-  // Date Row
+  // ======== DATE BOXES ========
   dateRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+    marginBottom: 20,
   },
 
   dateBox: {
-    padding: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderColor: '#E5E5E5',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    backgroundColor: '#FFF',
   },
 
-  // Reason box
+  // ======== REASON BOX ========
   reasonBox: {
-    height: 120,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 15,
+    borderColor: '#E5E5E5',
+    borderRadius: 12,
+    minHeight: 120,
+    padding: 14,
     textAlignVertical: 'top',
-    marginTop: 5,
+    backgroundColor: '#FFF',
   },
 
-  // Button
+  // ======== BUTTON ========
   btn: {
-    marginTop: 25,
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 10,
+    backgroundColor: '#C7A5FF',
+    height: 52,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-
   btnText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

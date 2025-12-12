@@ -27,11 +27,13 @@ import {
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { updateProfile } from '../../api/profile-api/profileApi';
 import {
   EditProfileForm,
   editProfileSchema,
 } from '../../schemas/profileSchema';
+import { loadNickname, saveNickname } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { showToast } from '../../utils/ToastHelper';
 import { styles } from './EditProfileStyles';
@@ -74,7 +76,7 @@ const PasswordInput = ({ field, error, placeholder }: any) => {
 };
 
 const EditProfileScreen = ({ navigation }: any) => {
-  const { user, setUser } = useUserStore();
+  const { user, setUser, team_name, setNickname } = useUserStore();
   const [loading, setLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
@@ -119,9 +121,11 @@ const EditProfileScreen = ({ navigation }: any) => {
   } = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
+      nickname: '',
       name: user?.name || '',
       email: user?.email || '',
       dob: '',
+      team: user?.team_name || team_name || '',
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
@@ -129,18 +133,22 @@ const EditProfileScreen = ({ navigation }: any) => {
   });
 
   useEffect(() => {
-    if (user) {
-      const formattedDob = user.dob ? isoToDDMMYYYY(user.dob) : '';
-      reset({
-        name: user.name,
-        email: user.email,
-        dob: formattedDob,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-    }
-  }, [user, reset]);
+    if (!user) return;
+
+    const formattedDob = user.dob ? isoToDDMMYYYY(user.dob) : '';
+    const nick = loadNickname(); // synchronous (MMKV)
+
+    reset({
+      nickname: nick || '',
+      name: user.name || '',
+      email: user.email || '',
+      dob: formattedDob,
+      team: user?.team_name || team_name || '',
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+  }, [user, reset, team_name]);
 
   const pickImage = () => {
     launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, response => {
@@ -197,6 +205,7 @@ const EditProfileScreen = ({ navigation }: any) => {
       const payload: any = {
         name: data.name,
         email: data.email,
+        team: data.team,
         dob: dobForBackend,
         current_password: data.currentPassword || null,
         new_password: data.newPassword || null,
@@ -204,6 +213,10 @@ const EditProfileScreen = ({ navigation }: any) => {
 
       const updatedUser = await updateProfile(payload);
       setUser(updatedUser);
+
+      saveNickname(data.nickname ?? '');
+      setNickname(data.nickname ?? '');
+
       showToast('Success', 'Profile updated successfully!', 'success');
 
       navigation.goBack();
@@ -235,37 +248,6 @@ const EditProfileScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       {/* SAFE AREA HEADER */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 16,
-          paddingVertical: 10,
-          backgroundColor: '#fff',
-        }}
-      >
-        {/* Back */}
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ChevronLeft size={28} color="#000" />
-        </TouchableOpacity>
-
-        <Text
-          style={{
-            flex: 1,
-            textAlign: 'center',
-            fontSize: 18,
-            fontWeight: '600',
-          }}
-        >
-          Edit Profile
-        </Text>
-
-        {/* Logo */}
-        {/* <Image
-          source={require('../../assets/logo/yuvabe-logo.png')}
-          style={{ width: 35, height: 35, resizeMode: 'contain' }}
-        /> */}
-      </View>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -279,25 +261,79 @@ const EditProfileScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Profile Image */}
-          <View style={styles.header}>
-            <Image
-              source={
-                profileImage
-                  ? { uri: profileImage }
-                  : require('../../assets/logo/yuvabe-logo.png')
-              }
-              style={styles.profileImage}
-            />
+          <Svg
+            width="100%"
+            height={styles.headerBg.height} // ensure this matches your header height
+            style={styles.headerBg}
+          >
+            <Defs>
+              <LinearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0%" stopColor="#592AC7" />
+                <Stop offset="100%" stopColor="#CCB6FF" />
+              </LinearGradient>
+            </Defs>
 
-            <TouchableOpacity style={styles.changePhotoBtn} onPress={pickImage}>
-              <Text style={styles.changePhotoText}>Change Photo</Text>
-            </TouchableOpacity>
+            <Rect
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="url(#headerGrad)"
+            />
+          </Svg>
+
+          {/* 🔙 Back Button */}
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{
+              position: 'absolute',
+              top: 15,
+              left: 15,
+              zIndex: 10,
+              padding: 5,
+            }}
+          >
+            <ChevronLeft size={32} color="#fff" strokeWidth={2.5} />
+          </TouchableOpacity>
+          {/* Profile Image */}
+          <View style={styles.editTopWrapper}>
+            <View style={styles.header}>
+              <Image
+                source={
+                  profileImage
+                    ? { uri: profileImage }
+                    : require('../../assets/logo/yuvabe-logo.png')
+                }
+                style={styles.profileImage}
+              />
+
+              <TouchableOpacity
+                style={styles.changePhotoBtn}
+                onPress={pickImage}
+              >
+                <Text style={styles.changePhotoText}>Change image</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Form */}
           <View style={styles.formContainer}>
             {/* Name */}
+            <Text style={styles.title}>Personal Details</Text>
+            <Text style={styles.label}>Nick Name</Text>
+            <Controller
+              control={control}
+              name="nickname"
+              render={({ field }) => (
+                <TextInput
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  placeholder="Enter your nickname"
+                  style={[styles.input]}
+                />
+              )}
+            />
+
             <Text style={styles.label}>Full Name</Text>
             <Controller
               control={control}
@@ -306,7 +342,12 @@ const EditProfileScreen = ({ navigation }: any) => {
                 <TextInput
                   value={field.value}
                   onChangeText={field.onChange}
-                  style={[styles.input, errors.name && styles.inputError]}
+                  editable={false}
+                  style={[
+                    styles.input,
+                    styles.disabledInput,
+                    errors.name && styles.inputError,
+                  ]}
                 />
               )}
             />
@@ -326,14 +367,37 @@ const EditProfileScreen = ({ navigation }: any) => {
                   editable={false}
                   autoCapitalize="none"
                   keyboardType="email-address"
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[
+                    styles.input,
+                    styles.disabledInput,
+                    errors.email && styles.inputError,
+                  ]}
                 />
               )}
             />
+
             {errors.email && (
               <Text style={styles.errorText}>{errors.email.message}</Text>
             )}
-
+            <Text style={styles.label}>Team</Text>
+            <Controller
+              control={control}
+              name="team"
+              render={({ field }) => (
+                <TextInput
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  editable={false}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  style={[
+                    styles.input,
+                    styles.disabledInput,
+                    errors.email && styles.inputError,
+                  ]}
+                />
+              )}
+            />
             {/* DOB */}
             <Text style={styles.label}>Date of Birth</Text>
             <Controller

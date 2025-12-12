@@ -1,6 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -28,7 +29,8 @@ import { newLeaveStyles as styles } from './RequestLeaveStyles';
 export default function RequestLeaveScreen() {
   const navigation = useNavigation<any>();
 
-  const [leaveType, setLeaveType] = useState('Sick Leave');
+  const [leaveType, setLeaveType] = useState('');
+
   const [showLeaveType, setShowLeaveType] = useState(false);
   const [balanceLoading, setBalanceLoading] = useState(true);
 
@@ -45,6 +47,8 @@ export default function RequestLeaveScreen() {
   const [casualCount, setCasualCount] = useState(0);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  const isSubmitDisabled = !leaveType || !reason.trim();
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () =>
@@ -149,7 +153,11 @@ export default function RequestLeaveScreen() {
   // UI
   // ---------------------------------------
   return (
-    <SafeAreaView style={{ flex: 1, padding: 0 }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+      }}
+    >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -162,39 +170,43 @@ export default function RequestLeaveScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* HEADER WITH CHEVRON + TITLE */}
-          {/* HEADER WITH BACK + TITLE + RIGHT LOGO */}
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
               marginBottom: 30,
+              paddingTop: 20,
             }}
           >
-            {/* LEFT SECTION: Back button + Title */}
             <View
-              style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 30,
+              }}
             >
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
-                style={{ paddingRight: 8 }}
+                style={{ width: 40, alignItems: 'flex-start' }}
               >
                 <ChevronLeft size={28} color="#000" />
               </TouchableOpacity>
 
               <Text
-                style={[
-                  styles.heading,
-                  {
-                    marginLeft: 0,
-                    marginBottom: 0,
-                    fontSize: 18,
-                    textAlign: 'left',
-                  },
-                ]}
+                style={{
+                  fontSize: 18,
+                  fontWeight: '700',
+                  color: '#000',
+                  textAlign: 'center',
+                  flex: 1,
+                }}
               >
                 Request Leave
               </Text>
+
+              {/* RIGHT: Empty placeholder (same width as left) */}
+              <View style={{ width: 40 }} />
             </View>
 
             {/* RIGHT SECTION: LOGO IN CORNER */}
@@ -211,17 +223,19 @@ export default function RequestLeaveScreen() {
           {/* Leave Balance */}
           <View style={styles.countContainer}>
             <View style={styles.countCard}>
-              <Text style={styles.countLabel}>Sick Count</Text>
+              <Text style={styles.countLabel}>Sick Leave</Text>
               <Text style={styles.countValue}>
                 {balanceLoading ? '--' : sickCount}
               </Text>
+              <Text style={styles.countSub}>Remaining</Text>
             </View>
 
-            <View style={styles.countCard}>
-              <Text style={styles.countLabel}>Casual Count</Text>
+            <View style={styles.countCardCasual}>
+              <Text style={styles.countLabel}>Casual Leave</Text>
               <Text style={styles.countValue}>
                 {balanceLoading ? '--' : casualCount}
               </Text>
+              <Text style={styles.countSub}>Remaining</Text>
             </View>
           </View>
 
@@ -231,7 +245,14 @@ export default function RequestLeaveScreen() {
             style={styles.dropdownBox}
             onPress={() => setShowLeaveType(!showLeaveType)}
           >
-            <Text style={styles.dropdownText}>{leaveType}</Text>
+            <Text
+              style={[
+                styles.dropdownText,
+                { color: leaveType ? '#000' : '#A0A0A0' },
+              ]}
+            >
+              {leaveType || 'Select leave type'}
+            </Text>
           </TouchableOpacity>
 
           {showLeaveType && (
@@ -315,13 +336,28 @@ export default function RequestLeaveScreen() {
           {/* Submit Button */}
           <View style={{ marginTop: 50, marginBottom: 20 }}>
             <TouchableOpacity
-              style={styles.btn}
+              disabled={loading || isSubmitDisabled}
               onPress={handleSubmit}
-              disabled={loading}
+              style={{
+                paddingVertical: 16,
+                borderRadius: 12,
+                backgroundColor: isSubmitDisabled ? '#BDA0FF' : '#592AC7',
+                alignItems: 'center',
+              }}
             >
-              <Text style={styles.btnText}>
-                {loading ? 'Submitting...' : 'Submit Leave Request'}
-              </Text>
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: '#FFFFFF',
+                    fontWeight: '600',
+                  }}
+                >
+                  Submit Leave Request
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>

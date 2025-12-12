@@ -35,6 +35,8 @@ type UserStore = {
   lead_label?: string;
   lead_name?: string;
   lead_email?: string;
+  nickname: string;
+  setNickname: (nick: string) => void;
   setUser: (userData: User) => void;
   setProfileDetails: (details: ProfileDetails) => void;
   setIsLoggedIn: (status: boolean) => void;
@@ -45,10 +47,12 @@ type UserStore = {
 
 export const useUserStore = create<UserStore>(set => ({
   user: null,
+
   userDetails: null,
   isLoggedIn: false,
   isVerified: false,
   isLogoutLoading: false,
+  nickname: '',
   team_name: '',
   lead_label: '',
   lead_name: '',
@@ -62,6 +66,7 @@ export const useUserStore = create<UserStore>(set => ({
         role: userData.role ?? state.user?.role,
       },
     })),
+  setNickname: (nick: string) => set({ nickname: nick }),
 
   setProfileDetails: (details: ProfileDetails) =>
     set(state => ({

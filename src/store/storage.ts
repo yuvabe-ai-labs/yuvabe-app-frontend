@@ -2,6 +2,24 @@ import { createMMKV } from 'react-native-mmkv';
 
 export const storage = createMMKV();
 
+const NICKNAME_KEY = 'nickname';
+
+export const saveNickname = (nick: string | null) => {
+  if (!nick) {
+    storage.remove(NICKNAME_KEY);
+  } else {
+    storage.set(NICKNAME_KEY, nick);
+  }
+};
+
+export const loadNickname = (): string | null => {
+  return storage.getString(NICKNAME_KEY) || null;
+};
+
+export const removeNickname = () => {
+  storage.remove(NICKNAME_KEY);
+};
+
 export const setItem = (key: string, value: string) => {
   storage.set(key, value);
 };

@@ -2,6 +2,8 @@ import z from 'zod';
 
 export const editProfileSchema = z
   .object({
+    nickname: z.string().optional(),
+
     name: z
       .string()
       .trim()
@@ -11,6 +13,8 @@ export const editProfileSchema = z
       }),
 
     email: z.string().email('Enter a valid email'),
+
+    team: z.string().optional(),
 
     dob: z.string().min(1, 'Date of Birth is required'),
 

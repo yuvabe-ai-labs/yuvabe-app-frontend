@@ -5,23 +5,21 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLeaveDetails } from '../../api/profile-api/profileApi';
 import { useLoadingStore } from '../../store/useLoadingStore';
+import { FONTS } from '../../utils/theme';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-
   const day = date.getDate();
   const month = date.toLocaleString('en-US', { month: 'short' });
   const year = date.getFullYear();
-
   return `${day} ${month} ${year}`;
 };
 
-export default function LeaveDetailsScreen({ route }: any) {
+export default function MentorDetailLeaveScreen({ route }: any) {
   const { leaveId } = route.params;
   const navigation = useNavigation<any>();
 
   const [leave, setLeave] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadLeave();
@@ -29,7 +27,7 @@ export default function LeaveDetailsScreen({ route }: any) {
 
   const loadLeave = async () => {
     const { showLoading, hideLoading } = useLoadingStore.getState();
-    showLoading('details', 'Loading leave details...');
+    showLoading('details', 'Loading  leave details ');
     try {
       const res = await getLeaveDetails(leaveId);
       setLeave(res.data.data);
@@ -40,7 +38,6 @@ export default function LeaveDetailsScreen({ route }: any) {
     }
   };
 
-  // Error Screen
   if (!leave) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -56,28 +53,24 @@ export default function LeaveDetailsScreen({ route }: any) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView style={{ flex: 1 }}>
-        {/* ⭐ CUSTOM HEADER */}
+        {/* HEADER */}
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
             paddingVertical: 14,
             paddingHorizontal: 16,
-            backgroundColor: '#fff',
-            marginBottom: 10,
           }}
         >
-          {/* LEFT ARROW */}
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ChevronLeft size={28} color="#000" />
           </TouchableOpacity>
 
-          {/* CENTER TITLE */}
           <View
             style={{
               flex: 1,
               alignItems: 'center',
-              marginLeft: -28, // IMPORTANT: pulls title to perfect center
+              marginLeft: -28,
             }}
           >
             <Text
@@ -92,15 +85,6 @@ export default function LeaveDetailsScreen({ route }: any) {
           </View>
         </View>
 
-        {/* <Image
-            source={require('../../assets/logo/yuvabe-logo.png')}
-            style={{
-              width: 40,
-              height: 40,
-              resizeMode: 'contain',
-            }}
-          /> */}
-
         <View style={{ padding: 20 }}>
           <View
             style={{
@@ -111,42 +95,51 @@ export default function LeaveDetailsScreen({ route }: any) {
               borderColor: '#592AC7',
             }}
           >
+            {/* EMPLOYEE NAME (NEW FIELD) */}
+            <Text style={{ fontSize: 16, fontWeight: '600',fontFamily: FONTS.gilroy.bold }}>
+              Employee Name
+            </Text>
+            <Text style={{ fontSize: 18, marginTop: 3,fontFamily: FONTS.gilroy.regular }}>
+              {leave.user_name}
+            </Text>
+
             {/* Leave Type */}
-            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 10 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20,fontFamily: FONTS.gilroy.bold }}>
               Leave Type
             </Text>
-            <Text style={{ fontSize: 18, marginTop: 3 }}>
+            <Text style={{ fontSize: 18, marginTop: 3,fontFamily: FONTS.gilroy.regular }}>
               {leave.leave_type}
             </Text>
 
             {/* Reason */}
-            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 ,fontFamily: FONTS.gilroy.bold}}>
               Reason for Leave
             </Text>
-            <Text style={{ fontSize: 18, marginTop: 3 }}>{leave.reason}</Text>
+            <Text style={{ fontSize: 18, marginTop: 3,fontFamily: FONTS.gilroy.regular }}>{leave.reason}</Text>
 
             {/* Dates */}
-            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 ,fontFamily: FONTS.gilroy.bold}}>
               From → To
             </Text>
-            <Text style={{ fontSize: 18, marginTop: 3 }}>
+            <Text style={{ fontSize: 18, marginTop: 3,fontFamily: FONTS.gilroy.regular }}>
               {formatDate(leave.from_date)} ➜ {formatDate(leave.to_date)}
             </Text>
 
             {/* Days */}
-            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 ,fontFamily: FONTS.gilroy.bold}}>
               Total Days
             </Text>
-            <Text style={{ fontSize: 18, marginTop: 3 }}>{leave.days} </Text>
+            <Text style={{ fontSize: 18, marginTop: 3 ,fontFamily: FONTS.gilroy.regular}}>{leave.days}</Text>
 
             {/* Status */}
-            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20,fontFamily: FONTS.gilroy.bold }}>
               Status
             </Text>
             <Text
               style={{
                 fontSize: 18,
                 marginTop: 3,
+                fontFamily: FONTS.gilroy.bold,
                 fontWeight: 'bold',
                 color:
                   leave.status === 'Approved'
@@ -162,10 +155,10 @@ export default function LeaveDetailsScreen({ route }: any) {
             </Text>
 
             {/* Updated Date */}
-            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 20 ,fontFamily: FONTS.gilroy.bold}}>
               Updated At
             </Text>
-            <Text style={{ fontSize: 18, marginTop: 3 }}>
+            <Text style={{ fontSize: 14, marginTop: 3,fontFamily: FONTS.gilroy.regular }}>
               {formatDate(leave.updated_at?.slice(0, 10))}
             </Text>
 

@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { JSX, useCallback, useEffect, useState } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -11,17 +11,23 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AssetDTO, fetchAssets } from '../../api/profile-api/assetsApi';
 import { useLoadingStore } from '../../store/useLoadingStore';
+import {
+  HeadphoneIcon,
+  KeyboardIcon,
+  LaptopFigure,
+  LaptopStand,
+  MonitoIcon,
+  MouseIcon,
+} from '../../utils/customIcons';
 import { styles } from './AssetStyle';
-import { LaptopFigure } from '../../utils/customIcons';
 
-export const ASSET_ICONS: Record<string, string> = {
-  laptop: '💻',
-  keyboard: '⌨️',
-  mouse: '🖱️',
-  monitor: '🖥️',
-  mobile: '📱',
-  headphone: '🎧',
-  tablet: '📱',
+const ASSET_COMPONENTS: Record<string, JSX.Element> = {
+  laptop: <LaptopFigure />,
+  mouse: <MouseIcon />,
+  keyboard: <KeyboardIcon />,
+  monitor: <MonitoIcon />,
+  headphone: <HeadphoneIcon />,
+  laptopStand: <LaptopStand />,
 };
 
 const AssetSection = () => {
@@ -29,7 +35,7 @@ const AssetSection = () => {
 
   const [assets, setAssets] = useState<AssetDTO[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [networkError, setNetworkError] = useState(false); 
+  const [networkError, setNetworkError] = useState(false);
 
   const loadAssets = async () => {
     const { showLoading, hideLoading } = useLoadingStore.getState();
@@ -46,7 +52,7 @@ const AssetSection = () => {
       const isNetworkError =
         e.message?.toLowerCase().includes('network') ||
         e.code === 'ERR_NETWORK' ||
-        (e.response === undefined && e.request); 
+        (e.response === undefined && e.request);
       if (isNetworkError) {
         setNetworkError(true);
         setAssets([]);
@@ -67,14 +73,15 @@ const AssetSection = () => {
   }, []);
 
   const renderItem = ({ item }: { item: AssetDTO }) => {
-    const icon = ASSET_ICONS[item.type.toLowerCase()] || '📦';
+    const iconComponent = ASSET_COMPONENTS[item.type.toLowerCase()] || (
+      <LaptopFigure />
+    );
 
     return (
       <View style={styles.assetCard}>
-        <Text style={styles.assetIcon}>{icon}</Text>
-        <LaptopFigure/>
+        <Text style={styles.assetIcon}>{iconComponent}</Text>
+
         <View style={{ flex: 1 }}>
-          
           <Text style={styles.assetName}>{item.asset_id}</Text>
           <Text style={styles.assetType}>{item.type}</Text>
         </View>
@@ -89,31 +96,46 @@ const AssetSection = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        
         <View
-          style={[
-            styles.header,
-            { flexDirection: 'row', alignItems: 'center' },
-          ]}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            backgroundColor: '#fff',
+            marginBottom: 10,
+          }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ChevronLeft size={28} color="#000" />
-            </TouchableOpacity>
+          {/* LEFT ARROW */}
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ChevronLeft size={28} color="#000" />
+          </TouchableOpacity>
 
-            <Text style={[styles.headerTitle, { marginLeft: 10 }]}>
+          {/* CENTER TITLE */}
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              marginLeft: -28, // IMPORTANT: pulls title to perfect center
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: '#000',
+              }}
+            >
               My Assets
             </Text>
           </View>
         </View>
 
-        
         {networkError ? (
           <View style={{ marginTop: 40, alignItems: 'center' }}>
             <Text style={styles.empty}>Check your internet connection</Text>
           </View>
         ) : assets.length === 0 ? (
-         
           <FlatList
             data={[]}
             renderItem={() => null}
@@ -128,7 +150,6 @@ const AssetSection = () => {
             }
           />
         ) : (
-          
           <FlatList
             data={assets}
             keyExtractor={item => item.id}

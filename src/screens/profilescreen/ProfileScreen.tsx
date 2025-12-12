@@ -3,29 +3,33 @@ import {
   ChevronLeft,
   ChevronRight,
   User as IconLucideUser,
-  UserCheck as IconLucideUserCheck,
-  Users as IconLucideUsers,
   LogOut,
-  Pencil,
+  PencilIcon,
 } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { getItem } from '../../store/storage';
+import { getItem, loadNickname } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
+import { MentorIcon, TeamIcon } from '../../utils/customIcons';
 import { logoutUser } from '../../utils/LogoutHelper';
 import { COLORS } from '../../utils/theme';
 import { styles } from './ProfileStyles';
 
 const ProfileScreen = () => {
   const navigation = useNavigation<any>();
-  const { user } = useUserStore();
+  const { user, nickname, setNickname } = useUserStore();
   const { team_name, lead_label, lead_name } = useUserStore();
 
   // Saved image from storage
   const storedImage = getItem('profile_image');
   const profileSrc = storedImage || user?.profile_picture;
+
+  useEffect(() => {
+    const nick = loadNickname();
+    if (nick) setNickname(nick);
+  }, []);
 
   const handleLogout = () => {
     logoutUser(navigation);
@@ -120,29 +124,24 @@ const ProfileScreen = () => {
           </View>
           {/* Details */}
           <View style={{ flex: 1 }}>
-            <Text style={styles.name}>{user?.name || 'User'}</Text>
+            <Text style={styles.name}>
+              {user?.name}
+              {nickname ? ` (${nickname})` : ''}
+            </Text>
             <Text style={styles.email}>
               {user?.email || 'example@yuvabe.com'}
             </Text>
 
             {/* Team */}
             <View style={[styles.infoRow, { marginTop: 8 }]}>
-              <IconLucideUsers
-                size={18}
-                color="#4A90E2"
-                style={styles.infoIcon}
-              />
+              <TeamIcon color="#000" style={styles.infoIcon} />
               <Text style={styles.infoLabel}>Team:</Text>
               <Text style={styles.infoValue}>{team_name || '—'}</Text>
             </View>
 
             {/* Mentor */}
             <View style={[styles.infoRow, { marginTop: 4 }]}>
-              <IconLucideUserCheck
-                size={18}
-                color="#4A90E2"
-                style={styles.infoIcon}
-              />
+              <MentorIcon color="#000" style={styles.infoIcon} />
               <Text style={styles.infoLabel}>{lead_label}:</Text>
               <Text style={styles.infoValue}>{lead_name || '—'}</Text>
             </View>
@@ -163,7 +162,9 @@ const ProfileScreen = () => {
 
         {/* 🔴 Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <LogOut size={18} color="#FF3B30" strokeWidth={2} />
+          <View style={{ transform: [{ scaleX: -1 }] }}>
+            <LogOut size={18} color="#ffffff" strokeWidth={2} />
+          </View>
 
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
@@ -174,14 +175,9 @@ const ProfileScreen = () => {
 
 const SectionItem = ({ label, onPress }: any) => (
   <TouchableOpacity style={styles.sectionRow} onPress={onPress}>
-    <Pencil
-      size={20}
-      color="#4A90E2"
-      strokeWidth={2}
-      style={{ marginRight: 12 }}
-    />
+    <PencilIcon color="#000" strokeWidth={2} style={{ marginRight: 12 }} />
     <Text style={styles.sectionLabel}>{label}</Text>
-    <ChevronRight size={22} color="#C4C4C4" strokeWidth={2} />
+    <ChevronRight size={22} color="#000" strokeWidth={2} />
   </TouchableOpacity>
 );
 

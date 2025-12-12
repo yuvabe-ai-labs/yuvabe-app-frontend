@@ -1,4 +1,4 @@
-import { Clock, User, Users } from 'lucide-react-native';
+import { LogOut, User } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
   ActivityIndicator,
@@ -119,7 +119,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           <>
             <DrawerItem
               label="Pending Leaves"
-              icon={<Clock height={20} width={24} color="#444" strokeWidth={1.8} />}
+              icon={<PendingIcon color="#444" strokeWidth={1.8} />}
               onPress={() => {
                 closeDrawer();
                 navigation.navigate('PendingLeaves');
@@ -128,7 +128,7 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
 
             <DrawerItem
               label="Team Leave History"
-              icon={<Users height={20} width={24} color="#444" strokeWidth={1.8} />}
+              icon={<TeamLeaveHistoryIcon color="#444" strokeWidth={1.8} />}
               onPress={() => {
                 closeDrawer();
                 navigation.navigate('TeamLeaveHistory');

@@ -1,14 +1,14 @@
-import * as React from "react"
+import * as React from 'react';
 import Svg, {
-  SvgProps,
-  G,
-  Path,
-  Defs,
-  LinearGradient,
-  Stop,
-  RadialGradient,
   ClipPath,
-} from "react-native-svg";
+  Defs,
+  G,
+  LinearGradient,
+  Path,
+  RadialGradient,
+  Stop,
+  SvgProps,
+} from 'react-native-svg';
 export const LaptopFigure = (props: SvgProps) => (
   <Svg
     xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +40,7 @@ export const LaptopFigure = (props: SvgProps) => (
         d="M73.024 1.374h-61.16v8.472l61.16 9.525V1.374Z"
         opacity={0.07}
         style={{
-          mixBlendMode: "overlay",
+          mixBlendMode: 'overlay',
         }}
       />
       <Path
@@ -48,7 +48,7 @@ export const LaptopFigure = (props: SvgProps) => (
         d="M73.024 1.374h-61.16v6.594l61.16 10.761V1.374Z"
         opacity={0.07}
         style={{
-          mixBlendMode: "overlay",
+          mixBlendMode: 'overlay',
         }}
       />
       <Path fill="#1B171B" d="M72.17 3.47h-59v2.614h59V3.47Z" opacity={0.34} />
@@ -57,7 +57,7 @@ export const LaptopFigure = (props: SvgProps) => (
         d="M75.098 42.16v4.998H38.192c-17.508.012-33.568.017-33.568.017s-1.177-.029-.895-.506a.947.947 0 0 1 .218-.23c.083-.07.189-.14.318-.223 1.29-.783 6.593-3.55 8.042-4.303l-.053-.036v-.4h-.024l-.07-.047V1.256s0-.03.011-.07a.96.96 0 0 1 .265-.536c.224-.253.63-.483 1.384-.483h59.07s.065 0 .112.018h.583s.059 0 .147.023c.018 0 .041.018.065.03.276.135.73.635.73 2.437v39.137l-.018.089c.16.064.36.147.595.265l-.006-.006Z"
         opacity={0.15}
         style={{
-          mixBlendMode: "multiply",
+          mixBlendMode: 'multiply',
         }}
       />
       <Path
@@ -135,7 +135,7 @@ export const LaptopFigure = (props: SvgProps) => (
       />
       <G
         style={{
-          mixBlendMode: "multiply",
+          mixBlendMode: 'multiply',
         }}
       >
         <Path
@@ -153,7 +153,7 @@ export const LaptopFigure = (props: SvgProps) => (
           d="M73.024 1.374h-61.16v8.472l61.16 9.525V1.374Z"
           opacity={0.07}
           style={{
-            mixBlendMode: "overlay",
+            mixBlendMode: 'overlay',
           }}
         />
         <Path
@@ -161,7 +161,7 @@ export const LaptopFigure = (props: SvgProps) => (
           d="M73.024 1.374h-61.16v6.594l61.16 10.761V1.374Z"
           opacity={0.07}
           style={{
-            mixBlendMode: "overlay",
+            mixBlendMode: 'overlay',
           }}
         />
         <Path
@@ -243,7 +243,7 @@ export const LaptopFigure = (props: SvgProps) => (
         d="M83.794 46.057h-.023c-.053-.123-.2-.224-.2-.224s-6.735-3.32-8.083-4.038a7.986 7.986 0 0 0-1.042-.483V2.51c0-1.801-.453-2.302-.73-2.437-.024-.012-.041-.024-.065-.03-.018-.011-.041-.017-.059-.023-.082-.03-.135-.018-.135-.018H12.532c-1.684 0-1.701 1.095-1.701 1.095v40.18l.053.035c-1.478.742-6.894 3.485-8.207 4.257-.612.359-.677.582-.536.718H2v3.055s.27.583 3.326.489c3.056-.089 77.344-.041 77.344-.041s1.213.047 1.213-1.39c0-1.436-.094-2.343-.094-2.343h.005Zm-29.87-.594c-.1.04-.23.07-.348.082-.235.012-.506 0-.76.012h-.4l-2.672.011c-1.46 0-2.92 0-4.38-.023-.595 0-1.183-.012-1.778-.024-2.055-.035-4.11-.04-6.158-.029-1.03.012-2.054.012-3.079.035l-1.536.03h-.2c-.183 0-.377-.012-.554-.036a1.131 1.131 0 0 1-.324-.076c-.011 0-.023 0-.035-.012-.047-.023-.094-.059-.1-.094-.012-.035.023-.088.065-.124l.012-.012v-.011h.011l.377-.395.07-.07.495-.518h.03c1.6.035 3.196.053 4.804.07h.294l4.397.024h2.926c.983 0 1.96 0 2.944-.012l5.092-.047.53.495c.177.176.424.347.46.523.017.083-.06.148-.172.195l-.011.006Zm-38.849-2.055 2.561-1.884h50.658l2.425 1.884H15.075Zm56.504-3.962H13.556V3.18H71.58v36.265Z"
         opacity={0.32}
         style={{
-          mixBlendMode: "overlay",
+          mixBlendMode: 'overlay',
         }}
       />
     </G>

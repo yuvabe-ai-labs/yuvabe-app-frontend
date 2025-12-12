@@ -1,5 +1,5 @@
-import { Calendar, ChevronLeft, CloudOff } from 'lucide-react-native';
-import React, { useEffect, useState ,useCallback} from 'react';
+import { ChevronLeft, CloudOff } from 'lucide-react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -12,6 +12,7 @@ import { fetchPendingLeaves } from '../../api/profile-api/profileApi';
 import { useLoadingStore } from '../../store/useLoadingStore';
 
 import { useFocusEffect } from '@react-navigation/native';
+import { formatDate } from '../leave/LeaveDetailsScreen';
 
 export default function MentorLeaveListScreen({ navigation }: any) {
   const [pendingLeaves, setPendingLeaves] = useState([]);
@@ -51,70 +52,130 @@ export default function MentorLeaveListScreen({ navigation }: any) {
     }
   };
 
+  const formatLeaveType = (leaveType: string): string => {
+    if (!leaveType) return '';
+
+    const type = leaveType.trim().toLowerCase();
+
+    if (type === 'sick') return 'Sick Leave';
+    if (type === 'casual') return 'Casual Leave';
+
+    return leaveType; // fallback
+  };
+
+  const badgeColor = (leaveType: string): string => {
+    if (!leaveType) return '#6C757D';
+
+    const type = leaveType.trim().toLowerCase();
+
+    if (type === 'sick') return '#C89C00'; // yellow
+    if (type === 'casual') return '#005DBD'; // blue
+
+    // fallback if backend returns unexpected value
+    return '#6C757D';
+  };
+
   const renderItem = ({ item }: any) => (
-    <TouchableOpacity
-      onPress={() =>
-        navigation.navigate('MentorApproval', { leaveId: item.id })
-      }
-      style={{
-        backgroundColor: '#F4F6F9',
-        padding: 18,
-        borderRadius: 12,
-        marginBottom: 14,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      }}
-    >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={{ fontWeight: '700', fontSize: 18, color: '#2C3E50' }}>
-          {item.leave_type}
-        </Text>
+    console.log('LEAVE TYPE FROM API:', item.leave_type),
+    (
+      <View style={{ paddingHorizontal: 16 }}>
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate('MentorApproval', { leaveId: item.id })
+        }
+        style={{
+          backgroundColor: '#FFFFFF',
+          padding: 18,
+          borderRadius: 12,
 
-        <Text style={{ fontSize: 15, fontWeight: '600', color: '#007AFF' }}>
-          {item.user_name}
-        </Text>
-      </View>
-
-      <View
-        style={{ flexDirection: 'row', marginTop: 10, alignItems: 'center' }}
+          marginBottom: 16,
+          borderWidth: 1.6,
+          borderColor: '#C9A0FF', // light purple border like screenshot
+        }}
       >
-        <Calendar size={18} color="#555" strokeWidth={2} />
+        {/* TOP ROW */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text style={{ fontWeight: '700', fontSize: 17, color: '#2C3E50' }}>
+            {item.user_name}
+          </Text>
 
-        <Text style={{ marginLeft: 6, color: '#555', fontSize: 15 }}>
-          {item.from_date} → {item.to_date}
-        </Text>
-      </View>
+          {/* LEAVE TYPE BADGE */}
+          <View
+            style={{
+              backgroundColor: badgeColor(item.leave_type),
+              paddingVertical: 4,
+              paddingHorizontal: 12,
+              borderRadius: 20,
+            }}
+          >
+            <Text style={{ color: '#fff', fontSize: 12, fontWeight: '600' }}>
+              {formatLeaveType(item.leave_type)}
+            </Text>
+          </View>
+        </View>
 
-      <View style={{ marginTop: 6 }}>
-        <Text style={{ fontSize: 12, color: 'gray' }}>
-          Updated: {item.updated_at?.slice(0, 10)}
-        </Text>
+        {/* DATE RANGE */}
+        <View style={{ marginTop: 12 }}>
+          <Text style={{ fontSize: 14, color: '#333' }}>
+            {formatDate(item.from_date)} ➜ {formatDate(item.to_date)}
+          </Text>
+        </View>
+
+        {/* NUMBER OF DAYS */}
+        <View style={{ marginTop: 12 }}>
+          <Text style={{ fontSize: 14, color: '#333' }}>
+            Number of Days: {item.days || 0}
+          </Text>
+        </View>
+
+        {/* REQUEST SENT DATE */}
+        <View style={{ marginTop: 6 }}>
+          <Text style={{ fontSize: 12, color: 'gray' }}>
+            Request sent: {formatDate(item.requested_at?.slice(0, 10))}
+          </Text>
+        </View>
+      </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    )
   );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-      <View style={{ flex: 1, padding: 16 }}>
+      <View style={{ flex: 1 }}>
         {/* Header */}
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 20,
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            backgroundColor: '#fff',
+            marginBottom: 10,
           }}
         >
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={{ padding: 6, marginRight: 10 }}
-          >
-            <ChevronLeft size={28} color="#000" strokeWidth={2} />
+          {/* LEFT ARROW */}
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ChevronLeft size={28} color="#000" />
           </TouchableOpacity>
 
-          <Text style={{ fontWeight: '800', fontSize: 18, color: '#1C1C1E' }}>
-            Pending Leave Requests
-          </Text>
+          {/* CENTER TITLE */}
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              marginLeft: -28, // IMPORTANT: pulls title to perfect center
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: '#000',
+              }}
+            >
+              Pending Leave Requests
+            </Text>
+          </View>
         </View>
 
         {/* LIST */}
@@ -137,6 +198,7 @@ export default function MentorLeaveListScreen({ navigation }: any) {
               <View
                 style={{
                   marginTop: 80,
+
                   alignItems: 'center',
                 }}
               >

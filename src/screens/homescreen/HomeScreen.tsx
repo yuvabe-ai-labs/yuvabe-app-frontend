@@ -20,10 +20,12 @@ import {
 } from '../../api/profile-api/profileApi';
 import AppDrawer from '../../components/AppDrawer';
 import DrawerContent from '../../components/DrawerContent';
+import NotificationDrawer from '../../components/NotificationDrawer';
 import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
 import { Alert, HamburgerMenu, YBLogo } from '../../utils/customIcons';
 import { COLORS } from '../../utils/theme';
+import NotificationScreen from '../notification/NotificationScreen';
 import styles from './HomeStyles';
 import BreathingModal from './components/BreathingModal';
 import CalmingAudio from './components/CalmingAudio';
@@ -33,17 +35,16 @@ import VisionBoard from './components/VisionBoard';
 
 export async function requestNotificationPermission() {
   if (Platform.OS === 'android') {
-    const granted = await PermissionsAndroid.request(
+    await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
     );
   }
 
   const authStatus = await messaging().requestPermission();
-  const enabled =
+  return (
     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-  return enabled;
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL
+  );
 }
 
 const HomeScreen = ({ navigation }: any) => {
@@ -55,10 +56,12 @@ const HomeScreen = ({ navigation }: any) => {
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [quote, setQuote] = useState<string>('');
   const [author, setAuthor] = useState<string>('');
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
 
   const user = useUserStore(state => state.user);
   const isLogoutLoading = useUserStore(state => state.isLogoutLoading);
   const { setProfileDetails } = useUserStore();
+
   const userMail = getItem('logged_in_email');
 
   const EMOJI_TO_EMOTION: Record<string, string> = {
@@ -71,26 +74,26 @@ const HomeScreen = ({ navigation }: any) => {
     '🤯': 'frustrated',
   };
 
+  // Permissions
   useEffect(() => {
     requestNotificationPermission();
   }, []);
 
+  // Load Profile Image
   useEffect(() => {
     const savedImage = getItem('profile_image');
-    if (savedImage) {
-      setProfileImage(savedImage);
-    }
+    if (savedImage) setProfileImage(savedImage);
   }, []);
 
+  // Fetch Daily Quote
   useEffect(() => {
     const fetchQuote = async () => {
       const today = new Date().toISOString().split('T')[0];
 
       try {
-        const storedQuoteData = getItem('daily_quote');
-        if (storedQuoteData) {
-          const parsed = JSON.parse(storedQuoteData);
-
+        const stored = getItem('daily_quote');
+        if (stored) {
+          const parsed = JSON.parse(stored);
           if (parsed.date === today && parsed.success === true) {
             setQuote(parsed.quote);
             setAuthor(parsed.author);
@@ -99,13 +102,10 @@ const HomeScreen = ({ navigation }: any) => {
         }
 
         const response = await fetch(
-          'https://motivational-spark-api.vercel.app/api/quotes/random', // if not try https://quotes.domiadi.com/api
+          'https://motivational-spark-api.vercel.app/api/quotes/random',
         );
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-
         const data = await response.json();
+
         const quoteData = {
           quote: data.quote,
           author: data.author,
@@ -117,49 +117,49 @@ const HomeScreen = ({ navigation }: any) => {
         setQuote(quoteData.quote);
         setAuthor(quoteData.author);
       } catch (error) {
-        console.error('Error fetching or storing quote:', error);
-
         setQuote('The only way to do great work is to love what you do.');
         setAuthor('Steve Jobs');
 
-        const fallbackData = {
-          quote: quote,
-          author: author,
-          date: today,
-          success: false,
-        };
-        setItem('daily_quote', JSON.stringify(fallbackData));
+        setItem(
+          'daily_quote',
+          JSON.stringify({
+            quote,
+            author,
+            date: today,
+            success: false,
+          }),
+        );
       }
     };
 
     fetchQuote();
   }, [author, quote]);
 
+  // Load Profile Details
   useEffect(() => {
     const loadProfileDetails = async () => {
       try {
         const res = await fetchProfileDetails();
-        if (res.code === 200) {
-          setProfileDetails(res.data);
-        }
+        if (res.code === 200) setProfileDetails(res.data);
       } catch (err) {
-        console.log('Profile fetch failed in HomeScreen:', err);
+        console.log('Profile fetch failed:', err);
       }
     };
 
     loadProfileDetails();
-  }, [setProfileDetails]);
+  }, []);
 
+  // Register Device (slight delay)
   useEffect(() => {
     const timer = setTimeout(() => {
       registerDevice().catch(err =>
         console.log('Device registration failed:', err),
       );
     }, 1000);
-
     return () => clearTimeout(timer);
   }, []);
 
+  // Home Alert Notification
   useEffect(() => {
     const interval = setInterval(() => {
       if ((globalThis as any).homeAlert?.visible) {
@@ -183,7 +183,9 @@ const HomeScreen = ({ navigation }: any) => {
           {isDrawerOpen && (
             <View style={styles.dimOverlay} pointerEvents="none" />
           )}
+
           <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
+
           <View style={{ flex: 1 }}>
             <Animated.ScrollView
               style={styles.container}
@@ -191,6 +193,7 @@ const HomeScreen = ({ navigation }: any) => {
               showsVerticalScrollIndicator={false}
               scrollEnabled={scrollEnabled}
             >
+              {/* HEADER */}
               <View
                 style={[styles.header, { justifyContent: 'space-between' }]}
               >
@@ -201,7 +204,7 @@ const HomeScreen = ({ navigation }: any) => {
                 <YBLogo width={100} height={28} />
 
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('Notifications')}
+                  onPress={() => setShowNotificationDrawer(true)}
                 >
                   <Alert width={20} height={24} />
                 </TouchableOpacity>
@@ -211,6 +214,7 @@ const HomeScreen = ({ navigation }: any) => {
                 Welcome, {user?.name || 'Loading...'} !
               </Text>
 
+              {/* QUOTE */}
               <View style={styles.thoughtContainer}>
                 <Text style={styles.thoughtTitle}>Thought of the Day</Text>
                 <Text style={styles.thoughtText}>“{quote}“</Text>
@@ -228,6 +232,7 @@ const HomeScreen = ({ navigation }: any) => {
               </View>
 
               <CalmingAudio />
+
               {(userMail || user?.email) && (
                 <VisionBoard
                   userEmail={userMail ?? user?.email}
@@ -237,6 +242,7 @@ const HomeScreen = ({ navigation }: any) => {
             </Animated.ScrollView>
           </View>
 
+          {/* EMOTION CHECK-IN */}
           {showNotificationModal && (
             <EmotionCheckIn
               visible={showNotificationModal}
@@ -246,24 +252,18 @@ const HomeScreen = ({ navigation }: any) => {
                 setShowNotificationModal(false);
                 const emotion = emoji ? EMOJI_TO_EMOTION[emoji] : null;
 
-                try {
-                  if (!user?.id) {
-                    console.error('User ID not available');
-                    return;
-                  }
-
+                if (user?.id) {
                   const timeOfDay = homeAlertMessage.includes('morning')
                     ? 'morning'
                     : 'evening';
                   await submitEmotion(user.id, emotion, timeOfDay);
-                } catch (err) {
-                  console.error('Emotion submit failed', err);
                 }
 
                 setShowGroundingModal(true);
               }}
             />
           )}
+
           <GroundingExerciseModal
             visible={showGroundingModal}
             onDone={() => {
@@ -272,12 +272,14 @@ const HomeScreen = ({ navigation }: any) => {
             }}
             onClose={() => setShowGroundingModal(false)}
           />
+
           <BreathingModal
             visible={showBreathingModal}
             onClose={() => setShowBreathingModal(false)}
             onFinish={() => setShowBreathingModal(false)}
           />
 
+          {/* LOGOUT LOADING */}
           {isLogoutLoading && (
             <View
               style={{
@@ -307,6 +309,22 @@ const HomeScreen = ({ navigation }: any) => {
               </View>
             </View>
           )}
+
+          {/* NOTIFICATION DRAWER */}
+          <NotificationDrawer
+            visible={showNotificationDrawer}
+            onClose={() => setShowNotificationDrawer(false)}
+          >
+            {showNotificationDrawer && (
+              <NotificationScreen
+                visible={showNotificationDrawer}
+                navigation={{
+                  goBack: () => setShowNotificationDrawer(false),
+                  navigate: navigation.navigate,
+                }}
+              />
+            )}
+          </NotificationDrawer>
         </SafeAreaView>
       )}
     </AppDrawer>
