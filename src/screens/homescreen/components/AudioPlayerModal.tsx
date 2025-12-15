@@ -12,6 +12,8 @@ import {
   Easing,
   Image,
   Modal,
+  PanResponder,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -51,6 +53,36 @@ const AudioPlayerModal: React.FC<Props> = ({
   const translateY = React.useRef(new Animated.Value(400)).current;
   const [isMounted, setIsMounted] = React.useState(visible);
   const overlayOpacity = React.useRef(new Animated.Value(0)).current;
+  const DRAG_CLOSE_THRESHOLD = 120;
+
+  const panResponder = React.useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        return gesture.dy > 5;
+      },
+
+      onPanResponderMove: (_, gesture) => {
+        if (gesture.dy > 0) {
+          translateY.setValue(gesture.dy);
+        }
+      },
+
+      onPanResponderRelease: (_, gesture) => {
+        const shouldClose =
+          gesture.dy > DRAG_CLOSE_THRESHOLD || gesture.vy > 1.2;
+
+        if (shouldClose) {
+          onClose(); // state change only
+          return;
+        }
+
+        Animated.spring(translateY, {
+          toValue: 0,
+          useNativeDriver: true,
+        }).start();
+      },
+    }),
+  ).current;
 
   React.useEffect(() => {
     if (visible) {
@@ -62,25 +94,26 @@ const AudioPlayerModal: React.FC<Props> = ({
         useNativeDriver: true,
       }).start();
 
-      Animated.timing(translateY, {
+      Animated.spring(translateY, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.exp),
+        damping: 18,
+        stiffness: 120,
         useNativeDriver: true,
       }).start();
     } else {
-      Animated.timing(overlayOpacity, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start();
-
-      Animated.timing(translateY, {
-        toValue: 400,
-        duration: 400,
-        easing: Easing.in(Easing.exp),
-        useNativeDriver: true,
-      }).start(() => setIsMounted(false));
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY, {
+          toValue: 400,
+          duration: 300,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]).start(() => setIsMounted(false));
     }
   }, [visible, translateY, overlayOpacity]);
 
@@ -92,6 +125,7 @@ const AudioPlayerModal: React.FC<Props> = ({
       animationType="none"
       transparent
       onRequestClose={onClose}
+      style={{ borderWidth: 0 }}
     >
       <View style={styles.modalRoot}>
         <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
@@ -103,59 +137,72 @@ const AudioPlayerModal: React.FC<Props> = ({
         </Animated.View>
 
         <Animated.View
-          style={[styles.container, { transform: [{ translateY }] }]}
+          {...panResponder.panHandlers}
+          style={{ transform: [{ translateY }] }}
         >
-          <TouchableOpacity style={styles.header} onPress={onClose}>
-            <ChevronDown width={24} height={24} />
-            <Text style={styles.headerText}>{track.title}</Text>
-            <View style={styles.headerSpacer} />
-          </TouchableOpacity>
-
-          <Image source={track.thumbnail} style={styles.image} />
-
-          <Text style={styles.title}>{track.title}</Text>
-          <Text style={styles.author}>{track.author}</Text>
-
-          <View style={styles.trackContainer}>
-            <View
-              style={[
-                styles.trackProgress,
-                {
-                  width: `${(parseTime(playTime) / parseTime(duration)) * 100}%`,
-                },
-              ]}
-            />
-          </View>
-
-          <View style={styles.progressWrapper}>
-            <Text style={styles.timestamp}>{playTime}</Text>
-            <Text style={styles.timestamp}>{duration}</Text>
-          </View>
-
-          <View style={styles.controls}>
-            <TouchableOpacity onPress={onToggleMute}>
-              {isMuted ? (
-                <VolumeOff width={24} height={24} />
-              ) : (
-                <Volume2 width={24} height={24} />
-              )}
+          <View style={styles.container}>
+            <TouchableOpacity style={styles.header} onPress={onClose}>
+              <ChevronDown width={24} height={24} />
+              <Text style={styles.headerText}>{track.title}</Text>
+              <View style={styles.headerSpacer} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={onPlayPause}>
-              {isPlaying ? (
-                <View style={styles.playButton}>
-                  <Pause color="white" size={32} />
-                </View>
-              ) : (
-                <View style={styles.playButton}>
-                  <Play height={32} width={32} color="white" />
-                </View>
-              )}
-            </TouchableOpacity>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 30 }}
+            >
+              <View style={styles.imageWrapper}>
+                <Image source={track.thumbnail} style={styles.image} />
+              </View>
 
-            <TouchableOpacity onPress={onReset}>
-              <RotateCcw width={24} height={24} />
-            </TouchableOpacity>
+              <Text style={styles.title} allowFontScaling={false}>
+                {track.title}
+              </Text>
+
+              <Text style={styles.author}>{track.author}</Text>
+
+              <View style={styles.trackContainer}>
+                <View
+                  style={[
+                    styles.trackProgress,
+                    {
+                      width: `${(parseTime(playTime) / parseTime(duration)) * 100}%`,
+                    },
+                  ]}
+                />
+              </View>
+
+              <View style={styles.progressWrapper}>
+                <Text style={styles.timestamp}>{playTime}</Text>
+                <Text style={styles.timestamp}>{duration}</Text>
+              </View>
+
+              <View style={styles.controls}>
+                <TouchableOpacity onPress={onToggleMute}>
+                  {isMuted ? (
+                    <VolumeOff width={24} height={24} />
+                  ) : (
+                    <Volume2 width={24} height={24} />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={onPlayPause}>
+                  {isPlaying ? (
+                    <View style={styles.playButton}>
+                      <Pause color="white" size={32} />
+                    </View>
+                  ) : (
+                    <View style={styles.playButton}>
+                      <Play height={32} width={32} color="white" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={onReset}>
+                  <RotateCcw width={24} height={24} />
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </Animated.View>
       </View>

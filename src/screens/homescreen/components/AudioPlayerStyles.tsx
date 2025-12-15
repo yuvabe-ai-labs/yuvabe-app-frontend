@@ -1,17 +1,25 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
+const { height } = Dimensions.get('window');
 
 export default StyleSheet.create({
   container: {
-    height: '70%',
+    maxHeight: '1000%',
+    flexShrink: 1,
     marginTop: 'auto',
     backgroundColor: '#FFFFFF',
+
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+
     borderWidth: 1,
     borderBottomWidth: 0,
     borderColor: '#592AC7',
+
     paddingHorizontal: 36,
     paddingTop: 40,
+
+    overflow: 'hidden',
+    marginBottom: -1,
   },
 
   header: {
@@ -26,7 +34,7 @@ export default StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
   arrowWrapper: {
@@ -63,10 +71,24 @@ export default StyleSheet.create({
     width: 40,
   },
 
+  // image: {
+  //   width: '100%',
+  //   resizeMode: 'contain',
+  //   aspectRatio: 0.5,
+  //   marginTop: 30,
+  //   alignSelf: 'center',
+  // },
   image: {
     width: '100%',
-    height: 300,
+    maxWidth: 280,
+    aspectRatio: 1,
     resizeMode: 'contain',
+  },
+  imageWrapper: {
+    width: '100%',
+    height: height * 0.3,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 30,
   },
 
@@ -93,6 +115,7 @@ export default StyleSheet.create({
 
   timestamp: {
     fontSize: 12,
+    flexShrink: 1,
     color: '#BBB1FA',
   },
 
@@ -116,9 +139,9 @@ export default StyleSheet.create({
   },
 
   playButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 40,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#592AC7',
     justifyContent: 'center',
     alignItems: 'center',
