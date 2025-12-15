@@ -366,7 +366,6 @@ const EditProfileScreen = ({ navigation }: any) => {
                   onChangeText={field.onChange}
                   editable={false}
                   autoCapitalize="none"
-                  keyboardType="email-address"
                   style={[
                     styles.input,
                     styles.disabledInput,
@@ -389,7 +388,6 @@ const EditProfileScreen = ({ navigation }: any) => {
                   onChangeText={field.onChange}
                   editable={false}
                   autoCapitalize="none"
-                  keyboardType="email-address"
                   style={[
                     styles.input,
                     styles.disabledInput,
