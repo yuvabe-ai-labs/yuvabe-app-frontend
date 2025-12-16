@@ -1,6 +1,6 @@
 import { Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Image, Text, TouchableOpacity } from 'react-native';
+import { Image, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -8,210 +8,180 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
+import ImagePreviewModal from './ImagePreviewModal';
 import TileModal from './TileModal';
-import styles, { GAP, TILE_WIDTH } from './VisionBoardStyles';
+import styles from './VisionBoardStyles';
 
 interface TileProps {
   id: string;
   height: number;
   index: number;
-  editMode: boolean;
-  onDelete: (id: string) => void;
-  onDragEnd: (fromIndex: number, toIndex: number) => void;
-  tiles: any[];
-  setScrollingEnabled?: (enabled: boolean) => void;
+  isUnlocked: boolean;
+  tiles: { id: string; imageUrl?: string | null }[];
   imageUrl?: string | null;
-  onUpdate: (
-    id: string,
-    data: { imageUrl?: string | null; label?: string },
-  ) => void;
-  onLayoutTile?: (
-    id: string,
-    layout: { x: number; y: number; width: number; height: number },
-  ) => void;
-  tileLayouts?: React.RefObject<{
-    [id: string]: { x: number; y: number; width: number; height: number };
-  }>;
+  onSwap: (fromIndex: number, toIndex: number) => void;
+  onDelete: (id: string) => void;
+  onUpdate: (id: string, data: { imageUrl?: string | null }) => void;
+  tileLayouts?: React.RefObject<Record<string, any>>;
+  onLayoutTile?: (id: string, layout: any) => void;
+  setScrollingEnabled?: (enabled: boolean) => void;
 }
-
-const COLUMN_COUNT = 2;
 
 const Tile: React.FC<TileProps> = ({
   id,
   height,
   index,
-  editMode,
-  onDelete,
-  onDragEnd,
+  isUnlocked,
   tiles,
-  setScrollingEnabled,
   imageUrl,
+  onSwap,
+  onDelete,
   onUpdate,
-  onLayoutTile,
   tileLayouts,
+  onLayoutTile,
+  setScrollingEnabled,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [previewVisible, setPreviewVisible] = useState(false);
 
-  const swapImages = (fromIndex: number, toIndex: number) => {
-    const fromTile = tiles[fromIndex];
-    const toTile = tiles[toIndex];
-    const fromImage = fromTile.imageUrl;
-    const toImage = toTile.imageUrl;
+  const isDragging = useSharedValue(false);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
 
-    onUpdate(fromTile.id, { imageUrl: toImage });
-    onUpdate(toTile.id, { imageUrl: fromImage });
+  const handleSwap = (dx: number, dy: number) => {
+    const layouts = tileLayouts?.current;
+    if (!layouts || !layouts[id]) return;
+
+    const self = layouts[id];
+
+    const draggedCenterX = self.x + dx + self.width / 2;
+    const draggedCenterY = self.y + dy + self.height / 2;
+
+    let closestIndex = index;
+    let minDistance = Infinity;
+
+    tiles.forEach((t, i) => {
+      if (i === index) return;
+      const l = layouts[t.id];
+      if (!l) return;
+
+      const cx = l.x + l.width / 2;
+      const cy = l.y + l.height / 2;
+
+      const dist = Math.hypot(draggedCenterX - cx, draggedCenterY - cy);
+
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestIndex = i;
+      }
+    });
+
+    if (closestIndex !== index) {
+      onSwap(index, closestIndex);
+    }
   };
 
-  const imageX = useSharedValue(0);
-  const imageY = useSharedValue(0);
-  const zIndex = useSharedValue(0);
-  const scale = useSharedValue(1);
+  const tapGesture = Gesture.Tap().onEnd(() => {
+    console.log('inside pan ended');
+    if (!isUnlocked && imageUrl) {
+      scheduleOnRN(setPreviewVisible, true);
+    } else {
+      scheduleOnRN(setModalVisible, true);
+    }
+  });
 
-  // image swap
-  const imagePanGesture = Gesture.Pan()
+  const panGesture = Gesture.Pan()
+    .enabled(isUnlocked)
+    .activateAfterLongPress(300)
     .onBegin(() => {
-      zIndex.value = 100;
-      scale.value = 1.05;
+      isDragging.value = true;
+      translateX.value = withSpring(translateX.value, { damping: 12 });
+      translateY.value = withSpring(translateY.value, { damping: 12 });
       setScrollingEnabled && scheduleOnRN(setScrollingEnabled, false);
     })
-    .onUpdate(event => {
-      imageX.value = event.translationX;
-      imageY.value = event.translationY;
+    .onUpdate(e => {
+      translateX.value = e.translationX;
+      translateY.value = e.translationY;
     })
     .onEnd(() => {
-      zIndex.value = 0;
-      scale.value = 1;
-      const row = Math.round(imageY.value / (height + GAP));
-      const col = Math.round(imageX.value / (TILE_WIDTH + GAP));
-      let targetIndex = index + row * COLUMN_COUNT + col;
+      const dx = translateX.value;
+      const dy = translateY.value;
 
-      if (targetIndex < 0) targetIndex = 0;
-      if (targetIndex >= tiles.length) targetIndex = tiles.length - 1;
+      scheduleOnRN(handleSwap, dx, dy);
 
-      if (targetIndex !== index) {
-        scheduleOnRN(swapImages, index, targetIndex);
-      }
+      translateX.value = withSpring(0);
+      translateY.value = withSpring(0);
 
-      imageX.value = withSpring(0);
-      imageY.value = withSpring(0);
+      isDragging.value = false;
+      setScrollingEnabled && scheduleOnRN(setScrollingEnabled, true);
+    })
+
+    .onFinalize(() => {
+      isDragging.value = false;
       setScrollingEnabled && scheduleOnRN(setScrollingEnabled, true);
     });
-  const imageAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: imageX.value }, { translateY: imageY.value }],
-    zIndex: zIndex.value,
-  }));
 
-  // tile swap
-  const tileX = useSharedValue(0);
-  const tileY = useSharedValue(0);
+  const gesture = isUnlocked ? panGesture : tapGesture;
 
-  const tilePanGesture = Gesture.Pan()
-    .onBegin(() => {
-      zIndex.value = 100;
-      scale.value = 1.05;
-      setScrollingEnabled && scheduleOnRN(setScrollingEnabled, false);
-    })
-    .onUpdate(event => {
-      tileX.value = event.translationX;
-      tileY.value = event.translationY;
-    })
-    .onEnd(() => {
-      zIndex.value = 0;
-      scale.value = 1;
-      if (!onLayoutTile || tiles.length < 2) {
-        tileX.value = withSpring(0);
-        tileY.value = withSpring(0);
-        setScrollingEnabled && scheduleOnRN(setScrollingEnabled, true);
-        return;
-      }
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: withSpring(isDragging.value ? 1.06 : 1) },
+    ],
+    zIndex: isDragging.value ? 1000 : 1,
 
-      let closestIndex = index;
-      let minDistance = Infinity;
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: isDragging.value ? 10 : 2 },
+    shadowOpacity: isDragging.value ? 0.25 : 0.1,
+    shadowRadius: isDragging.value ? 20 : 6,
 
-      const dragCenterX = tileX.value + TILE_WIDTH / 2;
-      const dragCenterY = tileY.value + height / 2;
-
-      tiles.forEach((t, i) => {
-        if (t.id === id) return;
-
-        const layout = tileLayouts?.current[t.id];
-        if (!layout) return;
-
-        const centerX = layout.x + layout.width / 2;
-        const centerY = layout.y + layout.height / 2;
-
-        const distance = Math.hypot(
-          dragCenterX - centerX,
-          dragCenterY - centerY,
-        );
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestIndex = i;
-        }
-      });
-
-      if (closestIndex !== index) {
-        scheduleOnRN(onDragEnd, index, closestIndex);
-      }
-
-      tileX.value = withSpring(0);
-      tileY.value = withSpring(0);
-      setScrollingEnabled && scheduleOnRN(setScrollingEnabled, true);
-    });
-  const tileAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: tileX.value }, { translateY: tileY.value }],
-    zIndex: zIndex.value,
+    elevation: isDragging.value ? 20 : 2,
   }));
 
   return (
     <>
-      <GestureDetector gesture={editMode ? tilePanGesture : imagePanGesture}>
+      <GestureDetector gesture={gesture}>
         <Animated.View
-          style={[
-            styles.tile,
-            { height },
-            editMode ? tileAnimatedStyle : imageAnimatedStyle,
-          ]}
-          onLayout={event => {
-            const { x, y, width, height } = event.nativeEvent.layout;
-            onLayoutTile && onLayoutTile(id, { x, y, width, height });
+          onLayout={e => {
+            e.target.measureInWindow((x, y, width, height) => {
+              onLayoutTile?.(id, { x, y, width, height });
+              console.log('tile layout', id, { x, y, width, height });
+            });
           }}
+          style={[styles.tile, { height }, animatedStyle]}
         >
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100%',
-            }}
-            onPress={() => setModalVisible(true)}
-            disabled={editMode}
-          >
-            {imageUrl ? (
-              <Image
-                source={{ uri: imageUrl }}
-                style={{ width: '100%', height: '100%' }}
-                resizeMode="cover"
-              />
-            ) : (
-              <Text style={{ color: '#444' }}></Text>
-            )}
-          </TouchableOpacity>
+          {imageUrl && (
+            <Image
+              source={{ uri: imageUrl }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
+          )}
 
-          {editMode && (
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => onDelete(id)}
-            >
-              <Trash2 size={18} color="#fff" strokeWidth={2} />
-            </TouchableOpacity>
+          {isUnlocked && (
+            <View style={styles.deleteButton}>
+              <Trash2
+                size={18}
+                color="#fff"
+                strokeWidth={2}
+                onPress={() => onDelete(id)}
+              />
+            </View>
           )}
         </Animated.View>
       </GestureDetector>
+
+      <ImagePreviewModal
+        visible={previewVisible}
+        imageUrl={imageUrl}
+        onClose={() => setPreviewVisible(false)}
+      />
+
       <TileModal
         visible={modalVisible}
-        imageUrl={imageUrl}
         tileId={id}
+        imageUrl={imageUrl}
         onClose={() => setModalVisible(false)}
         onSave={url => onUpdate(id, { imageUrl: url })}
       />

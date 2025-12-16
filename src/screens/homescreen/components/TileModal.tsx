@@ -90,34 +90,28 @@ const TileModal: React.FC<TileModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
-      {/* Overlay - dismiss modal on tap */}
       <TouchableOpacity
         activeOpacity={1}
         onPress={onClose}
         style={styles.modalOverlay}
       >
-        {/* Prevent inside touches from closing modal */}
         <TouchableOpacity
           activeOpacity={1}
           style={styles.modalCard}
           onPress={e => e.stopPropagation()}
         >
-          {/* Title */}
           <Text style={styles.modalTitle}>Edit Tile</Text>
 
-          {/* Upload Button */}
           <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
             <Text style={styles.uploadButtonText}>Upload Image</Text>
           </TouchableOpacity>
 
-          {/* Divider */}
           <View style={styles.dividerRow}>
             <View style={styles.line} />
             <Text style={styles.orText}>or</Text>
             <View style={styles.line} />
           </View>
 
-          {/* Input */}
           <TextInput
             placeholder="Enter a keyword"
             placeholderTextColor="#A5A5A5"
@@ -126,7 +120,6 @@ const TileModal: React.FC<TileModalProps> = ({
             style={styles.input}
           />
 
-          {/* Search Button */}
           <TouchableOpacity
             style={styles.searchButton}
             onPress={handleSearch}
@@ -139,7 +132,6 @@ const TileModal: React.FC<TileModalProps> = ({
             )}
           </TouchableOpacity>
 
-          {/* Remove Image */}
           {tempImageUrl ? (
             <TouchableOpacity
               style={styles.removeImageButton}
@@ -149,7 +141,6 @@ const TileModal: React.FC<TileModalProps> = ({
             </TouchableOpacity>
           ) : null}
 
-          {/* Footer Buttons */}
           <View style={styles.footerRow}>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
               <Text style={styles.cancelText}>Cancel</Text>
