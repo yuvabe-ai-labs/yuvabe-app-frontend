@@ -1,8 +1,8 @@
 'use client';
 
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { ChevronLeft } from 'lucide-react-native';
 import { Linking, TouchableWithoutFeedback } from 'react-native';
+import MonthPicker from 'react-native-month-year-picker';
 
 import { useEffect, useState } from 'react';
 import {
@@ -60,6 +60,7 @@ export default function PayslipScreen({ navigation }: any) {
 
         if (isSuccess) {
           showToast('Success', 'Gmail connected successfully!', 'success');
+
           setGmailConnected(true);
         } else {
           if (url.includes('email_mismatch')) {
@@ -147,6 +148,7 @@ export default function PayslipScreen({ navigation }: any) {
     try {
       setLoading(true);
       const res = await getGmailConnectUrl(user.id);
+      console.log(gmailConnected);
       const url = res.data.auth_url;
 
       if (await InAppBrowser.isAvailable()) {
@@ -240,30 +242,31 @@ export default function PayslipScreen({ navigation }: any) {
     })}`;
   };
 
-  const getFromDateForMin = () => {
-    if (!fromMonth) return joinDate;
+  // const getFromDateForMin = () => {
+  //   if (!fromMonth) return joinDate;
 
-    const [mm, yyyy] = fromMonth.split('/').map(Number);
-    return new Date(yyyy, mm - 1, 1);
-  };
+  //   const [mm, yyyy] = fromMonth.split('/').map(Number);
+  //   return new Date(yyyy, mm - 1, 1);
+  // };
 
-  const handleFromDate = (event: any, selectedDate?: Date) => {
+  const handleFromDate = (event: any, date?: Date) => {
     setShowFromPicker(false);
-    if (selectedDate) {
-      const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const yyyy = selectedDate.getFullYear();
+    if (date) {
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = date.getFullYear();
       setFromMonth(`${mm}/${yyyy}`);
     }
   };
 
-  const handleToDate = (event: any, selectedDate?: Date) => {
-    setShowToPicker(false);
-    if (selectedDate) {
-      const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const yyyy = selectedDate.getFullYear();
-      setToMonth(`${mm}/${yyyy}`);
+  const handleToDate = (event: any, date?: Date) => {
+    setShowToPicker(false); // ✅ correct picker
+    if (date) {
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      setToMonth(`${mm}/${yyyy}`); // ✅ update TO field
     }
   };
+
   const isRequestDisabled = () => {
     if (loading) return true;
 
@@ -557,24 +560,20 @@ export default function PayslipScreen({ navigation }: any) {
 
       {/* DATE PICKERS + GMAIL MODAL REMAIN EXACTLY SAME */}
       {showFromPicker && (
-        <DateTimePicker
+        <MonthPicker
+          onChange={handleFromDate}
           value={new Date()}
-          mode="date"
-          display="calendar"
           minimumDate={joinDate}
           maximumDate={new Date()}
-          onChange={handleFromDate}
         />
       )}
 
       {showToPicker && (
-        <DateTimePicker
-          value={new Date()}
-          mode="date"
-          display="calendar"
-          minimumDate={getFromDateForMin()}
-          maximumDate={new Date()}
+        <MonthPicker
           onChange={handleToDate}
+          value={new Date()}
+          minimumDate={joinDate}
+          maximumDate={new Date()}
         />
       )}
 

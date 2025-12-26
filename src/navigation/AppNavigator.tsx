@@ -19,6 +19,7 @@ import EditProfileScreen from '../screens/profilescreen/EditProfileScreen';
 import InformationScreen from '../screens/profilescreen/InformationScreen';
 import ProfileScreen from '../screens/profilescreen/ProfileScreen';
 import RequestLeaveScreen from '../screens/requestLeave/RequestLeave';
+import StepScreen from '../screens/wellbeing/steps/StepsScreen';
 import WaterTrackerScreen from '../screens/wellbeing/water/WaterTrackingScreen';
 
 const AppStack = createNativeStackNavigator();
@@ -125,6 +126,8 @@ const AppNavigator = () => {
         <AppStack.Screen
           name="LunchPreference"
           component={LunchPreferenceScreen}
+          name="Steps"
+          component={StepScreen}
           options={{ headerShown: false }}
         />
       </AppStack.Navigator>
