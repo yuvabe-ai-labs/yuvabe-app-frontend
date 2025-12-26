@@ -1,4 +1,4 @@
-import { User } from 'lucide-react-native';
+import { CookingPot, User } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
   ActivityIndicator,
@@ -100,6 +100,16 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           onPress={() => {
             closeDrawer();
             navigation.navigate('Journaling');
+          }}
+        />
+        <DrawerItem
+          label="Lunch Preference"
+          icon={
+            <CookingPot height={20} width={25} color="#444" strokeWidth={1.8} />
+          }
+          onPress={() => {
+            closeDrawer();
+            navigation.navigate('LunchPreference');
           }}
         />
 

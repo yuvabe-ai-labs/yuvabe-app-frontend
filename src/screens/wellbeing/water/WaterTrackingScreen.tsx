@@ -15,6 +15,7 @@ import {
 import { BarChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { storage } from '../../../store/storage';
+import { StatTilesRow } from './components/StatTilesRow';
 import { useWeeklyWaterChart } from './useWeeklyWaterChart';
 
 import { fetchWaterLogs } from '../../../api/wellbeing/wellBeingApi';
@@ -170,23 +171,28 @@ const WaterTrackerScreen = ({ navigation }: any) => {
           </View>
         </View>
 
-        <View style={styles.statsContainer}>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Today's Intake</Text>
-            <Text style={styles.statValue}>{todayTotal}</Text>
-            <Text style={styles.statUnit}>ml</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Remaining</Text>
-            <Text style={styles.statValue}>{remaining}</Text>
-            <Text style={styles.statUnit}>ml</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Progress</Text>
-            <Text style={styles.statValue}>{progressPercent}%</Text>
-            <Text style={styles.statUnit}>done</Text>
-          </View>
-        </View>
+        <StatTilesRow
+          tiles={[
+            {
+              label: "Today's Intake",
+              value: todayTotal,
+              unit: 'ml',
+              colors: ['#592AC7', '#CCB6FF'],
+            },
+            {
+              label: 'Remaining',
+              value: remaining,
+              unit: 'ml',
+              colors: ['#FFEDBA', '#FFCA2D'],
+            },
+            {
+              label: 'Progress',
+              value: progressPercent + '%',
+              unit: 'completed',
+              colors: ['#592AC7', '#CCB6FF'],
+            },
+          ]}
+        />
 
         <Animated.View
           style={[styles.glassWrapper, { transform: [{ scale: scaleAnim }] }]}

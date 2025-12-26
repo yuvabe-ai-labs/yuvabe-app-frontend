@@ -26,6 +26,24 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  statGradientBorder: {
+    flex: 1,
+    borderRadius: 14,
+    padding: 1.5,
+  },
+
+  statInnerBox: {
+    flex: 1,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    padding: 14,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -34,7 +52,6 @@ export const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: 'white',
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',
@@ -46,19 +63,19 @@ export const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#000000',
     fontWeight: '500',
-    marginBottom: 8,
+    marginBottom: 2,
   },
   statValue: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#0066cc',
+    color: '#1E1E1E',
   },
   statUnit: {
-    fontSize: 12,
-    color: '#94a3b8',
-    marginTop: 4,
+    fontSize: 13,
+    color: '#505050',
+    marginTop: 0,
   },
   glassWrapper: {
     flex: 1,
