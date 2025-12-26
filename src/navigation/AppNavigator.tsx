@@ -8,6 +8,7 @@ import JournalingScreen from '../screens/journaling/JournalingScreen';
 import LeaveDetailsScreen from '../screens/leave/LeaveDetailsScreen';
 import MyLeaveHistoryScreen from '../screens/leave/MyLeaveHistoryScreen';
 import TeamLeaveHistoryScreen from '../screens/leave/TeamLeaveHistoryScreen';
+import LunchPreferenceScreen from '../screens/lunchpreference/LunchPreference';
 import MentorApprovalScreen from '../screens/mentor/MentorApproveScreen';
 import MentorDetailLeaveScreen from '../screens/mentor/MentorDetailLeaveScreen';
 import MentorLeaveListScreen from '../screens/mentor/MentorLeaveListScreen';
@@ -123,6 +124,8 @@ const AppNavigator = () => {
           options={{ headerShown: false }}
         />
         <AppStack.Screen
+          name="LunchPreference"
+          component={LunchPreferenceScreen}
           name="Steps"
           component={StepScreen}
           options={{ headerShown: false }}

@@ -34,7 +34,7 @@ const EmotionCheckIn: React.FC<Props> = ({
   if (!visible) return null;
 
   return (
-    <TouchableWithoutFeedback onPress={onClose}>
+    <TouchableWithoutFeedback>
       <View style={styles.overlay}>
         <TouchableWithoutFeedback>
           <View style={styles.container}>

@@ -1,21 +1,27 @@
 import * as RNFS from '@dr.pogodin/react-native-fs';
-import { Pause, Play, Square } from 'lucide-react-native';
+import { Pause } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import Sound, { createSound } from 'react-native-nitro-sound';
 import { getItem, removeItem, setItem } from '../../../store/storage';
+import { Play } from '../../../utils/customIcons';
 import styles from '../HomeStyles';
+import AudioPlayerModal from './AudioPlayerModal';
 
 const tracks = [
   {
     id: 'wellness',
     file: 'audio/MindfullnessExcercise.mp3',
     title: 'Mindfull Meditation',
+    author: 'Dr. Adhitya Varma',
+    thumbnail: require('../../../assets/images/Mindfull_Meditation.png'),
   },
   {
     id: 'selfRealisation',
     file: 'audio/PQReps.mp3',
     title: 'PQ Reps',
+    author: 'Dr. Shankar',
+    thumbnail: require('../../../assets/images/PQ_Reps.png'),
   },
 ];
 
@@ -50,10 +56,26 @@ const CalmingAudio = () => {
     {},
   );
   const [paused, setPaused] = useState(false);
-
+  const [isMuted, setIsMuted] = useState(false);
   const [playTime, setPlayTime] = useState('00:00');
   const [duration, setDuration] = useState('00:00');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState(null);
 
+  const openModal = track => {
+    setSelectedTrack(track);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => setModalVisible(false);
+  const handleToggleMute = async () => {
+    if (isMuted) {
+      await Sound.setVolume(1);
+    } else {
+      await Sound.setVolume(0);
+    }
+    setIsMuted(prev => !prev);
+  };
   useEffect(() => {
     return () => {
       Sound.removePlayBackListener();
@@ -105,6 +127,9 @@ const CalmingAudio = () => {
 
     await Sound.startPlayer(localPath);
 
+    // Ensure correct volume when starting
+    await Sound.setVolume(isMuted ? 0 : 1);
+
     if (savedPos > 0) {
       await Sound.seekToPlayer(savedPos);
     }
@@ -116,14 +141,14 @@ const CalmingAudio = () => {
 
         setPlayTime(formatMMSS(pos));
         setDuration(formatMMSS(dur));
+
         setItem(
           `audioProgress_${track.id}`,
           JSON.stringify({ position: pos, duration: dur }),
         );
+
         setItem('lastPlayedTrack', track.id);
-      } catch (err) {
-        console.log('Timestamp error:', err);
-      }
+      } catch {}
     });
 
     Sound.addPlaybackEndListener(() => {
@@ -224,68 +249,70 @@ const CalmingAudio = () => {
   };
 
   return (
-    <View style={styles.audioContainer}>
-      <Text style={styles.audioTitle}>
-        Would you like to hear calming audio?
-      </Text>
+    <View style={styles.section}>
+      <Text style={styles.heading}>Would you like to hear calming audio?</Text>
 
       {tracks.map(track => {
         const isActive = currentTrack === track.id;
 
         return (
-          <View key={track.id} style={styles.audioItem}>
-            <Text style={styles.audioItemTitle}>{track.title}</Text>
+          <View key={track.id}>
+            {/* Row content */}
+            <View style={styles.row}>
+              <Image source={track.thumbnail} style={styles.thumbnail} />
 
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: 8,
-              }}
-            >
               <TouchableOpacity
-                onPress={() => handlePlayPause(track)}
-                style={{ marginRight: 16 }}
+                style={styles.middle}
+                onPress={() => openModal(track)}
               >
+                <Text style={styles.title}>{track.title}</Text>
+                <Text style={styles.author}>{track.author}</Text>
+
+                <Text style={styles.time}>
+                  {isActive
+                    ? `${playTime} / ${duration}`
+                    : (() => {
+                        const saved = getItem(`audioProgress_${track.id}`);
+                        if (!saved)
+                          return `00:00 / ${trackDurations[track.id] ?? '00:00'}`;
+
+                        const { position, duration } = JSON.parse(saved);
+                        return `${formatMMSS(position)} / ${
+                          duration
+                            ? formatMMSS(duration)
+                            : (trackDurations[track.id] ?? '00:00')
+                        }`;
+                      })()}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => handlePlayPause(track)}>
                 {isActive && isPlaying ? (
-                  <Pause size={24} color="black" strokeWidth={2} />
+                  <Pause size={26} strokeWidth={2} />
                 ) : (
-                  <Play size={24} color="black" strokeWidth={2} />
+                  <Play height={18} width={16} />
                 )}
               </TouchableOpacity>
-
-              <TouchableOpacity onPress={handleReset}>
-                <Square size={24} color="black" strokeWidth={2} />
-              </TouchableOpacity>
-
-              {isActive ? (
-                <Text
-                  style={{ marginLeft: 'auto', fontSize: 14, color: '#444' }}
-                >
-                  {playTime} / {duration}
-                </Text>
-              ) : (
-                <Text
-                  style={{ marginLeft: 'auto', fontSize: 14, color: '#444' }}
-                >
-                  {(() => {
-                    const saved = getItem(`audioProgress_${track.id}`);
-                    if (!saved)
-                      return `00:00 / ${trackDurations[track.id] ?? '00:00'}`;
-
-                    const { position, duration } = JSON.parse(saved);
-                    return `${formatMMSS(position)} / ${
-                      duration
-                        ? formatMMSS(duration)
-                        : (trackDurations[track.id] ?? '00:00')
-                    }`;
-                  })()}
-                </Text>
-              )}
             </View>
+
+            {track.id !== tracks[tracks.length - 1].id && (
+              <View style={styles.separator} />
+            )}
           </View>
         );
       })}
+      <AudioPlayerModal
+        visible={modalVisible}
+        track={selectedTrack}
+        onClose={closeModal}
+        isPlaying={isPlaying}
+        playTime={playTime}
+        duration={duration}
+        onPlayPause={() => handlePlayPause(selectedTrack)}
+        onReset={handleReset}
+        isMuted={isMuted}
+        onToggleMute={handleToggleMute}
+      />
     </View>
   );
 };

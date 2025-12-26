@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { Bot, ChevronLeft, User } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
@@ -17,6 +17,7 @@ import {
 import Markdown from 'react-native-markdown-display';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useModelSessionStore } from '../../store/useModelSessionStore';
+import { BotIcon, UserIcon } from '../../utils/customIcons';
 import ChatDownloadIndicator from './models/modelDownloadIndicator';
 
 import { Message, useChatStore } from '../../store/chatStore';
@@ -27,6 +28,7 @@ import { MODEL_3_PATH } from '../chatbot/models/modelPaths';
 import { loadOnnxModel } from '../chatbot/models/onnxLoader';
 import { retrieveContextForQuery } from '../chatbot/rag/ragPipeline';
 
+import { TEXT_STYLES } from '../../utils/theme';
 import { styles } from './ChatbotStyles';
 import DefaultSuggestions from './models/DefaultSuggestions';
 
@@ -110,22 +112,22 @@ const ChatScreen = () => {
   }, []);
 
   const markdownImageRenderer = (node: any) => {
-  const uri = node.attributes.src;
+    const uri = node.attributes.src;
 
-  return (
-    <Image
-      source={{ uri }}
-      style={{
-        width: MAX_WIDTH,
-        height: undefined,
-        aspectRatio: 1,
-        resizeMode: 'contain',
-        borderRadius: 12,
-        marginTop: 8,
-      }}
-    />
-  );
-};
+    return (
+      <Image
+        source={{ uri }}
+        style={{
+          width: MAX_WIDTH,
+          height: undefined,
+          aspectRatio: 1,
+          resizeMode: 'contain',
+          borderRadius: 12,
+          marginTop: 8,
+        }}
+      />
+    );
+  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -205,30 +207,38 @@ const ChatScreen = () => {
         style={{
           flexDirection: 'row',
           justifyContent: isUser ? 'flex-end' : 'flex-start',
-          marginVertical: 6,
+          marginVertical: 0,
           alignItems: 'flex-start',
         }}
       >
         {!isUser && (
-          <Bot
-            size={30}
-            color="#555"
+          <BotIcon
+            width={30}
+            height={30}
+            color="#592AC7"
             style={{
               marginRight: 8,
-              marginTop: 4,
+              marginTop: 8,
             }}
           />
         )}
 
         <View
-          style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}
+          style={[
+            styles.bubble,
+            isUser ? styles.userBubble : styles.botBubble,
+            item.streaming && styles.thinkingBubble,
+          ]}
         >
-          {item.from === 'bot' && !item.streaming ? (
+          {item.streaming ? (
+            <Text style={styles.thinkingText}>{item.text || 'Thinking...'}</Text>
+          ) : item.from === 'bot' ? (
             <Markdown
               style={{
                 body: {
-                  color: 'black',
+                  color: '#592AC7',
                   fontSize: 14,
+                  fontWeight: '600',
                   fontFamily: 'gilroy-regular',
                 },
               }}
@@ -239,19 +249,18 @@ const ChatScreen = () => {
               {item.text}
             </Markdown>
           ) : (
-            <Text style={isUser ? styles.text : styles.botText}>
-              {item.text}
-            </Text>
+            <Text style={styles.text}>{item.text}</Text>
           )}
         </View>
 
         {isUser && (
-          <User
-            size={30}
-            color="#555"
+          <UserIcon
+            width={30}
+            height={30}
+            color="#592AC7"
             style={{
               marginLeft: 8,
-              marginTop: 4,
+              marginTop: 10,
             }}
           />
         )}
@@ -270,29 +279,25 @@ const ChatScreen = () => {
           backgroundColor: '#fff',
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <ChevronLeft size={28} color="#000" />
-          </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ width: 28 }}
+        >
+          <ChevronLeft size={28} color="#000" />
+        </TouchableOpacity>
 
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: '600',
-              marginLeft: 10,
-            }}
-          >
-            Yuvabot
-          </Text>
-        </View>
-        <Image
-          source={require('../../assets/logo/yuvabe-logo.png')}
+        <Text
           style={{
-            width: 40,
-            height: 40,
-            resizeMode: 'contain',
+            ...TEXT_STYLES.title,
+            flex: 1,
+            fontSize: 18,
+            fontWeight: '600',
+            textAlign: 'center',
           }}
-        />
+        >
+          YuvaBot
+        </Text>
+        <View style={{ width: 28 }} />
       </View>
       <ChatDownloadIndicator />
       <KeyboardAvoidingView

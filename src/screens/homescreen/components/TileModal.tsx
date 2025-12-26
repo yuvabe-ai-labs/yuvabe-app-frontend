@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Button,
   Keyboard,
   Modal,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import Config from 'react-native-config';
 import * as ImagePicker from 'react-native-image-picker';
+import { GradientButton } from '../../../components/GradientButton';
 import styles from './VisionBoardStyles';
 
 interface TileModalProps {
@@ -91,64 +90,72 @@ const TileModal: React.FC<TileModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
-      <TouchableWithoutFeedback
-        onPress={() => {
-          Keyboard.dismiss();
-          onClose();
-        }}
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={onClose}
+        style={styles.modalOverlay}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Edit Tile</Text>
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.modalCard}
+          onPress={e => e.stopPropagation()}
+        >
+          <Text style={styles.modalTitle}>Edit Tile</Text>
 
-            <View style={styles.modalButton}>
-              <Button title="Upload Image" onPress={pickImage} />
-            </View>
+          <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
+            <Text style={styles.uploadButtonText}>Upload Image</Text>
+          </TouchableOpacity>
 
-            <TextInput
-              placeholder="Enter a keyword to get an image"
-              placeholderTextColor="#888"
-              value={tempKeyword}
-              onChangeText={setTempKeyword}
-              style={styles.modalTextInput}
-            />
-            <View style={styles.modalButton}>
-              {searching ? (
-                <ActivityIndicator size="small" color="#000" />
-              ) : (
-                <Button title="Search" onPress={handleSearch} />
-              )}
-            </View>
-
-            {tempImageUrl ? (
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={handleRemove}
-              >
-                <Text style={styles.removeImageText}>Remove Image</Text>
-              </TouchableOpacity>
-            ) : null}
-
-            <View style={styles.modalFooter}>
-              <Button
-                title="Cancel"
-                color="red"
-                onPress={() => {
-                  setTempImageUrl(imageUrl || '');
-                  onClose();
-                }}
-              />
-              <Button
-                title="Save"
-                onPress={() => {
-                  onSave(tempImageUrl);
-                  onClose();
-                }}
-              />
-            </View>
+          <View style={styles.dividerRow}>
+            <View style={styles.line} />
+            <Text style={styles.orText}>or</Text>
+            <View style={styles.line} />
           </View>
-        </View>
-      </TouchableWithoutFeedback>
+
+          <TextInput
+            placeholder="Enter a keyword"
+            placeholderTextColor="#A5A5A5"
+            value={tempKeyword}
+            onChangeText={setTempKeyword}
+            style={styles.input}
+          />
+
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={handleSearch}
+            disabled={searching}
+          >
+            {searching ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.searchButtonText}>Search</Text>
+            )}
+          </TouchableOpacity>
+
+          {tempImageUrl ? (
+            <TouchableOpacity
+              style={styles.removeImageButton}
+              onPress={handleRemove}
+            >
+              <Text style={styles.removeImageText}>Remove Image</Text>
+            </TouchableOpacity>
+          ) : null}
+
+          <View style={styles.footerRow}>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <GradientButton
+              title="Save"
+              onPress={() => {
+                onSave(tempImageUrl);
+                onClose();
+              }}
+            />
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { AppState, Linking } from 'react-native';
+import { AppState, Linking, Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 
 import { getAppVersion } from '../api/version-api/versionApi';
@@ -13,18 +13,22 @@ export const VersionGate = ({ children }: any) => {
   const checkVersion = async () => {
     try {
       const local = DeviceInfo.getVersion().trim();
-      const { version, apk_download_link } = await getAppVersion();
+      const { version, apk_download_link, ios_download_link } = await getAppVersion();
 
+      const updateUrl = Platform.OS === 'android'
+        ? apk_download_link
+        : ios_download_link;
+      
       setVersionInfo({
         localVersion: local,
         serverVersion: version.trim(),
-        apkUrl: apk_download_link,
+        apkUrl: updateUrl,
       });
 
       if (local !== version.trim()) {
         setForceBlock(true);
 
-        const url = apk_download_link;
+        const url = updateUrl;
         showAlert({
           title: 'Update Required',
           onCancel: () => {},

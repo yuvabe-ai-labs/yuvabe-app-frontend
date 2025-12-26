@@ -1,5 +1,5 @@
 import { useIsFocused } from '@react-navigation/native';
-import { ChevronLeft, Plus } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { getAllJournals } from '../../api/journal-api/journalApi';
+import { TEXT_STYLES } from '../../utils/theme';
 
 const JournalingScreen = ({ navigation }: any) => {
   const [entries, setEntries] = useState<any[]>([]);
@@ -47,12 +48,23 @@ const JournalingScreen = ({ navigation }: any) => {
       <View className="flex-row items-center mb-6">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={{ paddingRight: 8 }}
+          className="w-7 justify-center"
         >
           <ChevronLeft size={28} color="#000" />
         </TouchableOpacity>
 
-        <Text className="text-xl font-bold text-[#111827]">Journal</Text>
+        <Text
+          style={{
+            ...TEXT_STYLES.title,
+            fontSize: 18,
+            fontWeight: '600',
+          }}
+          className="flex-1 text-center text-[#111827]"
+        >
+          Journal
+        </Text>
+
+        <View className="w-7" />
       </View>
 
       {loading ? (
@@ -69,17 +81,26 @@ const JournalingScreen = ({ navigation }: any) => {
           }
           renderItem={({ item }) => (
             <TouchableOpacity
-              className="p-4 mb-3 border border-[#D1D5DB] rounded-xl"
+              className="p-4 mb-3 border border-[#592AC7] rounded-xl flex-row items-center justify-between"
               onPress={() =>
                 navigation.navigate('CreateJournal', { id: item.id })
               }
             >
-              <Text className="text-xl font-medium text-[#111827]">
-                {item.title}
-              </Text>
-              <Text className="text-[#6B7280] mt-1">
-                {new Date(item.journal_date).toDateString()}
-              </Text>
+              {/* Left side: title + date */}
+              <View className="flex-1">
+                <Text className="text-xl font-medium text-[#111827]">
+                  {item.title}
+                </Text>
+                <Text className="text-[#6B7280] mt-1">
+                  {new Date(item.journal_date).toDateString()}
+                </Text>
+              </View>
+
+              {/* Right chevron */}
+              <ChevronRight
+                size={24}
+                color="black"
+              />
             </TouchableOpacity>
           )}
         />

@@ -20,6 +20,7 @@ export default StyleSheet.create({
   title: {
     ...TEXT_STYLES.title,
     fontFamily: FONTS.clashDisplay.bold,
+    color: '#4B5563',
     textAlign: 'center',
     marginBottom: SIZES.base,
   },
@@ -51,7 +52,7 @@ export default StyleSheet.create({
   },
 
   buttonText: {
-    ...TEXT_STYLES.large,
+    ...TEXT_STYLES.regular,
     color: COLORS.white,
     fontFamily: FONTS.clashDisplay.bold, // 👈 use Gilroy bold
   },

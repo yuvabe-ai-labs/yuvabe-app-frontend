@@ -4,7 +4,7 @@ import { COLORS, SIZES, TEXT_STYLES } from '../../utils/theme';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: SIZES.padding,
+    paddingHorizontal: SIZES.padding + 4,
     backgroundColor: COLORS.background,
   },
 
@@ -12,6 +12,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SIZES.base * 2,
+    marginTop: SIZES.base * 2,
+    marginLeft: SIZES.base,
+    marginRight: SIZES.base,
   },
 
   profileImage: {
@@ -23,26 +26,33 @@ const styles = StyleSheet.create({
 
   welcomeText: {
     ...TEXT_STYLES.large,
-    marginLeft: 8,
-    marginBottom: 10,
+    marginTop: 15,
   },
 
   thoughtContainer: {
-    backgroundColor: COLORS.lightGray,
-    padding: SIZES.base * 2,
+    backgroundColor: '#FFFBF0',
+    padding: 15,
     borderRadius: SIZES.radius,
-    marginBottom: SIZES.base * 2.5,
+    borderColor: '#FFCA2D',
+    borderWidth: 1,
+    marginTop: 15,
+    marginBottom: SIZES.base * 2,
+    alignItems: 'center',
   },
 
   thoughtTitle: {
     ...TEXT_STYLES.title,
-    fontSize: SIZES.lg,
-    marginBottom: 4,
+    fontSize: 18,
+    marginBottom: 10,
   },
 
   thoughtText: {
     ...TEXT_STYLES.regular,
-    fontStyle: 'italic',
+    fontSize: 16,
+    fontWeight:'600',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 10,
   },
 
   notificationCard: {
@@ -92,50 +102,63 @@ const styles = StyleSheet.create({
   moodHistoryTitle: {
     ...TEXT_STYLES.title,
   },
-  audioContainer: {
-    backgroundColor: COLORS.lightGray,
-    padding: SIZES.base * 2,
-    borderRadius: SIZES.radius,
-    marginBottom: SIZES.base * 2.5,
+  section: {
+    paddingRight: 16,
   },
 
-  audioTitle: {
-    ...TEXT_STYLES.title,
-    fontSize: SIZES.lg,
-    marginBottom: 8,
-  },
-
-  audioItem: {
-    backgroundColor: COLORS.background,
-    padding: SIZES.base * 1.5,
-    borderRadius: SIZES.radius,
-    marginTop: SIZES.base,
-    shadowColor: COLORS.textPrimary,
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-
-  audioItemTitle: {
-    ...TEXT_STYLES.large,
-    fontSize: SIZES.md,
+  heading: {
+    ...TEXT_STYLES.regular,
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 10,
+    marginTop: 20,
   },
 
-  audioControls: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 6,
+    paddingVertical: 16,
   },
 
-  audioButton: {
+  rowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e6e6e6',
+  },
+
+  thumbnail: {
+    width: 63,
+    height: 63,
+    borderRadius: 12,
     marginRight: 20,
   },
 
-  audioButtonText: {
-    ...TEXT_STYLES.regular,
-    fontSize: 16,
+  middle: {
+    flex: 1,
   },
+
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2F2F2F',
+  },
+
+  author: {
+    fontSize: 14,
+    color: '#858585',
+  },
+
+  time: {
+    fontSize: 12,
+    color: '#6C6C6C',
+    marginTop: 5,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#e6e6e6',
+    marginLeft: 0,
+    marginRight: 0,
+  },
+
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',

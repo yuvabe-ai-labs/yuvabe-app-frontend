@@ -25,7 +25,8 @@ export default function DefaultSuggestions({ onSelect }: Props) {
       <Text
         style={{
           fontSize: 18,
-          color: '#222',
+          color: '#1E1E1E',
+          fontWeight: '500',
           textAlign: 'center',
           marginBottom: 24,
         }}
@@ -46,7 +47,7 @@ export default function DefaultSuggestions({ onSelect }: Props) {
           <TouchableOpacity
             key={i}
             style={{
-              backgroundColor: '#e5e5e5',
+              backgroundColor: '#FBF7FF',
               paddingVertical: 10,
               paddingHorizontal: 14,
               borderRadius: 20,
@@ -54,7 +55,7 @@ export default function DefaultSuggestions({ onSelect }: Props) {
             }}
             onPress={() => onSelect(s)}
           >
-            <Text style={{ color: '#333', fontSize: 14 }}>{s}</Text>
+            <Text style={{ color: '#592AC7', fontSize: 14 }}>{s}</Text>
           </TouchableOpacity>
         ))}
       </View>

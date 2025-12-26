@@ -26,9 +26,9 @@ export const SIZES = {
   xs: 10,
   sm: 12,
   md: 14,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
+  lg: 18,
+  xl: 22,
+  xxl: 26,
   xxxl: 32,
 
   // Button and input sizes
@@ -62,9 +62,9 @@ export const TEXT_STYLES = {
     fontFamily: FONTS.gilroy.regular,
   },
   large: {
-    fontSize: SIZES.lg,
+    fontSize: SIZES.xl,
     color: COLORS.textPrimary,
-    fontFamily: FONTS.gilroy.medium,
+    fontFamily: FONTS.gilroy.bold,
   },
   title: {
     fontSize: SIZES.xl,

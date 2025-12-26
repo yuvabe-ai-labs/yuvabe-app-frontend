@@ -1,11 +1,9 @@
 'use client';
 
 import messaging from '@react-native-firebase/messaging';
-import { Bell, Menu } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   PermissionsAndroid,
   Platform,
   StatusBar,
@@ -25,6 +23,7 @@ import DrawerContent from '../../components/DrawerContent';
 import NotificationDrawer from '../../components/NotificationDrawer';
 import { getItem, setItem } from '../../store/storage';
 import { useUserStore } from '../../store/useUserStore';
+import { Alert, HamburgerMenu, YBLogo } from '../../utils/customIcons';
 import { COLORS } from '../../utils/theme';
 import NotificationScreen from '../notification/NotificationScreen';
 import styles from './HomeStyles';
@@ -199,33 +198,33 @@ const HomeScreen = ({ navigation }: any) => {
                 style={[styles.header, { justifyContent: 'space-between' }]}
               >
                 <TouchableOpacity onPress={openDrawer}>
-                  <Menu size={28} color="#000" strokeWidth={1.7} />
+                  <HamburgerMenu width={24} height={16} />
                 </TouchableOpacity>
 
-                <Image
-                  source={require('../../assets/logo/yuvabe-logo.png')}
-                  style={{ width: 45, height: 45, resizeMode: 'contain' }}
-                />
+                <YBLogo width={100} height={28} />
 
                 <TouchableOpacity
                   onPress={() => setShowNotificationDrawer(true)}
                 >
-                  <Bell size={28} color={COLORS.secondary} strokeWidth={2} />
+                  <Alert width={20} height={24} />
                 </TouchableOpacity>
               </View>
 
-              <Text style={styles.welcomeText}>
-                Welcome, {user?.name || 'Loading...'}
+              <Text style={[styles.welcomeText]}>
+                Welcome, {user?.name || 'Loading...'} !
               </Text>
 
               {/* QUOTE */}
               <View style={styles.thoughtContainer}>
                 <Text style={styles.thoughtTitle}>Thought of the Day</Text>
-                <Text style={styles.thoughtText}>"{quote}"</Text>
+                <Text style={styles.thoughtText}>“{quote}“</Text>
                 <Text
                   style={[
-                    styles.thoughtText,
-                    { fontStyle: 'italic', fontSize: 14 },
+                    {
+                      fontStyle: 'italic',
+                      fontSize: 14,
+                      alignSelf: 'flex-end',
+                    },
                   ]}
                 >
                   — {author}
