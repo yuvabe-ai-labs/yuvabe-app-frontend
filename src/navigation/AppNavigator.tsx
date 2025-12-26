@@ -9,6 +9,7 @@ import LeaveDetailsScreen from '../screens/leave/LeaveDetailsScreen';
 import MyLeaveHistoryScreen from '../screens/leave/MyLeaveHistoryScreen';
 import TeamLeaveHistoryScreen from '../screens/leave/TeamLeaveHistoryScreen';
 import MentorApprovalScreen from '../screens/mentor/MentorApproveScreen';
+import MentorDetailLeaveScreen from '../screens/mentor/MentorDetailLeaveScreen';
 import MentorLeaveListScreen from '../screens/mentor/MentorLeaveListScreen';
 import NotificationScreen from '../screens/notification/NotificationScreen';
 import PayslipScreen from '../screens/payslip/PaySlipScreen';
@@ -17,8 +18,8 @@ import EditProfileScreen from '../screens/profilescreen/EditProfileScreen';
 import InformationScreen from '../screens/profilescreen/InformationScreen';
 import ProfileScreen from '../screens/profilescreen/ProfileScreen';
 import RequestLeaveScreen from '../screens/requestLeave/RequestLeave';
+import StepScreen from '../screens/wellbeing/steps/StepsScreen';
 import WaterTrackerScreen from '../screens/wellbeing/water/WaterTrackingScreen';
-import MentorDetailLeaveScreen from '../screens/mentor/MentorDetailLeaveScreen';
 
 const AppStack = createNativeStackNavigator();
 
@@ -119,6 +120,11 @@ const AppNavigator = () => {
         <AppStack.Screen
           name="MentorDetailLeave"
           component={MentorDetailLeaveScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="Steps"
+          component={StepScreen}
           options={{ headerShown: false }}
         />
       </AppStack.Navigator>

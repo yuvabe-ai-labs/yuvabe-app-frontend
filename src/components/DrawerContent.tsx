@@ -1,4 +1,4 @@
-import { LogOut, User } from 'lucide-react-native';
+import { Footprints, LogOut, User } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
   ActivityIndicator,
@@ -163,6 +163,14 @@ const DrawerContent = ({ navigation, closeDrawer }: any) => {
           onPress={() => {
             closeDrawer();
             navigation.navigate('Chat');
+          }}
+        />
+        <DrawerItem
+          label="Steps count"
+          icon={<Footprints color="#444" strokeWidth={1.8} />}
+          onPress={() => {
+            closeDrawer();
+            navigation.navigate('Steps');
           }}
         />
       </View>

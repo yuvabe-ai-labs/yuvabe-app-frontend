@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@dongminyu/react-native-step-counter": "^0.2.5",
     "@dr.pogodin/react-native-fs": "^2.36.1",
     "@hookform/resolvers": "^5.2.2",
     "@notifee/react-native": "^9.1.8",
@@ -35,8 +36,10 @@
     "react": "19.1.1",
     "react-hook-form": "^7.66.0",
     "react-native": "0.82.1",
+    "react-native-background-actions": "^4.0.1",
     "react-native-bootsplash": "^6.3.11",
     "react-native-chart-kit": "^6.12.0",
+    "react-native-circular-progress-indicator": "^4.4.2",
     "react-native-config": "^1.6.0",
     "react-native-device-info": "^15.0.1",
     "react-native-drawer": "^2.5.1",
@@ -50,6 +53,7 @@
     "react-native-month-year-picker": "^1.9.0",
     "react-native-nitro-modules": "^0.31.9",
     "react-native-nitro-sound": "^0.2.9",
+    "react-native-permissions": "^5.4.4",
     "react-native-reanimated": "^4.2.0",
     "react-native-safe-area-context": "^5.6.2",
     "react-native-screens": "^4.18.0",
