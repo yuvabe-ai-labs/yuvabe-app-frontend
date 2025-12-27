@@ -126,6 +126,9 @@ const AppNavigator = () => {
         <AppStack.Screen
           name="LunchPreference"
           component={LunchPreferenceScreen}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
           name="Steps"
           component={StepScreen}
           options={{ headerShown: false }}

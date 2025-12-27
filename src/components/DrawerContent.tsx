@@ -1,5 +1,4 @@
-import { CookingPot, User } from 'lucide-react-native';
-import { Footprints, LogOut, User } from 'lucide-react-native';
+import { CookingPot, Footprints, LogOut, User } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import {
   ActivityIndicator,
@@ -16,7 +15,6 @@ import {
   ChatBot,
   Journaling,
   LeaveHistory,
-  LogOut,
   PaySlip,
   PendingIcon,
   RequestLeave,

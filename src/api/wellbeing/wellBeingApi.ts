@@ -62,3 +62,8 @@ export const fetchWaterLogsForChart = async () => {
   const res = await api.get('/wellbeing/water_logs/');
   return res.data;
 };
+
+export const getWeeklySteps = () => {
+  return api.get('/wellbeing/steps/weekly');
+};
+
